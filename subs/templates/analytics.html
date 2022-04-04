@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Analytics</title>
+    <link rel="stylesheet" href="http://printerwatch/static/css/style.css">
+    <style>
+           .headInput{
+            padding: 0;
+			margin: auto;
+			width: 90%;
+			background-color: lightgrey;
+            text-align: center;#text-size: 14;
+            color: lightorange;
+			}
+            .canvas{
+            margin: auto;
+            padding-top: 5px;
+            width: 90%;
+            background-color: lightgrey;
+            }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+<body>
+    <form action="http://printerwatch/subsite/analytics">
+        <div class="headInput">
+        <label class="label">Filter for device/s</label>
+        <input type="text" id="group" name="group">
+        <input type="submit" value="Go!">
+        </div>
+    </form>
+    <div class="canvas">
+    <canvas id="myChart" width="400" height="200"></canvas>
+     </div>
+<script>
+
+  const labels = {{ index|safe }};
+  const data = {
+    labels: labels,
+    datasets: [{
+      label: {{ filter|safe }},
+      backgroundColor: 'rgb(255, 99, 132)',
+      borderColor: 'rgb(255, 99, 132)',
+	  borderWidth: 2,
+	  pointRadius: 1,
+	  tension: 0.3,
+      data: {{ pages|safe }}
+    }
+	]
+  };
+
+  const config = {
+    type: 'line',
+    data: data,
+    options: {}
+  };
+</script>
+<script>
+    window.onload = function(){
+    var ctx = document.getElementById('myChart').getContext('2d');
+    window.myChart = new Chart(ctx, config);
+    };
+
+</script>
+
+</body>
+</html>

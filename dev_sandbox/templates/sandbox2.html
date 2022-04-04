@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Analytics</title>
+    <link rel="stylesheet" href="http://printerwatch/static/css/style.css">
+    <style>
+           .headInput{
+            padding: 0;
+			margin: auto;
+			width: 90%;
+			background-color: lightgrey;
+            text-align: center;#text-size: 14;
+            color: lightorange;
+			}
+            .canvas{
+            margin: auto;
+            padding-top: 5px;
+            width: 90%;
+            background-color: lightgrey;
+            }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+<body>
+    <form action="http://printerwatch/sandbox/">
+        <div class="headInput">
+    <label for="group"> grouped by:</label>
+        <select id="group" name="group" title="if None is selected its recommended to use filter">
+            <option value="Manufacture">Manufacture</option>
+            <option value="Model">Model</option>
+            <option value="Serial_No">None</option>
+        </select>
+    <label for="value"> grouped by:</label>
+        <select id="value" name="value">
+            <option value="BW">Black/White</option>
+            <option value="BCYM">Colored</option>
+        </select>
+    <label for="filter"> filter: </label>
+        <input id="filter" type="text" name="filter">
+        <input type="submit" value=">>">
+        </div>
+    </form>
+    <div class="canvas">
+    <canvas id="myChart" width="400" height="200"></canvas>
+     </div>
+
+<script>
+
+
+    const config = {
+    type: 'line',
+    data: {
+        labels: {{ index|safe }},
+        datasets: {{ sets|safe }}
+        },
+    options: {}
+    };
+
+</script>
+<script>
+    window.onload= function make_chart(){
+    var ctx = document.getElementById('myChart').getContext('2d');
+    window.myChart = new Chart(ctx, config);
+    };
+
+</script>
+
+</body>
+</html>

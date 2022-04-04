@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PrinterMonitor</title>
+    <link rel="stylesheet" href="http://printerwatch/static/css/style.css">
+        <style>
+           .headInput{
+            padding: 0;
+			margin: auto;
+			width: 90%;
+			background-color: lightgrey;
+            text-align: center;#text-size: 14;
+            color: lightorange;
+			}
+    </style>
+</head>
+
+<body onload="insertRow()">
+
+<form action="http://printerwatch/cartridges/">
+    <div class="headInput">
+    <label class="label">Enter time window</label>
+    <input type="text" id="days" name="days" title='default are 10 days'>
+    <label  class="label"> in days. </label>
+    <input type="submit" value="Go!">
+    </div>
+</form>
+
+<div class='scoreboard'>
+        <table id="myTable" class='monitorTable'>
+		<thead id="aHeader">
+        <tr id="headRow">
+            <td>Cart.Types</td>
+            <td># Stored</td>
+			<td><p id="timeVar">10 days forecast</p></td>
+			<td>expected # in store</td>
+			<td>add to storage</td>
+		</tr>
+
+		</thead>
+		<tbody id="tableBody">
+
+        </tbody>
+
+        </table></div>
+     <script>
+		function insertRow(){
+		const db = JSON.parse("{{data|escapejs}}");
+
+		for(let i of db){
+		var tBody = document.getElementById("tableBody");
+		var row = tBody.insertRow(0);
+		row.className = "tBodyRow"
+
+		var typCell = row.insertCell(0);
+		typCell.innerHTML = i.cTyp;
+
+		var storeCell = row.insertCell(1);
+        storeCell.innerHTML = i.cStore;
+
+		var lowCell = row.insertCell(2);
+        lowCell.innerHTML = i.cLow;
+
+		var newCell = row.insertCell(3);
+        newCell.innerHTML = i.cNew;
+
+		var addCell = row.insertCell(4);
+
+        addCell.innerHTML = '<form action="http://printerwatch/cartridges/"><input type="text" id="'+i.cTyp+'" name="num"><input type="hidden" id="'+i.cTyp+'" name="cart" value="'+i.cTyp+'"><input type="submit" value="[+]"></form>' ;
+		}}
+
+
+        function xfunc(){
+        alert("Hi")
+        }
+        </script>
+</body>
+</html>

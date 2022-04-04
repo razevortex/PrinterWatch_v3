@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Device Manager</title>
+
+    <link rel="stylesheet" href="http://printerwatch/static/css/style.css">
+    <style>
+           .headInput{
+            padding: 0;
+			margin: auto;
+			width: 90%;
+			background-color: lightgrey;
+            text-align: center;#text-size: 14;
+            color: lightorange;
+			}
+    </style>
+
+</head>
+<body onload="insertRow()">
+<form action="http://printerwatch/subsite/deviceMgr/">
+    <div  class="headInput">
+    <label class="label">Add Ip:</label>
+    <input type="text" id="add_ip" name="add_ip">
+    <input type="submit" value="[+]">
+        </div>
+    </form>
+
+<div class='scoreboard'>
+        <table id="myTable" class='monitorTable'>
+		<thead id="aHeader">
+        <tr id="headRow">
+            <td>Pending IP</td>
+            <td>Tryed</td>
+			<td>Remove</td>
+        </tr>
+
+		</thead>
+		<tbody id="tableBody">
+
+        </tbody>
+
+        </table></div>
+     <script>
+		function insertRow(){
+		const db = JSON.parse("{{data|escapejs}}");
+
+		for(let i of db){
+		var tBody = document.getElementById("tableBody");
+		var row = tBody.insertRow(0);
+		row.className = "tBodyRow"
+
+		var ipCell = row.insertCell(0);
+		ipCell.innerHTML = i.IP;
+
+		var triedCell = row.insertCell(1);
+        triedCell.innerHTML = i.TRIED;
+
+		var delCell = row.insertCell(2);
+        delCell.innerHTML = '<form action="http://printerwatch/subsite/deviceMgr/"><input type="text" id="remove" name="remove" value="'+i.IP+'"><input type="submit" value="[-]"></form>' ;
+}}
+
+
+        function xfunc(){
+        alert("Hi")
+        }
+        </script>
+</body>
+</html>
