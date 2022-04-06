@@ -180,7 +180,6 @@ def get_global_timeline():
         id = line['Serial_No']
         container = DataSet(id, headless=True)
         container.light_Data()
-
         for day in container.ProcessedData:
             time_index.append(day[0])
     time_index = list(set(time_index))
@@ -196,18 +195,25 @@ def neutral_timeline():
 def get_group_id_set(filter='', filter_for='Manufacture'):
     cli = dbClient()
     cli.updateData()
-    arr_t = []
     dic_t = {}
     if filter == '':
         clients = cli.ClientData
+
     else:
         arr_t = []
         for line in cli.ClientData:
-            for key, val in line.items():
-                for v in val:
-                    if filter in str(v):
-                        arr_t.append(line)
-                        break
+            specs = dbClientSpecs()
+            specs.updateData()
+            t_dic = line
+            for spe in specs.ClientData:
+                if spe['Serial_No'] == line['Serial_No']:
+                    t_dic.update(spe)
+                    t_dic['ID'] = t_dic['Serial_No']
+                    override = LibOverride()
+                    t_dic = override.updateDict(t_dic)
+            for key, val in t_dic.items():
+                if filter.casefold() in val.casefold():
+                    arr_t.append(line)
         clients = arr_t
     arr_t = []
     for line in clients:
@@ -222,37 +228,50 @@ def get_group_id_set(filter='', filter_for='Manufacture'):
         dic_t[key] = grouped
     return dic_t
 
-def create_group_data(id_set, data_key, time_line):
+
+def create_group_data(id_set, data_key, time_line, slim=True):
+    fuse = to = False
     if data_key == 'BW':
         fuse = ('Printed_BW', 'Copied_BW')
         to = 'BW'
     elif data_key == 'BCYM':
         fuse = ('Printed_BCYM', 'Copied_BCYM')
         to = 'BCYM'
-    else:
+    elif data_key == 'CYM':
         fuse = ('TonerC', 'TonerM', 'TonerY')
-        to = ['TonerCYM', 'BW', 'BCYM']
+        to = 'CYM'
+    arr_t = []
     for id in id_set:
         container = DataSet(id, headless=True)
-        container.light_Data()
-        container.combine_keys(fuse, to)
-        container.light_Data(reduce='keys', key=to)
+        if slim:
+            container.light_Data()
+            if fuse is not False:
+                container.combine_keys(fuse, to)
+            container.light_Data(reduce='keys', key=data_key)
         container.diff_Data()
-        #for i in range(len(fuse)):
-        #    container.combine_keys(fuse, to)
-        arr_t = []
+        arr_sub_t = []
+        # create list with timeline consistent differential values of each id
         for time, val in time_line:
+            v = 0 # is inserted if no timeline entry exists to keep consistency
             for index, dic in container.ProcessedData:
                 if index == time:
-                    val += dic[data_key]
-            arr_t.append((time, val))
-        time_line = arr_t
-    arr_t = []
-    for time, val in time_line:
-        arr_t.append(val)
-    return arr_t
+                    v = dic[data_key] # the value on the current timestamp
+            arr_sub_t.append(v)
+        arr_t.append(arr_sub_t) # bundel all timeline listed values
 
-colors = ['#0000FF','#00FF00','#FF0000','#990000','#009900','#000099','#990099','#009999','#999900','#ffff00','#00ffff','#ff00ff']
+    # sum vals of each timestamp together and add it to previous to create a progressive list of the value
+    fused = []
+    val = 0
+    for summing in zip(*arr_t):
+
+        val += sum(summing)
+
+        fused.append(val)
+    return fused
+
+
+colors = ['#000054', '#5400fe', '#a90000', '#a9a9fe', '#fe5454', '#0000fe', '#5454a9', '#a900a9', '#a9fe54', '#fe54fe', '#005454', '#54a900', '#a95400', '#a9fefe', '#fea954', '#0054fe', '#54a9a9', '#a954a9', '#fe0054', '#fea9fe', '#00a954', '#54fea9', '#a9a900', '#fe00fe', '#fefe54']
+
 
 def create_plot_data(group, filter, data_key):
     id_set = get_group_id_set(filter=filter, filter_for=group)
@@ -261,62 +280,33 @@ def create_plot_data(group, filter, data_key):
     for key in id_set.keys():
         dic_t = {}
         group_data = create_group_data(id_set[key], data_key, time_line)
-        print(key, group_data)
-        val = 0
-        data = []
-        for i in group_data:
-            val += i
-            data.append(val)
-        dic_t['data'] = data
+        dic_t['data'] = group_data
         dic_t['label'] = key
         arr_t.append(dic_t)
     data = []
     for i in range(len(arr_t)):
         dic = arr_t[i]
         dic['borderColor'] = colors[i % len(colors)]
+        dash = i // len(colors) * 2
+        dic['borderDash'] = [10, int(dash)]
         dic['pointRadius'] = 1
         dic['lineTension'] = 0.2
         data.append(dic)
     return data
 
-if __name__ == '__main__':
-    id_set = get_group_id_set(filter_for='Model')
-    time_line = neutral_timeline()
-    print(id_set)
-    for key in id_set.keys():
-        print(len(id_set[key]))
-        group_data = create_group_data(id_set[key], 'BW', time_line)
-        print(key, group_data)
-        val = 0
-        data = []
-        for i in group_data:
-            val += i
-            data.append(val)
-        print(key)
-        print(data)
-        print(len(data))
-
-
+def create_eff_stats(group, filter, toner='all'):
     '''
-        #print(len(container.ProcessedData))
-        container.diff_Data()
-        for i in range(len(fuse)):
-            container.combine_keys(fuse[i], to[i])
-        container.sum_data()
-        for line in container.ProcessedData:
-            print(line)
+    toner= 'all'/'bk'/'cym'
+    '''
+    key_dict = {'all': ('TonerBK', 'CYM', 'BW', 'BCYM'),
+                'bk': ('TonerBK', 'BW'),
+                 'cym': ('CYM', 'BCYM')}
 
-            all.append(line)
-        dates = []
-        for line in all:
-            dates.append(line[0])
-        data = []
-        for date in list(set(dates)):
-            dic_t = copy.deepcopy(ttt)
-            for index, dic in all:
-                if date == index:
-                    for key in dic.keys():
-                        dic_t[key] += dic[key]
-            data.append((date, dic_t))
-    for line in sorted(data):
-        print(line)'''
+
+
+
+if __name__ == '__main__':
+    data_arr = create_plot_data('Serial_No', 'orga', 'BW')
+    for i in data_arr:
+        print(i)
+

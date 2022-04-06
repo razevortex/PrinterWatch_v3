@@ -18,7 +18,7 @@
 
 <body onload="insertRow()">
 
-<form action="http://printerwatch/cartridges/">
+<form action="http://printerwatch/subsite/storage_tracker/">
     <div class="headInput">
     <label class="label">Enter time window</label>
     <input type="text" id="days" name="days" title='default are 10 days'>
@@ -67,7 +67,7 @@
 
 		var addCell = row.insertCell(4);
 
-        addCell.innerHTML = '<form action="http://printerwatch/cartridges/"><input type="text" id="'+i.cTyp+'" name="num"><input type="hidden" id="'+i.cTyp+'" name="cart" value="'+i.cTyp+'"><input type="submit" value="[+]"></form>' ;
+        addCell.innerHTML = '<form action="http://printerwatch/subsite/storage_tracker/"><input type="text" id="'+i.cTyp+'" name="num"><input type="hidden" id="'+i.cTyp+'" name="cart" value="'+i.cTyp+'"><input type="submit" value="[+]"></form>' ;
 		}}
 
 

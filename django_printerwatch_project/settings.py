@@ -38,8 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'mainframe',
-    'printer_monitor',
-    'running_out',
+    #'printer_monitor',
+    #'running_out',
     'dev_sandbox',
     'subs',
 ]

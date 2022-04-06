@@ -1,8 +1,9 @@
 from Packages.RequestHandle import *
-from Packages.SubPkg.foos import running, get_recent_data, data_dict_to_store
+from Packages.SubPkg.foos import *
 from Packages.SubPkg.const.ConstantParameter import data_dict_template, run_interval
 from Packages.SubPkg.csv_handles import *
 import time
+import datetime as dt
 
 
 def coffee_break(min, start):
@@ -10,19 +11,19 @@ def coffee_break(min, start):
     running_for = time.time() - start
     early = running_for - sec
     print('run & early', running_for, early)
-    t_dic = get_pending_ip()
-    try_again = {}
-    for key, val in t_dic.items():
-        cli = {'IP': key}
+    arr = get_pending_ip()
+    t_arr = []
+    for t_dic in arr:
+        cli = {'IP': t_dic['IP']}
         get = ClientGet(cli)
         data = get.snmp_run_main()
-        print(data)
         if data_dict_to_store(data) is not True:
-            count = int(val) + 1
-            try_again[key] = count
-    print(try_again)
-    update_ip_form(try_again)
+            t_dic['TRIED'] = int(t_dic['TRIED']) + 1
+            t_arr.append(t_dic)
+    update_ip_form(t_arr)
     if early < 0:
+        now = write_timestamp_to_com()
+        print(f'wrote {now} to com')
         print(f'doin´ ma {early / 60} minute coffee  break!')
         early = early * -1
         time.sleep(early)

@@ -24,41 +24,50 @@
 
 </head>
 <body>
-    <form action="http://printerwatch/subsite/analytics">
+    <form action="http://printerwatch/subsite/analytics/">
         <div class="headInput">
-        <label class="label">Filter for device/s</label>
-        <input type="text" id="group" name="group">
-        <input type="submit" value="Go!">
+    <label for="group"> grouped by:</label>
+        <select id="group" name="group" title="if None is selected its recommended to use filter">
+            <option value="Manufacture">Manufacture</option>
+            <option value="Model">Model</option>
+            <option value="Serial_No">None</option>
+        </select>
+    <label for="value"> > plot value:</label>
+        <select id="value" name="value">
+            <option value="BW">Black/White</option>
+            <option value="BCYM">Colored</option>
+            <option value="TonerBK">TonerBK</option>
+            <option value="TonerC">TonerC</option>
+            <option value="TonerY">TonerY</option>
+            <option value="TonerM">TonerM</option>
+        </select>
+    <label for="filter"> > filter : </label>
+        <input id="filter" type="text" name="filter">
+        <input type="submit" value=">>">
+            </br>
+            <p style="align:center"> {{ last }} </p>
         </div>
     </form>
+
     <div class="canvas">
     <canvas id="myChart" width="400" height="200"></canvas>
      </div>
+
 <script>
 
-  const labels = {{ index|safe }};
-  const data = {
-    labels: labels,
-    datasets: [{
-      label: {{ filter|safe }},
-      backgroundColor: 'rgb(255, 99, 132)',
-      borderColor: 'rgb(255, 99, 132)',
-	  borderWidth: 2,
-	  pointRadius: 1,
-	  tension: 0.3,
-      data: {{ pages|safe }}
-    }
-	]
-  };
 
-  const config = {
+    const config = {
     type: 'line',
-    data: data,
+    data: {
+        labels: {{ index|safe }},
+        datasets: {{ sets|safe }}
+        },
     options: {}
-  };
+    };
+
 </script>
 <script>
-    window.onload = function(){
+    window.onload= function make_chart(){
     var ctx = document.getElementById('myChart').getContext('2d');
     window.myChart = new Chart(ctx, config);
     };

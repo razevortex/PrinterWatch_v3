@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <link rel="stylesheet" href="http://printerwatch/static/css/style.css">
+
+</head>
+<body style="background-color:rgb(33,33,33)">
+<img src="http://printerwatch/static/img/logo_bw.png" id="pw-logo" class="logo_img" width="300" height="150" style="width:40%; margin-left:30%; top:0; float:top">
+<form action="http://printerwatch/main/" method="post">
+    {% csrf_token %}
+    <div  class="headInput" style="width:40%; margin:auto; float:top">
+    <label class="label">User: </label>
+    <input type="text" id="user" name="user">
+    <label class="label">Password: </label>
+    <input type="password" id="pass" name="pass">
+    <input type="submit" value="Enter">
+    </div>
+</form>
+</body>
+</html>

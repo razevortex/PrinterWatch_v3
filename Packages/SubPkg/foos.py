@@ -258,13 +258,21 @@ def handle_ip_form(input):
     client.updateData()
     already_existing = client.getEntry('col', 'IP')
     ip_pattern = re.compile(r'(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})')
-    t = ip_pattern.search(input)[0]
+    #t = ip_pattern.search(input)[0]
+    match = ip_pattern.findall(input)
+    if type(match) == list:
+        for t in match:
+            if t not in already_existing:
+                string = f'{t}:0;'
+                with open(f'{ROOT}db/includeIP.txt', 'a') as ips:
+                    ips.write(string)
+    elif type(match) == str:
+        if match not in already_existing:
+            string = f'{match}:0;'
+            with open(f'{ROOT}db/includeIP.txt', 'a') as ips:
+                ips.write(string)
 
-    if t not in already_existing:
-        string = f'{t}:0;'
-        with open(f'{ROOT}db/includeIP.txt', 'a') as ips:
-            ips.write(string)
-
+'''
 def get_pending_ip(to_json=False):
     with open(f'{ROOT}db/includeIP.txt', 'r') as ips:
         data = ips.read()
@@ -284,10 +292,24 @@ def get_pending_ip(to_json=False):
                     data.append({'IP': temp[0], 'TRIED': temp[1]})
     return data
 
-def update_ip_form(ip_dict):
+'''
+
+def get_pending_ip():
+    with open(f'{ROOT}db/includeIP.txt', 'r') as ips:
+        data = ips.read()
+        split = data.split(';')
+    arr = []
+    for t in split:
+        if t != '':
+            temp = t.split(':')
+            dic = {'IP': temp[0], 'TRIED': temp[1]}
+            arr.append(dic)
+    return arr
+
+def update_ip_form(ip_arr):
     string = ''
-    for key, val in ip_dict.items():
-        string += f'{key}:{val};'
+    for ip_dict in ip_arr:
+        string += f'{ip_dict["IP"]}:{ip_dict["TRIED"]};'
     with open(f'{ROOT}db/includeIP.txt', 'w') as ips:
         ips.write(string)
 
@@ -339,6 +361,22 @@ def calculate_diff(key, old, new, diff):
         diff[key] = new[key] - old[key]
     old[key] = new[key]
     return old, diff
+
+def write_timestamp_to_com():
+    now = dt.datetime.now()
+    with open(f'{ROOT}static/com/last_update.txt', 'w') as update:
+        update.write(str(now))
+    return now
+
+def timestamp_from_com(diff=10):
+    with open(f'{ROOT}static/com/last_update.txt', 'r') as update:
+        string = update.read()
+    string = string.strip()
+    now = dt.datetime.now()
+    if dt.datetime.fromisoformat(string) + dt.timedelta(minutes=diff) > now:
+        return 1, string
+    else:
+        return 0, string
 
 if __name__ == '__main__':
     print(get_pending_ip())

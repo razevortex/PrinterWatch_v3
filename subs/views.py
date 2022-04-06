@@ -79,15 +79,17 @@ def cartTrack(request):
 
 
 def analytics(request):
-    filter = request.GET.get('group', '')
-    index, pages = filteredTableContent(filter, json=False)
-    jsonindex = dumps(index)
-    jsonpages = dumps(pages)
-    return render(request, 'analytics.html', {'index': index, 'pages': pages, 'filter': filter})
+    group = request.GET.get('group', 'Manufacture')
+    value = request.GET.get('value', 'BW')
+    filter = request.GET.get('filter', '')
+    data_arr = create_plot_data(group, filter, value)
+    index = get_global_timeline()
+    string = f'{group}   /> {value}   /> {filter}'
+    return render(request, 'analytics.html', {'index': index, 'sets': data_arr, 'last': string})
 
 def config(request):
-    data2json = dumps(cart_state(int(days)))
-    return render(request, 'config.html', {'data': data2json})
+
+    return render(request, 'config.html')
 
 def dmgr(request):
     ip = request.GET.get('add_ip', '')
@@ -96,10 +98,15 @@ def dmgr(request):
     try:
         if request.GET.get('remove'):
             remove = request.GET.get('remove')
-            t_dic = get_pending_ip()
-            del t_dic[remove]
-            update_ip_form(t_dic)
+            arr = get_pending_ip()
+            entry = False
+            for i in arr:
+                if remove == i['IP']:
+                    entry = i
+            if entry is not False:
+                arr.remove(entry)
+            update_ip_form(arr)
     except:
         remove = ''
-    data2json = dumps(get_pending_ip(to_json=True))
+    data2json = dumps(get_pending_ip())
     return render(request, 'devMgr.html', {'data': data2json})
