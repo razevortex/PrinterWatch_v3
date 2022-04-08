@@ -1,5 +1,6 @@
 from Packages.SubPkg.csv_handles import *
 from Packages.SubPkg.foos import *
+import datetime as dt
 
 db_dict_template = {}
 db_keys = ['TonerBK', 'TonerC', 'TonerM', 'TonerY', 'Printed_BW', 'Printed_BCYM', 'Copied_BW', 'Copied_BCYM']
@@ -14,6 +15,7 @@ class DataSet(object):
             self.Statistics = {}
             # Data is struc [(index/TimeStamp, {key, val}), (...), ... ]
             self.get_device_data(ID)
+        self.ID = ID
         self.Data = []
         self.get_struc_data(ID, only_recent=only_recent)
         self.processing = False
@@ -37,8 +39,9 @@ class DataSet(object):
                 self.Static['IP'] = line['IP']
         stat = dbStats()
         for line in stat.ClientData:
-            for key in ['UsedBK_daily', 'UsedCYM_daily', 'PagesBK_daily', 'PagesCYM_daily', 'CostPerBK', 'CostPerCYM']:
-                self.Statistics[key] = line[key]
+            if line['Serial_No'] == id:
+                for key in ['UsedBK_daily', 'UsedCYM_daily', 'PagesBK_daily', 'PagesCYM_daily', 'CostPerBK', 'CostPerCYM']:
+                    self.Statistics[key] = line[key]
         spec = dbClientSpecs()
         spec.updateData()
         for line in spec.ClientData:
@@ -57,6 +60,32 @@ class DataSet(object):
                             string += ';'
                         string += line[cart]
                 self.Static['Carts'] = string
+
+    def addCartPrices(self, comb=False):
+        t_dic = {}
+        if comb is not False:
+            t_dic['CartCYM'] = 0
+        spec = dbClientSpecs()
+        spec.updateData()
+        for line in spec.ClientData:
+            if line['Serial_No'] == self.ID:
+                for cart in ['CartBK', 'CartC', 'CartM', 'CartY']:
+                    if line[cart] != 'NaN':
+                        if comb is not False:
+                            if cart.endswith('BK'):
+                                cost = TONER_COST_DICT[line[cart]]
+                                t_dic[cart] = cost[1]
+                            else:
+                                cost = TONER_COST_DICT[line[cart]]
+                                t_dic['CartCYM'] += cost[1]
+                        else:
+                            cost = TONER_COST_DICT[line[cart]]
+                            t_dic[cart] = cost[1]
+                if comb is not False:
+                    t = t_dic['CartCYM'] / 3
+                    t = str(t)[:6]
+                    t_dic['CartCYM'] = float(t)
+                return t_dic
 
     def get_struc_data(self, id, only_recent=False):
         db = dbRequest(id)
@@ -183,6 +212,9 @@ class DataSet(object):
             return f"{self.Const['Serial_No']}, {self.Const['Device']}"
         if line == '2':
             return f"{self.Static['UserLoc']}, {self.Static['IP']}"
+
+    def back2raw(self):
+        self.processing = False
 
 fuse = [('TonerC', 'TonerM', 'TonerY'),
          ('Printed_BW', 'Copied_BW'),
@@ -312,22 +344,7 @@ def create_plot_data(group, filter, data_key):
         data.append(dic)
     return data
 
-def create_eff_stats(group, filter, toner='all'):
-    '''
-    toner= 'all'/'bk'/'cym'
-    '''
-    key_dict = {'all': ('TonerBK', 'CYM', 'BW', 'BCYM'),
-                'bk': ('TonerBK', 'BW'),
-                 'cym': ('CYM', 'BCYM')}
-
-
-
-
-if __name__ == '__main__':
-    #data_arr = create_plot_data('Serial_No', 'orga', 'BW')
-    #for i in data_arr:
-    #    print(i)
-
+def update_recentCache():
     cli = dbClient()
     cli.updateData()
     arr = []
@@ -346,6 +363,112 @@ if __name__ == '__main__':
     cache.updateCSV()
     cache.updateData()
     print(cache.ClientData)
-#import os
-#for f in os.listdir("/home/razevortex/django_printerwatch/chache"):
-#    print(f)
+
+def create_eff_stats(group, filter, toner='all'):
+    '''
+    toner= 'all'/'bk'/'cym'
+    '''
+    key_dict = {'all': ('TonerBK', 'CYM', 'BW', 'BCYM'),
+                'bk': ('TonerBK', 'BW'),
+                 'cym': ('CYM', 'BCYM')}
+
+def calculate_tonerPer(toner, pages, to):
+    t_dic = {to: 0}
+    if toner != 0 and pages != 0:
+        cart = toner / 100
+        pagesPer = pages / cart
+        if '.' in str(pagesPer):
+            point = str(pagesPer).index('.')
+            point += 2
+            pagesPer = str(pagesPer)[:point]
+            t_dic = {to: float(pagesPer)}
+        else:
+            t_dic = {to: pagesPer}
+    return t_dic
+
+def calculate_pageCost(pagesPer, cartPrice, to):
+    t_dic = {to: 0}
+    if pagesPer != 0 and cartPrice != 0:
+        pageCost = cartPrice / pagesPer
+        if len(str(pageCost)) > 5:
+            #point = str(pageCost).index('.')
+            #point += 3
+            pageCost = str(pageCost)[:5]
+            t_dic = {to: float(pageCost)}
+        else:
+            t_dic = {to: pageCost}
+    return t_dic
+
+if __name__ == '__main__':
+    cli = dbClient()
+    cli.updateData()
+    t_arr = []
+    for line in cli.ClientData:
+        t_dic = {}
+        t_dic['Serial_No'] = line['Serial_No']
+        t_dic['Model'] = line['Model']
+        time_index = []
+        container = DataSet(t_dic['Serial_No'], headless=True)
+        container.light_Data()
+        for day in container.ProcessedData:
+            time_index.append(day[0])
+        time_index = list(set(time_index))
+        time_index = sorted(time_index)
+        start = time_index[0].split('-')
+        timepast = dt.date.today() - dt.date(int(start[0]), int(start[1]), int(start[2]))
+        t_dic['days_tracked'] = timepast.days
+        container.back2raw()
+        container.combine_keys(('Printed_BW', 'Copied_BW'), 'BW')
+        container.combine_keys(('Printed_BCYM', 'Copied_BCYM'), 'BCYM')
+        container.diff_Data()
+        container.combine_keys(('TonerC', 'TonerM', 'TonerY'), 'CYM')
+        container.sum_data()
+        t = container.ProcessedData[-1]
+        t_dic.update(container.addCartPrices(comb=True))
+        t_dic.update(t[1])
+        t_arr.append(t_dic)
+    models = []
+    for i in t_arr:
+        i.update(calculate_tonerPer(i['TonerBK'], i['BW'], 'perBK'))
+        i.update(calculate_tonerPer(i['CYM'], i['BCYM'], 'perCYM'))
+        i.update(calculate_pageCost(i['perBK'], i['CartBK'], 'costPageBK'))
+        i.update(calculate_pageCost(i['perCYM'], i['CartCYM'], 'costPageCYM'))
+        models.append(i['Model'])
+    solo_stats = t_arr
+    models = list(set(models))
+    t_model_arr = []
+    for model in models:
+        t_dic = {'Model': model, '#': 0}
+        for key in ['TonerBK', 'BW', 'CYM', 'BCYM', 'perBK', 'perCYM', 'costPageBK', 'costPageCYM']:
+            t_dic[key] = (0, 0)
+        for line in t_arr:
+            if line['Model'] == model:
+                t_dic['#'] += 1
+                for key in ['CYM', 'BCYM', 'BW', 'TonerBK', 'perBK', 'perCYM', 'costPageBK', 'costPageCYM']:
+                    if line[key] != 0:
+                        days, val = t_dic[key]
+                        days += line['days_tracked']
+                        val += line[key]# * line['days_tracked']
+                        t_dic[key] = (days, val)
+
+
+        for key in ['CYM', 'BCYM', 'BW', 'TonerBK', 'perBK', 'perCYM', 'costPageBK', 'costPageCYM']:
+            days, val = t_dic[key]
+            if days != 0:
+                if key in ['perBK', 'perCYM', 'costPageBK', 'costPageCYM']:
+                    avg = val / t_dic['#']
+                else:
+                    avg = val / days
+                if type(avg) == float:
+                    point = int(str(avg).index('.'))
+                    point += 4
+                    avg = float(str(avg)[:point])
+                t_dic[key] = avg
+            else:
+                t_dic[key] = 'NaN'
+        t_model_arr.append(t_dic)
+    for i in t_model_arr:
+        print(i)
+        for ii in t_arr:
+            if ii['Model'] == i['Model']:
+                print(ii)

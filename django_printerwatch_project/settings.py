@@ -73,9 +73,10 @@ TEMPLATES = [
 WSGI_APPLICATION = 'django_printerwatch_project.wsgi.application'
 
 CACHES = {
-    'session_cache': {
-        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
-        'LOCATION': 'session_table',
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': '/home/razevortex/django_printerwatch/chache/session_cached_tabel',
+        'SESSION_ENGINE': 'django.contrib.session.backends.cache',
     }
 
 }
@@ -85,7 +86,7 @@ CACHES = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': '/home/razevortex/django_printerwatch/chache/db.sqlite3',
     }
 }
 
