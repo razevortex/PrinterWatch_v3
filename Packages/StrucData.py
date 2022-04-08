@@ -7,16 +7,25 @@ for key in db_keys:
     db_dict_template[key] = 'NaN'
 
 class DataSet(object):
-    def __init__(self, ID, headless=False):
+    def __init__(self, ID, headless=False, only_recent=False):
         if headless is not True:
             self.Const = {}
             self.Static = {}
+            self.Statistics = {}
             # Data is struc [(index/TimeStamp, {key, val}), (...), ... ]
             self.get_device_data(ID)
         self.Data = []
-        self.get_struc_data(ID)
+        self.get_struc_data(ID, only_recent=only_recent)
         self.processing = False
         self.ProcessedData = []
+
+    def get_recent_dict(self):
+        t_dic = self.Const
+        t_dic.update(self.Static)
+        t_dic.update(self.Statistics)
+        if type(self.Data) == dict:
+            t_dic.update(self.Data)
+            return t_dic
 
     def get_device_data(self, id):
         cli = dbClient()
@@ -26,6 +35,10 @@ class DataSet(object):
                 self.Const['Serial_No'] = line['Serial_No']
                 self.Const['Device'] = f"{line['Manufacture']} {line['Model']}"
                 self.Static['IP'] = line['IP']
+        stat = dbStats()
+        for line in stat.ClientData:
+            for key in ['UsedBK_daily', 'UsedCYM_daily', 'PagesBK_daily', 'PagesCYM_daily', 'CostPerBK', 'CostPerCYM']:
+                self.Statistics[key] = line[key]
         spec = dbClientSpecs()
         spec.updateData()
         for line in spec.ClientData:
@@ -33,13 +46,9 @@ class DataSet(object):
                 # Get and Add User / Location data
                 string = user = loc = ''
                 if line['Contact'] != 'NaN':
-                    user = line['Contact']
+                    self.Static['Contact'] = line['Contact']
                 if line['Location'] != 'NaN':
-                    loc = line['Location']
-                string += user
-                if loc != user:
-                    string += f' {loc}'
-                self.Static['UserLoc'] = string
+                    self.Static['Location'] = line['Location']
                 # Get and Add a string with the used Cartidges
                 string = ''
                 for cart in ['CartBK', 'CartC', 'CartM', 'CartY']:
@@ -49,16 +58,25 @@ class DataSet(object):
                         string += line[cart]
                 self.Static['Carts'] = string
 
-    def get_struc_data(self, id):
+    def get_struc_data(self, id, only_recent=False):
         db = dbRequest(id)
         self.Data = []
-        for line in db.ClientData:
-            dic_t = copy.deepcopy(db_dict_template)
-            index = line['Time_Stamp']
-            for key in db_keys:
-                if line[key] != 'NaN':
-                    dic_t[key] = int(line[key])
-            self.Data.append((index, dic_t))
+        if only_recent is not True:
+            for line in db.ClientData:
+                dic_t = copy.deepcopy(db_dict_template)
+                index = line['Time_Stamp']
+                for key in db_keys:
+                    if line[key] != 'NaN':
+                        dic_t[key] = int(line[key])
+                        if len(line['Status_Report']) > 14:
+                            line['Status_Report'] = str(line['Status_Report'])[:14]
+                self.Data.append((index, dic_t))
+        else:
+            line = db.ClientData[-1]
+            if len(line['Status_Report']) > 14:
+                line['Status_Report'] = str(line['Status_Report'])[:14]
+            self.Data = line
+
 
     def light_Data(self, reduce='time', key=''):
         if self.processing is not False:
@@ -306,7 +324,28 @@ def create_eff_stats(group, filter, toner='all'):
 
 
 if __name__ == '__main__':
-    data_arr = create_plot_data('Serial_No', 'orga', 'BW')
-    for i in data_arr:
-        print(i)
+    #data_arr = create_plot_data('Serial_No', 'orga', 'BW')
+    #for i in data_arr:
+    #    print(i)
 
+    cli = dbClient()
+    cli.updateData()
+    arr = []
+    for line in cli.ClientData:
+        struc = DataSet(line['Serial_No'], only_recent=True)
+        recent = struc.get_recent_dict()
+        oRide = LibOverride()
+        recent['ID'] = recent['Serial_No']
+        recent = oRide.updateDict(recent)
+        arr.append(recent)
+    for line in arr:
+        print(line)
+    print(list(arr[0].keys()))
+    cache = recentCached()
+    cache.ClientData = arr
+    cache.updateCSV()
+    cache.updateData()
+    print(cache.ClientData)
+#import os
+#for f in os.listdir("/home/razevortex/django_printerwatch/chache"):
+#    print(f)

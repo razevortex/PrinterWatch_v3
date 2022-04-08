@@ -37,6 +37,11 @@ def filteredTableContent(filter, json=True, **kwargs):
             cut_dict['ID'] = cut_dict['Serial_No']
             override = LibOverride()
             cut_dict = override.updateDict(cut_dict)
+            if json:
+                if 'WJW' in cut_dict['Serial_No']:
+                    sn = cut_dict['Serial_No']
+                    cut_dict['Serial_No'] = '<a href="https://tool.wjwgmbh.de/index.php/panel/showItem/*" target="_blank"> * </a>'.replace('*', sn)
+
             if filter == '':
                 t_list.append(cut_dict)
             else:
@@ -61,7 +66,7 @@ def data_struc4JSON(dic_list):
     result_list = []
     for entry in dic_list:
         t_dic = {'sno': entry['Serial_No']}
-        t_dic['id'] = entry['ID']
+
         t_dic['device'] = f'{entry["Manufacture"]} {entry["Model"]}'
         t_dic['ip'] = entry['IP']
         string = user = loc = ''
@@ -145,6 +150,7 @@ def get_timetrack_dict(printer_set, sort='continues'):
         data = dbRequest(client)
         t_dic = {'TonerBK': 0, 'TonerC': 0, 'TonerM': 0, 'TonerY': 0, 'BW': 0, 'BCYM': 0}
         hold = {}
+        print(client)
         for key in template.keys():
             first = data.ClientData[0]
             hold[key] = first[key]
@@ -184,7 +190,7 @@ def get_timetrack_dict(printer_set, sort='continues'):
             line_plot_data['pages'].append(val)
         return line_plot_data['index'], line_plot_data['pages']
 
-#if __name__ == '__main__':
-#    print(filteredTableContent('', json=False))
+if __name__ == '__main__':
+    print(filteredTableContent('', json=False))
 
 

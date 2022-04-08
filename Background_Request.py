@@ -16,7 +16,23 @@ def coffee_break(min, start):
     for t_dic in arr:
         cli = {'IP': t_dic['IP']}
         get = ClientGet(cli)
+
         data = get.snmp_run_main()
+        if data is not False:
+            try:
+                for key in ['Serial_No', 'Model', 'Manufacture']:
+                    if key not in list(data.keys()):
+                        t_dic['TRIED'] = int(t_dic['TRIED']) + 1
+                        t_arr.append(t_dic)
+                        break
+                    if data[key] == 'NaN':
+                        t_dic['TRIED'] = int(t_dic['TRIED']) + 1
+                        t_arr.append(t_dic)
+                        break
+            except:
+                t_dic['TRIED'] = int(t_dic['TRIED']) + 1
+                t_arr.append(t_dic)
+                break
         if data_dict_to_store(data) is not True:
             t_dic['TRIED'] = int(t_dic['TRIED']) + 1
             t_arr.append(t_dic)
@@ -37,13 +53,13 @@ while running(True):
     progress = 0
 
     for cli in listed:
-        print('<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
-        print(f'request cycle progress : {progress}/{len(listed)}')
+        #print('<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
+        #print(f'request cycle progress : {progress}/{len(listed)}')
         get = ClientGet(cli)
 
         data = get.snmp_run_main()
-        print(data)
+        #print(data)
         data_dict_to_store(data)
-        progress += 1
+        #progress += 1
     coffee_break(run_interval, start)
 

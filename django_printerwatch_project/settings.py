@@ -38,8 +38,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'mainframe',
-    #'printer_monitor',
-    #'running_out',
     'dev_sandbox',
     'subs',
 ]
@@ -74,7 +72,13 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'django_printerwatch_project.wsgi.application'
 
+CACHES = {
+    'session_cache': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'session_table',
+    }
 
+}
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 

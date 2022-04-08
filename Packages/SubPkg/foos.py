@@ -24,8 +24,32 @@ def foo():
     return None
 '''
 
-#                                        END OF IMPORT
+#
+#                                       END OF IMPORT
 
+def update_override(wjw_dic_list):
+    cli = dbClient()
+    cli.updateData()
+    arr = []
+    for line in cli.ClientData:
+        arr.append(line['Serial_No'])
+    oRide = LibOverride()
+    or_list = []
+    non_list = []
+    for dic in wjw_dic_list:
+        if dic['Serial_No'] in arr:
+            id = dic['Serial_No']
+            dic['Serial_No'] = dic['WJW']
+            for key in dic.keys():
+                if dic[key] == 'default' or dic[key] == 'aaaa_wjw_allgemain noname':
+                    dic[key] = ''
+            oRide.addEntry(id, dic)
+            or_list.append(dic)
+        else:
+            non_list.append(dic)
+    print(or_list)
+    print(non_list)
+    print(oRide.ClientData)
 
 # get_recent_data is used up on start to get the last stored data of the monitored clients
 def get_filter():
@@ -123,6 +147,8 @@ def add_ip(pending, get_class):
 def DataValidation(func):
     @wraps(func)
     def data_validation(data):
+        if data is not True:
+            return False
         reference = data_dict_template()
         if data is None:
             print('non')
@@ -379,4 +405,4 @@ def timestamp_from_com(diff=10):
         return 0, string
 
 if __name__ == '__main__':
-    print(get_pending_ip())
+    update_override(wjw_data_dic)

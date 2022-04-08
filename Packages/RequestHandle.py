@@ -71,4 +71,5 @@ class ClientGet(object):
                     self.dict.update(method.return_dict())
                     print(self.dict)
                     return self.dict
-
+        else:
+            return False

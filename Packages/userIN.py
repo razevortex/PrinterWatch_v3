@@ -23,9 +23,33 @@ def verifyU(inuser, inpass):
     with open(usereg, 'r') as reg:
         hashed = reg.read()
     if bcrypt.checkpw(inpass.encode('utf-8'), hashed.encode()):
-        return inuser
+        return inuser, inpass
     else:
         return False
+
+def AuTo(uToken):
+    try:
+        inuser, inpass = uToken
+        usereg = Path(f'{ROOT}user/{inuser}.txt')
+        with open(usereg, 'r') as reg:
+            hashed = reg.read()
+        if bcrypt.checkpw(inpass.encode('utf-8'), hashed.encode()):
+            return True
+        else:
+            return False
+    except:
+        return False
+
+def AuToView(req):
+    if req.method == 'POST':
+        loginput = req.POST
+        _user = loginput.get('user')
+        _pass = loginput.get('pass')
+        if AuTo((_user, _pass)):
+            return _user, _pass
+    else:
+        return False
+
 
 def repeat_pw(pw=False):
     while pw is not True:
