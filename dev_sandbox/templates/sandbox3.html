@@ -64,18 +64,10 @@
 <body> <!-- style="padding:0px; margin:0px"><div style="position:relative; top:0px; left:0px; width:100%; height:100%"> -->
 
 
+<div style="position:absolute; padding:4px; width:100%; height:100%;">
+    <iframe src="{{frame}}" name="content_frame" height="100%" width="100%" id="content_frame"></iframe>
 
-
-<div style="position:absolute; left:100px; width:10%; height:100%;">
-
-    <content>
-        <iframe src="C:\Users\admin\Desktop\page\table.html" name="content_frame" height="100%" width="100%" titel="content_frame"></iframe>
-    </content>
 </div>
-  <!-- <div id ="container" class="cont" style="position:absolute">
-  <button id ="animate" class="ilink" style=''> text </button>
-</div>
--->
 
 
 <script>
@@ -126,25 +118,30 @@ function createContainer(g) {
 
   /* creating the nav links as sliding buttons in a for loop */
 
-  let btns = ['Monitor', 'Analytics'] // the ids / labels of the buttons that are going to created
+  let btns = [{'name': 'PrinterMonitor', 'id': 'monitor'},
+{'name': 'CartStorage', 'id': 'storage_tracker'},
+{'name': 'Analytics', 'id': 'analytics'},
+{'name': 'addDevices', 'id': 'http://printerwatch/subsite/deviceMgr/'}] // the ids / labels of the buttons that are going to created
   // will need another list or a combination with id list for the href links
   let timer = new Object;
   let top_pos;
   for (let i = 0; i < btns.length; i++) {
     var button = document.createElement("button");
+
 	var spacing = i + 1
 	spacing = spacing * grid.buttonTopSpacing;
     top_pos = grid.logoSize[1] + spacing;
-    button.id = btns[i];
+    button.id = btns[i].id;
     timer[button.id] = null;
     button.style.width = grid.buttonWidth + 'px';
     button.style.left = grid.buttonSlidePos[1] + 'px';
     button.style.top = top_pos + 'px';
-    button.innerHTML = btns[i];
+    button.innerHTML = btns[i].name+"";
     document.getElementById('container').appendChild(button); // appending the buttons to the container
   }
   this.timer = timer;
 }
+
 
 
 
@@ -196,7 +193,7 @@ function hoverSlider(elemId, eve) {
   // INIT portion to prepair the animation
   let elem = document.getElementById(elemId.id);
 
-  console.log(elem);
+
   clearInterval(this.timer[elemId.id]); // stop timer of the triggering element
   this.timer[elemId.id] = null;
   let rect = elem.getBoundingClientRect(); // find the current position of element
@@ -227,7 +224,9 @@ function hoverSlider(elemId, eve) {
     }
   }
 }
-
+function linked(elemID){
+self.frames['content_frame'].location.href = 'http://printerwatch/subsite/'+elemId.id+'/';
+}
 
 function foo() {
   let _this = document.getElementById('container');
@@ -242,7 +241,9 @@ function foo2() {
 
   for (var i = 0; i < btns.length; i++) {
     let ele = document.getElementById(btns[i].id);
-    console.log(ele.timer);
+      ele.addEventListener('click', function() {
+      linked(ele);
+    });
     ele.addEventListener('mouseover', function() {
       hoverSlider(ele, 'mouseover');
     });

@@ -147,25 +147,26 @@ def add_ip(pending, get_class):
 def DataValidation(func):
     @wraps(func)
     def data_validation(data):
-        if data is not True:
-            return False
+        #if data is not True:
+        #    return False
         reference = data_dict_template()
         if data is None:
-            print('non')
-            return False
+
+            return 'non'
         elif type(data).__name__ is type(reference).__name__:
-            print('typ')
-            return False
+
+            return 'typ'
         elif len(data.items()) < len(reference.items()):
-            print('len')
-            return False
+
+            return 'len'
         for key, val in data.items():
             if key not in list(reference.keys()):
-                print(f'{key} not in reference keys')
-                return False
+
+                return f'{key} not in reference keys'
             elif val is None or val == '':
                 data[key] = 'NaN'
         data_handle = func(data)
+
         return data_handle
     return data_validation
 
@@ -177,7 +178,7 @@ def data_dict_to_store(data_dict):
     client = {}
     request = {}
     specs = {}
-    print(f'Client S.n.:{data_dict["Serial_No"]} IP:{data_dict["Serial_No"]} . . . ')
+    print(f'Client S.n.:{data_dict["Serial_No"]} IP:{data_dict["IP"]} . . . ')
     for key, var in data_dict.items():
         if var is None or var == '' or var is False:
             data_dict[key] = 'NaN'
@@ -226,9 +227,10 @@ def Storage2Dict():
     with open(f'{ROOT}db/cartStorage.txt', 'r') as storage:
         string = storage.readline()
         item_list = string.split(',')
-        for entry in item_list:
-            item = entry.split(':')
-            t_dic[item[0]] = item[1]
+        for item in [entry.split(':') for entry in [t for t in item_list if t != '']]:
+            if type(item) == list and len(item) == 2:
+                t_dic[item[0]] = item[1]
+                print(t_dic)
     return t_dic
 
 
@@ -328,8 +330,9 @@ def get_pending_ip():
     for t in split:
         if t != '':
             temp = t.split(':')
-            dic = {'IP': temp[0], 'TRIED': temp[1]}
-            arr.append(dic)
+            if type(temp) == list and len(temp) == 2:
+                dic = {'IP': temp[0], 'TRIED': temp[1]}
+                arr.append(dic)
     return arr
 
 def update_ip_form(ip_arr):
@@ -404,5 +407,5 @@ def timestamp_from_com(diff=10):
     else:
         return 0, string
 
-if __name__ == '__main__':
-    update_override(wjw_data_dic)
+#if __name__ == '__main__':
+#    update_override(wjw_data_dic)

@@ -1,6 +1,7 @@
 from Packages.SubPkg.csv_handles import *
 from Packages.SubPkg.foos import *
 import datetime as dt
+from collections import defaultdict
 
 db_dict_template = {}
 db_keys = ['TonerBK', 'TonerC', 'TonerM', 'TonerY', 'Printed_BW', 'Printed_BCYM', 'Copied_BW', 'Copied_BCYM']
@@ -21,13 +22,31 @@ class DataSet(object):
         self.processing = False
         self.ProcessedData = []
 
-    def get_recent_dict(self):
+    def get_all(self, customized=False):
         t_dic = self.Const
         t_dic.update(self.Static)
         t_dic.update(self.Statistics)
+        if customized is not False:
+            t_dic['ID'] = t_dic['Serial_No']
+            t_dic['Notes'] = 'NaN'
+            orData = LibOverride()
+            orData.updateDict(t_dic)
         if type(self.Data) == dict:
             t_dic.update(self.Data)
-            return t_dic
+        return t_dic
+
+    def cout_data(self):
+        if self.processing:
+            arr = self.ProcessedData
+        else:
+            arr = self.Data
+        [print(d) for d in arr]
+
+    def get_data(self):
+        if self.processing:
+            return self.ProcessedData
+        else:
+            return self.Data
 
     def get_device_data(self, id):
         cli = dbClient()
@@ -48,10 +67,8 @@ class DataSet(object):
             if line['Serial_No'] == id:
                 # Get and Add User / Location data
                 string = user = loc = ''
-                if line['Contact'] != 'NaN':
-                    self.Static['Contact'] = line['Contact']
-                if line['Location'] != 'NaN':
-                    self.Static['Location'] = line['Location']
+                self.Static['Contact'] = line['Contact'] if line['Contact'] != 'NaN' else ''
+                self.Static['Location'] = line['Location'] if line['Location'] != 'NaN' else ''
                 # Get and Add a string with the used Cartidges
                 string = ''
                 for cart in ['CartBK', 'CartC', 'CartM', 'CartY']:
@@ -211,7 +228,7 @@ class DataSet(object):
         if line == '1':
             return f"{self.Const['Serial_No']}, {self.Const['Device']}"
         if line == '2':
-            return f"{self.Static['UserLoc']}, {self.Static['IP']}"
+            return f"{self.Static['Contact']}, {self.Static['Location']}, {self.Static['IP']}"
 
     def back2raw(self):
         self.processing = False
@@ -248,9 +265,21 @@ def get_group_id_set(filter='', filter_for='Manufacture'):
     dic_t = {}
     if filter == '':
         clients = cli.ClientData
-
     else:
-        arr_t = []
+        clients = []
+        for line in cli.ClientData:
+            dSet = DataSet(line['Serial_No'])
+            for key, val in dSet.get_all(customized=True).items():
+                if filter.casefold() in val.casefold():
+                    clients.append(line)
+    group_dict = defaultdict(list)
+
+    for temp in [{line[filter_for]: line['Serial_No']} for line in clients]:
+        for key, val in temp.items():
+            group_dict[key].append(val)
+    return group_dict
+
+    '''    arr_t = []
         for line in cli.ClientData:
             specs = dbClientSpecs()
             specs.updateData()
@@ -274,9 +303,10 @@ def get_group_id_set(filter='', filter_for='Manufacture'):
         grouped = []
         for line in cli.ClientData:
             if line[filter_for] == key:
+           
                 grouped.append(line['Serial_No'])
         dic_t[key] = grouped
-    return dic_t
+    return dic_t'''
 
 
 def create_group_data(id_set, data_key, time_line, slim=True):
@@ -350,7 +380,7 @@ def update_recentCache():
     arr = []
     for line in cli.ClientData:
         struc = DataSet(line['Serial_No'], only_recent=True)
-        recent = struc.get_recent_dict()
+        recent = struc.get_all()
         oRide = LibOverride()
         recent['ID'] = recent['Serial_No']
         recent = oRide.updateDict(recent)
@@ -404,71 +434,30 @@ if __name__ == '__main__':
     cli.updateData()
     t_arr = []
     for line in cli.ClientData:
-        t_dic = {}
-        t_dic['Serial_No'] = line['Serial_No']
-        t_dic['Model'] = line['Model']
-        time_index = []
-        container = DataSet(t_dic['Serial_No'], headless=True)
-        container.light_Data()
-        for day in container.ProcessedData:
-            time_index.append(day[0])
-        time_index = list(set(time_index))
-        time_index = sorted(time_index)
-        start = time_index[0].split('-')
-        timepast = dt.date.today() - dt.date(int(start[0]), int(start[1]), int(start[2]))
-        t_dic['days_tracked'] = timepast.days
-        container.back2raw()
+        container = DataSet(line['Serial_No'])
         container.combine_keys(('Printed_BW', 'Copied_BW'), 'BW')
         container.combine_keys(('Printed_BCYM', 'Copied_BCYM'), 'BCYM')
         container.diff_Data()
-        container.combine_keys(('TonerC', 'TonerM', 'TonerY'), 'CYM')
         container.sum_data()
-        t = container.ProcessedData[-1]
-        t_dic.update(container.addCartPrices(comb=True))
-        t_dic.update(t[1])
-        t_arr.append(t_dic)
-    models = []
-    for i in t_arr:
-        i.update(calculate_tonerPer(i['TonerBK'], i['BW'], 'perBK'))
-        i.update(calculate_tonerPer(i['CYM'], i['BCYM'], 'perCYM'))
-        i.update(calculate_pageCost(i['perBK'], i['CartBK'], 'costPageBK'))
-        i.update(calculate_pageCost(i['perCYM'], i['CartCYM'], 'costPageCYM'))
-        models.append(i['Model'])
-    solo_stats = t_arr
-    models = list(set(models))
-    t_model_arr = []
-    for model in models:
-        t_dic = {'Model': model, '#': 0}
-        for key in ['TonerBK', 'BW', 'CYM', 'BCYM', 'perBK', 'perCYM', 'costPageBK', 'costPageCYM']:
-            t_dic[key] = (0, 0)
-        for line in t_arr:
-            if line['Model'] == model:
-                t_dic['#'] += 1
-                for key in ['CYM', 'BCYM', 'BW', 'TonerBK', 'perBK', 'perCYM', 'costPageBK', 'costPageCYM']:
-                    if line[key] != 0:
-                        days, val = t_dic[key]
-                        days += line['days_tracked']
-                        val += line[key]# * line['days_tracked']
-                        t_dic[key] = (days, val)
-
-
-        for key in ['CYM', 'BCYM', 'BW', 'TonerBK', 'perBK', 'perCYM', 'costPageBK', 'costPageCYM']:
-            days, val = t_dic[key]
-            if days != 0:
-                if key in ['perBK', 'perCYM', 'costPageBK', 'costPageCYM']:
-                    avg = val / t_dic['#']
-                else:
-                    avg = val / days
-                if type(avg) == float:
-                    point = int(str(avg).index('.'))
-                    point += 4
-                    avg = float(str(avg)[:point])
-                t_dic[key] = avg
-            else:
-                t_dic[key] = 'NaN'
-        t_model_arr.append(t_dic)
-    for i in t_model_arr:
-        print(i)
-        for ii in t_arr:
-            if ii['Model'] == i['Model']:
-                print(ii)
+        try:
+            start_date, last = container.get_data()[0][0], container.get_data()[-1]
+            time_past = dt.datetime.fromisoformat(last[0]) - dt.datetime.fromisoformat(start_date)
+            t_dic = last[1]
+            t_dic['DaysWatched'] = time_past.days
+            t_dic['Serial_No'] = container.get_all()['Serial_No']
+            #print(t_dic)
+            t_arr.append(t_dic)
+        except:
+            print('-------')
+    for line in t_arr:
+        t_dic = {}
+        for key, val in line.items():
+            if key != 'DaysWatched':
+                string = f'{key}PerDay'
+                if val != 0 and line['DaysWatched'] != 0 and type(val) == int:
+                    t_dic[string] = val / int(line['DaysWatched'])
+            if key.startswith('Toner') and val != 0:
+                 string = key.replace('Toner', 'PagesPerCart')
+                 pages = line['BW'] + line['BCYM'] if key.endswith('BK') else line['BCYM']
+                 t_dic[string] = 100 / val * pages
+        print(t_dic)

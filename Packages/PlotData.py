@@ -66,7 +66,7 @@ def data_struc4JSON(dic_list):
     result_list = []
     for entry in dic_list:
         t_dic = {'sno': entry['Serial_No']}
-
+        t_dic['id'] = entry['ID']
         t_dic['device'] = f'{entry["Manufacture"]} {entry["Model"]}'
         t_dic['ip'] = entry['IP']
         string = user = loc = ''

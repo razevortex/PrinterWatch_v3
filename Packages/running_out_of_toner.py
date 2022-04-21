@@ -138,16 +138,21 @@ def Storage2Dict():
     with open(f'{ROOT}db/cartStorage.txt', 'r') as storage:
         string = storage.readline()
         item_list = string.split(',')
-        for entry in item_list:
-            item = entry.split(':')
-            t_dic[item[0]] = item[1]
+        for item in [entry.split(':') for entry in [t for t in item_list if t != '']]:
+            if type(item) == list and len(item) == 2:
+                t_dic[item[0]] = item[1]
+                print(t_dic)
     return t_dic
 
 def UpdateStorage(dic):
     string = ''
+    i = 0
     for key, val in dic.items():
-        string += f'{key}:{val},'
-    string.rstrip(',')
+        if i > 0:
+            string += f',{key}:{val}'
+        else:
+            string += f'{key}:{val}'
+        i += 1
     with open(f'{ROOT}db/cartStorage.txt', 'w') as storage:
         storage.write(string)
 

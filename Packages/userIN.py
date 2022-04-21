@@ -2,6 +2,7 @@ import bcrypt
 from Packages.SubPkg.const.ConstantParameter import ROOT
 import os.path
 from pathlib import Path
+from django.contrib.auth.models import User
 
 
 def get_hashed_password(inuser, inpass):
@@ -23,7 +24,7 @@ def verifyU(inuser, inpass):
     with open(usereg, 'r') as reg:
         hashed = reg.read()
     if bcrypt.checkpw(inpass.encode('utf-8'), hashed.encode()):
-        return inuser, inpass
+        return inuser
     else:
         return False
 
@@ -61,12 +62,13 @@ def repeat_pw(pw=False):
 
 
 if __name__ == '__main__':
-    verified = False
-    while verified is not True:
-        user = input('u r ?')
-        verified = knownUser(user)
-        if verified is not False:
-            break
-        pw = repeat_pw()
-        get_hashed_password(user, pw.encode('utf-8'))
-    print(verified)
+    '''    verified = False
+        while verified is not True:
+            user = input('u r ?')
+            verified = knownUser(user)
+            if verified is not False:
+                break
+            pw = repeat_pw()
+            get_hashed_password(user, pw.encode('utf-8'))
+        print(verified)'''
+    user = User.objects.create_s

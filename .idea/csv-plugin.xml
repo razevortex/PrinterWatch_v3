@@ -24,6 +24,20 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/db/E74552K5J157940.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/db/E79028F1N485593.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/db/E79032E1N463928.csv">
           <value>
             <Attribute>
@@ -53,6 +67,13 @@
           </value>
         </entry>
         <entry key="/db/clients.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/db/model_statistics.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
