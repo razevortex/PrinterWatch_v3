@@ -200,7 +200,6 @@ def data_dict_to_store(data_dict):
     db.addingEntry(specs)
     return True
 
-
 def toner_replaced(last_line, new_line):
     replaced_toner = {'TonerBK', 'TonerC', 'TonerM', 'TonerY'}
     for key in replaced_toner:
@@ -209,7 +208,6 @@ def toner_replaced(last_line, new_line):
                 cart = key.replace('Toner', 'Cart')
                 temp = add_to_Storage(new_line[cart], "-1", Storage2Dict())
                 UpdateStorage(temp)
-
 
 def calc(store, low):
     new = int(store) - int(low)

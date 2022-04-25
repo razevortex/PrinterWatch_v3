@@ -1,7 +1,10 @@
 from Packages.SubPkg.csv_handles import *
 from Packages.SubPkg.foos import *
 import datetime as dt
+import numpy as np
 from collections import defaultdict
+from Packages.SubPkg.const.ConstantParameter import *
+from math import fsum
 
 db_dict_template = {}
 db_keys = ['TonerBK', 'TonerC', 'TonerM', 'TonerY', 'Printed_BW', 'Printed_BCYM', 'Copied_BW', 'Copied_BCYM']
@@ -76,13 +79,20 @@ class DataSet(object):
                         if string != '':
                             string += ';'
                         string += line[cart]
+                        self.Static[cart] = line[cart]
                 self.Static['Carts'] = string
 
     def addCartPrices(self, comb=False):
         t_dic = {}
         if comb is not False:
             t_dic['CartCYM'] = 0
-        spec = dbClientSpecs()
+        cost_dic = {'CartBK': 'NaN', 'CartC': 'NaN', 'CartY': 'NaN', 'CartM': 'NaN'}
+        for key in self.Static.keys():
+            if key.startswith('Cart') and key != 'Carts':
+                cost_dic[key] = TONER_COST_DICT[self.Static[key]][1]
+        print(cost_dic)
+        return cost_dic
+        '''spec = dbClientSpecs()
         spec.updateData()
         for line in spec.ClientData:
             if line['Serial_No'] == self.ID:
@@ -102,7 +112,7 @@ class DataSet(object):
                     t = t_dic['CartCYM'] / 3
                     t = str(t)[:6]
                     t_dic['CartCYM'] = float(t)
-                return t_dic
+                return t_dic'''
 
     def get_struc_data(self, id, only_recent=False):
         db = dbRequest(id)
@@ -429,7 +439,51 @@ def calculate_pageCost(pagesPer, cartPrice, to):
             t_dic = {to: pageCost}
     return t_dic
 
-if __name__ == '__main__':
+
+def cart_efficency(bw, bcym, b, c, y, m):
+    t_dic = {}
+    p_total = bw + bcym
+    if 0 not in (p_total, b):
+        t_dic['PpBK'] = float_depth(float(100 / b * p_total))
+    if bcym != 0:
+        for key, val in {'C': c, 'Y': y, 'M': m}.items():
+            string = f'Pp{key}'
+            if val != 0:
+                t_dic[string] = float_depth(float(100 / val * bcym))
+    return t_dic
+
+
+def stats(t_dic, price_dict):
+    result_dic = {}
+    for key in stat_header['client_stats']:
+        result_dic[key] = 'NaN'
+
+    result_dic.update(
+        {'Serial_No': t_dic['Serial_No'], 'Device': t_dic['Device'], 'DaysMonitored': t_dic['DaysWatched']})
+    result_dic.update(
+        cart_efficency(t_dic['BW'], t_dic['BCYM'], t_dic['TonerBK'], t_dic['TonerC'], t_dic['TonerY'], t_dic['TonerM']))
+    for key, val in t_dic.items():
+        if key != 'DaysWatched':
+            string = f'{key}PerDay'
+            if val != 0 and t_dic['DaysWatched'] != 0 and type(val) == int:
+                result_dic[string] = float_depth(float(val / int(t_dic['DaysWatched'])))
+    t_price = {'BK': 0, 'C': 0, 'M': 0, 'Y': 0}
+    for key, val in result_dic.items():
+        if key.startswith('Pp'):
+            color_key = key.replace('Pp', '')
+            if price_dict[f'Cart{color_key}'] != 'NaN':
+                t_price[color_key] = float_depth(price_dict[f'Cart{color_key}'] / float(val), depth=4)
+            else:
+                t_price[color_key] = 'NaN'
+    result_dic['CostPerBW'] = t_price['BK']
+    if 'NaN' not in t_price.values():
+        result_dic['CostPerBCYM'] = float_depth(fsum(t_price.values()), depth=4)
+        if np.isnan(result_dic['CostPerBCYM']):
+            result_dic['CostPerBCYM'] = 'NaN'
+    return result_dic
+
+
+def create_stat_db():
     cli = dbClient()
     cli.updateData()
     t_arr = []
@@ -439,25 +493,15 @@ if __name__ == '__main__':
         container.combine_keys(('Printed_BCYM', 'Copied_BCYM'), 'BCYM')
         container.diff_Data()
         container.sum_data()
-        try:
-            start_date, last = container.get_data()[0][0], container.get_data()[-1]
-            time_past = dt.datetime.fromisoformat(last[0]) - dt.datetime.fromisoformat(start_date)
-            t_dic = last[1]
-            t_dic['DaysWatched'] = time_past.days
-            t_dic['Serial_No'] = container.get_all()['Serial_No']
-            #print(t_dic)
-            t_arr.append(t_dic)
-        except:
-            print('-------')
-    for line in t_arr:
-        t_dic = {}
-        for key, val in line.items():
-            if key != 'DaysWatched':
-                string = f'{key}PerDay'
-                if val != 0 and line['DaysWatched'] != 0 and type(val) == int:
-                    t_dic[string] = val / int(line['DaysWatched'])
-            if key.startswith('Toner') and val != 0:
-                 string = key.replace('Toner', 'PagesPerCart')
-                 pages = line['BW'] + line['BCYM'] if key.endswith('BK') else line['BCYM']
-                 t_dic[string] = 100 / val * pages
-        print(t_dic)
+        start_date, last = container.get_data()[0][0], container.get_data()[-1]
+        time_past = dt.datetime.fromisoformat(last[0]) - dt.datetime.fromisoformat(start_date)
+        t_dic = last[1]
+        t_dic['DaysWatched'] = time_past.days
+        t_dic.update(container.Const)
+        t_dic.update(container.Static)
+        t_arr.append(stats(t_dic, container.addCartPrices()))
+    [print(line) for line in t_arr]
+
+
+if __name__ == '__main__':
+    create_stat_db()

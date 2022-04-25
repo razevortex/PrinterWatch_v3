@@ -32,6 +32,13 @@ header = {'request_db': ['TonerBK', 'TonerC', 'TonerM', 'TonerY',
                            'TonerY', 'Printed_BW', 'Printed_BCYM', 'Copied_BW', 'Copied_BCYM', 'Status_Report', 'Time_Stamp', 'ID']
           }
 
+stat_header = {'client_stats': ['Serial_No', 'Device', 'DaysMonitored', 'TonerYPerDay', 'PpY', 'BCYMPerDay',
+                                'CostPerBCYM', 'PpC', 'TonerBKPerDay', 'PpBK',
+                                'PpM', 'CostPerBW', 'TonerCPerDay', 'TonerMPerDay', 'BWPerDay'],
+               'device_stats': ['Device', '#', 'DaysMonitored', 'TonerYPerDay', 'PpY', 'BCYMPerDay', 'CostPerBCYM',
+                                'PpC', 'TonerBKPerDay', 'PpBK', 'PpM', 'CostPerBW', 'TonerCPerDay', 'TonerMPerDay',
+                                'BWPerDay']}
+
 statistics_key_type = {'Serial_No': 'string', 'IP': 'string', 'Manufacture': 'string', 'Model': 'string',
                        'CostBK': 'float', 'CostCYM': 'float',
                        'UsedBK': 'int', 'UsedCYM': 'int', 'PagesBK': 'int', 'PagesCYM': 'int', 'PagesPerBK': 'float',
