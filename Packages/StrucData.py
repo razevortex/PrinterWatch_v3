@@ -1,9 +1,10 @@
+from Packages.SubPkg.const.ConstantParameter import *
 from Packages.SubPkg.csv_handles import *
+from Packages.SubPkg.storage_data_handles import *
 from Packages.SubPkg.foos import *
 import datetime as dt
 import numpy as np
 from collections import defaultdict
-from Packages.SubPkg.const.ConstantParameter import *
 from math import fsum
 
 db_dict_template = {}
@@ -249,6 +250,83 @@ fuse = [('TonerC', 'TonerM', 'TonerY'),
 to = ['TonerCYM', 'BW', 'BCYM']
 ttt = {'BCYM': 0, 'BW': 0, 'TonerCYM': 0, 'TonerBK': 0}
 
+class CartStoreTracker(object):
+    def __init__(self):
+        self.storage_handle = CartridgeStorage()
+        self.data_list = self.get_data_from_cache()
+        self.date = dt.date.today()
+        self.data = []
+        self.delta = ''
+        self.colors = {'BK': '#000000', 'C': '#00ffff', 'Y': '#FFFF00', 'M': '#FF00FF'}
+        self.plot_timeline = []
+        self.plot = []
+        self.table_data = []
+
+    def get_data_from_cache(self):
+        cache = Cached('recentCached')
+        cache.updateData()
+        stats = Cached('client_stats')
+        stats.updateData()
+        t_arr = []
+        for line in cache.ClientData:
+            for stat in stats.ClientData:
+                if stat['Serial_No'] == line['ID']:
+                    for v in ['BK', 'C', 'Y', 'M']:
+                        if line[f'Cart{v}'] != '':
+                            t_dic = {line[f'Cart{v}']: (line[f'Toner{v}'], stat[f'Toner{v}PerDay'])}
+                            if 'NaN' not in t_dic.values():
+                                t_arr.append(t_dic)
+        return t_arr
+
+    def process_line(self, line):
+        for key, val in line.items():
+            a, b = val
+            a = float(a) - float(b)
+            if a <= 0:
+                val = (100, b)
+                self.delta[key] -= 1
+            else:
+                val = (a, b)
+        return {key: val}
+
+    def create_table_data(self):
+        end = copy.deepcopy(self.storage_handle.virtual_storage)
+        self.storage_handle.restore_vs()
+        start = copy.deepcopy(self.storage_handle.virtual_storage)
+        for key in sorted(list(start.keys())):
+            t_dic = {'cTyp': key, 'cStore': start[key], 'cLow': str(start[key] - end[key]), 'cNew': end[key]}
+            self.table_data.append(t_dic)
+
+    def process_time(self, days):
+        self.data.append((self.date, copy.deepcopy(self.storage_handle.virtual_storage)))
+        for day in range(days):
+            self.date = self.date + dt.timedelta(days=1)
+            self.delta = self.storage_handle.get_delta_zero_dict()
+            print(self.delta, self.data)
+            self.data_list = [self.process_line(line) for line in self.data_list]
+            self.storage_handle.update_vs(self.delta)
+            self.data.append((self.date, copy.deepcopy(self.storage_handle.virtual_storage)))
+        self.create_table_data()
+        key_list = list(self.delta.keys())
+        self.plot_timeline = [str(date[0]) for date in self.data]
+        self.plot = []
+        for key in key_list:
+            t_dic = {}
+            t_dic['label'] = key
+            t_dic['data'] = [date[1][key] for date in self.data]
+            #if len(set(t_dic['data'])) > 1:
+
+            for k in self.colors.keys():
+                if k in key:
+                    t_dic['borderColor'] = self.colors[k]
+            t_dic['pointRadius'] = 1
+
+            t_dic['lineTension'] = 0.2
+            self.plot.append(t_dic)
+        return self.plot_timeline, self.plot
+
+
+
 def get_global_timeline():
     cli = dbClient()
     cli.updateData()
@@ -359,7 +437,6 @@ def create_group_data(id_set, data_key, time_line, slim=True):
         fused.append(val)
     return fused
 
-
 colors = ['#000054', '#5400fe', '#a90000', '#a9a9fe', '#fe5454', '#0000fe', '#5454a9', '#a900a9', '#a9fe54', '#fe54fe', '#005454', '#54a900', '#a95400', '#a9fefe', '#fea954', '#0054fe', '#54a9a9', '#a954a9', '#fe0054', '#fea9fe', '#00a954', '#54fea9', '#a9a900', '#fe00fe', '#fefe54']
 
 
@@ -389,20 +466,47 @@ def update_recentCache():
     cli.updateData()
     arr = []
     for line in cli.ClientData:
-        struc = DataSet(line['Serial_No'], only_recent=True)
-        recent = struc.get_all()
+        recent = DataSet(line['Serial_No'], only_recent=True)
+        t_recent = recent.get_all()
         oRide = LibOverride()
-        recent['ID'] = recent['Serial_No']
-        recent = oRide.updateDict(recent)
-        arr.append(recent)
-    for line in arr:
-        print(line)
-    print(list(arr[0].keys()))
-    cache = recentCached()
+        t_recent['ID'] = t_recent['Serial_No']
+        t_recent['Notes'] = 'NaN'
+        t_recent = oRide.updateDict(t_recent)
+        container = DataSet(line['Serial_No'], only_recent=False)
+        if 'Brother' in container.Const['Device']:
+            cache = Cached('client_stats')
+            cache.updateData()
+            for line in cache.ClientData:
+                if line['Serial_No'] == container.Const['Serial_No']:
+                    stat = line
+                    break
+            container.combine_keys(('Printed_BW', 'Copied_BW'), 'BW')
+            container.combine_keys(('Printed_BCYM', 'Copied_BCYM'), 'BCYM')
+            container.diff_Data()
+            data = container.ProcessedData[::-1]
+            t_dic = {'BK': 0, 'C': 0, 'Y': 0, 'M': 0}
+            for key in t_dic.keys():
+                i = 0
+                toner = f'Toner{key}'
+                line = data[i][1]
+                if t_recent[toner] != 'NaN':
+                    while line[toner] == 0:
+                        if key == 'BK':
+                            t_dic[key] += line['BW'] if line['BW'] != 'NaN' else 0
+                        t_dic[key] += line['BCYM'] if line['BCYM'] != 'NaN' else 0
+                        i += 1
+                        if i > len(data) - 1:
+                            break
+                        else:
+                            line = data[i][1]
+                    if t_dic[key] != 0 and t_dic[key] != 'NaN':
+                        t_dic[key] = (float(stat[f'Pp{key}']) / 10) / t_dic[key]
+                        if int(t_recent[toner]) < 100:
+                            t_recent[toner] = int(int(t_recent[toner]) + 10 - t_dic[key] if t_dic[key] < 10 else int(t_recent[toner]))
+        arr.append(t_recent)
+    cache = Cached('recentCached')
     cache.ClientData = arr
     cache.updateCSV()
-    cache.updateData()
-    print(cache.ClientData)
 
 def create_eff_stats(group, filter, toner='all'):
     '''
@@ -455,7 +559,7 @@ def cart_efficency(bw, bcym, b, c, y, m):
 
 def stats(t_dic, price_dict):
     result_dic = {}
-    for key in stat_header['client_stats']:
+    for key in cache_header['client_stats']:
         result_dic[key] = 'NaN'
 
     result_dic.update(
@@ -500,8 +604,101 @@ def create_stat_db():
         t_dic.update(container.Const)
         t_dic.update(container.Static)
         t_arr.append(stats(t_dic, container.addCartPrices()))
-    [print(line) for line in t_arr]
+    cache = Cached('client_stats')
+    cache.ClientData = t_arr
+    cache.updateCSV()
 
+def get_table_data(filter):
+    cache = Cached('recentCached')
+    cache.updateData()
+    arr = []
+    for line in cache.ClientData:
+        if filter != '':
+            for val in line.values():
+                if filter.casefold() in val.casefold():
+                    arr.append(line)
+                    break
+        else:
+            arr.append(line)
+
+    return data_struc4JSON(arr)
+
+def data_struc4JSON(dic_list):
+    result_list = []
+    for entry in dic_list:
+        t_dic = {'sno': entry['Serial_No']}
+        t_dic['id'] = entry['ID']
+        t_dic['device'] = entry['Device']
+        t_dic['ip'] = entry['IP']
+        string = user = loc = ''
+        if entry['Contact'] != 'NaN':
+            user = entry['Contact']
+        if entry['Location'] != 'NaN': # and entry['Location'] != entry['Contact']:
+            loc = entry['Location']
+        string += user
+        if loc != user:
+            string += f' {loc}'
+        t_dic['userLoc'] = string
+        toner_fill = []
+        for key in ['TonerBK', 'TonerC', 'TonerY', 'TonerM']:
+            if entry[key] != 'NaN':
+                toner_fill.append(entry[key])
+            else:
+                toner_fill.append('')
+        toner_fill.append(entry['Carts'])
+        t_dic['toner'] = toner_fill
+        string = entry['Status_Report']
+        t_dic['status'] = string if len(string) < 12 else string[:11]
+        if entry['Notes'] != 'NaN':
+            t_dic['notes'] = entry['Notes']
+        else:
+            t_dic['notes'] = ''
+        result_list.append(t_dic)
+    return result_list
 
 if __name__ == '__main__':
-    create_stat_db()
+    group = 'Manufacture'
+    value = 'BW'
+    filter = ''
+    data_arr = create_plot_data(group, filter, value)
+    print(data_arr)
+    tracker = CartStoreTracker()
+    print(tracker.data_list)
+
+    time, data = tracker.process_time(20)
+    print(tracker.table_data)
+    '''days = 10
+    cache = Cached('recentCached')
+    cache.updateData()
+    stat = Cached('client_stats')
+    stat.updateData()
+    arr = []
+    for line in cache.ClientData:
+        print(line)
+        t_dic = line
+        for sline in stat.ClientData:
+            if line['ID'] == sline['Serial_No']:
+                t_dic.update(sline)
+                print(line['ID'], sline['Serial_No'])
+                arr.append(t_dic)
+    for day in range(days):
+        string = ''
+        for line in arr:
+            for toner in ['TonerBK', 'TonerC', 'TonerY', 'TonerM']:
+                tpd = f'{toner}PerDay'
+                if line[tpd] != 'NaN' and line[toner] != 'NaN':
+                    if int(line[toner]) - (day * float(line[tpd])) < 0:
+                        string += line[toner.replace('Toner', 'Cart')]
+        print(string)
+'''
+
+    '''cache = Cached('recentCached')
+    cache.updateData()
+    arr = []
+    for line in cache.ClientData:
+        if filter != '':
+            if filter in line.values():
+                arr.append(line)
+        else:
+            arr.append(line)
+    [print(line) for line in arr]'''

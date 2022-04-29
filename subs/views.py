@@ -10,8 +10,10 @@ from Packages.StrucData import *
 
 def PrintMonitor(request):
     filter = request.GET.get('filter', '')
-    data2json = dumps(filteredTableContent(filter))
-    return render(request, 'monitor.html', {'data': data2json})
+
+    data2json = dumps(get_table_data(filter))
+    #data2json = dumps(filteredTableContent(filter))
+    return render(request, 'monitor.html', {'data': data2json})  #data2json})
 
 
 def details(request):
@@ -74,8 +76,10 @@ def cartTrack(request):
         days = 10
     else:
         days = int(days)
-    data2json = dumps(cart_state(int(days)))
-    return render(request, 'cartTracker.html', {'data': data2json, 'days': days})
+    tracker = CartStoreTracker()
+    index, arr = tracker.process_time(int(days))
+    data2json = dumps(tracker.table_data)
+    return render(request, 'cartTracker.html', {'index': index, 'sets': arr, 'data': data2json, 'days': days, })
 
 
 def analytics(request):

@@ -115,7 +115,7 @@ def cart_state(days):
     t_arr = []
     low = till_then(days)
     for cart in get_used_toner_types():
-        cart['cLow'] = '0'
+        cart['cLow'] = ''
         cart['cNew'] = cart['cStore']
         if cart['cTyp'] in low.keys():
             cart['cLow'] = low[cart['cTyp']]
@@ -125,8 +125,11 @@ def cart_state(days):
 
 
 def calc(store, low):
-    new = int(store) - int(low)
-    return str(new)
+    if low != '':
+        new = int(store) - int(low)
+        return str(new)
+    else:
+        return store
 
 def add_to_Storage(typ, num, db_dict):
     new = int(db_dict[typ]) + int(num)
@@ -159,7 +162,7 @@ def UpdateStorage(dic):
 
 if __name__ == '__main__':
 
-    print(Storage2Dict())
+    print(cart_state(30))
     #cart_list = []
     #for line in cart_state(0):
     #    cart_list.append(line['cTyp'])

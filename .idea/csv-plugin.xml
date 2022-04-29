@@ -10,7 +10,35 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/chached_data/client_stats.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/chached_data/recentCached.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/db/E69498J1J225635.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/db/E69498K0J129772.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/db/E69498M0J145493.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
@@ -24,6 +52,20 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/db/E74552J6J693052.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/db/E74552K4J513105.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/db/E74552K5J157940.csv">
           <value>
             <Attribute>
@@ -31,7 +73,28 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/db/E79015J0N198445.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/db/E79028D1N412406.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/db/E79028F1N485593.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/db/E79028J1N561477.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />

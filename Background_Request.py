@@ -2,6 +2,7 @@ from Packages.RequestHandle import *
 from Packages.SubPkg.foos import *
 from Packages.SubPkg.const.ConstantParameter import data_dict_template, run_interval
 from Packages.SubPkg.csv_handles import *
+from Packages.StrucData import create_stat_db, update_recentCache
 import time
 import datetime as dt
 
@@ -11,6 +12,8 @@ def coffee_break(min, start):
     running_for = time.time() - start
     early = running_for - sec
     print('run & early', running_for, early)
+    create_stat_db()
+    update_recentCache()
     '''arr = get_pending_ip()
     t_arr = []
     for t_dic in arr:

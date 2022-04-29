@@ -464,14 +464,15 @@ class dbStats(HandleDB):
         self.updateCSV()
         print('data updated')
 
-class recentCached(HandleDB):
-    def __init__(self):
-        csv = '/home/razevortex/django_printerwatch/chache/data-recent-struc.csv'
+class Cached(HandleDB):
+    def __init__(self, data):
+        csv = '/home/razevortex/django_printerwatch/chached_data/'
         _for_ini = (False,
-                    csv,
-                    header['recentCached'],
+                    f'{csv}{data}.csv',
+                    cache_header[data],
                     'Serial_No'
                     )
+
         super().__init__(_for_ini)
         #if self.create_file():
         #    self.updateData()

@@ -13,7 +13,14 @@
             text-align: center;#text-size: 14;
             color: lightorange;
 			}
+			.canvas{
+            margin: auto;
+            padding-top: 5px;
+            width: 90%;
+            background-color: lightgrey;
+            }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body onload="insertRow()">
@@ -27,13 +34,62 @@
     </div>
 </form>
 
+    <div class="canvas">
+    <canvas id="myChart" width="400" height="200"></canvas>
+     </div>
+
+<script>
+
+
+    const config = {
+    type: 'line',
+    data: {
+        labels: {{ index|safe }},
+        datasets: {{ sets|safe }}
+        },
+    options: {}
+    };
+	function insertRow(){
+		const db = JSON.parse("{{data|escapejs}}");
+
+		for(let i of db){
+		var tBody = document.getElementById("tableBody");
+		var row = tBody.insertRow(0);
+		row.className = "tBodyRow"
+
+		var typCell = row.insertCell(0);
+		typCell.innerHTML = i.cTyp;
+
+		var storeCell = row.insertCell(1);
+        storeCell.innerHTML = i.cStore;
+
+		var lowCell = row.insertCell(2);
+        lowCell.innerHTML = i.cLow;
+
+		var newCell = row.insertCell(3);
+        newCell.innerHTML = i.cNew;
+
+		var addCell = row.insertCell(4);
+
+        addCell.innerHTML = '<form action="http://printerwatch/subsites/storage_tracker/"><input type="text" id="'+i.cTyp+'" name="num"><input type="hidden" id="'+i.cTyp+'" name="cart" value="'+i.cTyp+'"><input type="submit" value="[+]"></form>' ;
+		}}
+</script>
+<script>
+    window.onload= function make_chart(){
+    var ctx = document.getElementById('myChart').getContext('2d');
+    window.myChart = new Chart(ctx, config);
+    insertRow()
+    };
+
+</script>
+
 <div class='scoreboard'>
         <table id="myTable" class='monitorTable'>
 		<thead id="aHeader">
         <tr id="headRow">
             <td>Cart.Types</td>
             <td># Stored</td>
-			<td><p id="timeVar">10 days forecast</p></td>
+			<td><p id="timeVar">{{days}} days forecast</p></td>
 			<td>expected # in store</td>
 			<td>add to storage</td>
 		</tr>
@@ -44,7 +100,8 @@
         </tbody>
 
         </table></div>
-     <script>
+
+   <!--  <script>
 		function insertRow(){
 		const db = JSON.parse("{{data|escapejs}}");
 
@@ -67,13 +124,13 @@
 
 		var addCell = row.insertCell(4);
 
-        addCell.innerHTML = '<form action="http://printerwatch/subsite/storage_tracker/"><input type="text" id="'+i.cTyp+'" name="num"><input type="hidden" id="'+i.cTyp+'" name="cart" value="'+i.cTyp+'"><input type="submit" value="[+]"></form>' ;
+        addCell.innerHTML = '<form action="http://printerwatch/cartridges/"><input type="text" id="'+i.cTyp+'" name="num"><input type="hidden" id="'+i.cTyp+'" name="cart" value="'+i.cTyp+'"><input type="submit" value="[+]"></form>' ;
 		}}
-
 
         function xfunc(){
         alert("Hi")
         }
         </script>
+-->
 </body>
 </html>
