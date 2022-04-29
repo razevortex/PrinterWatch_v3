@@ -28,12 +28,14 @@
         <div class="headInput">
     <label for="group"> grouped by:</label>
         <select id="group" name="group" title="if None is selected its recommended to use filter">
+            <option value="{{ group }}">{{ group }}</option>
             <option value="Manufacture">Manufacture</option>
             <option value="Model">Model</option>
             <option value="Serial_No">None</option>
         </select>
     <label for="value"> > plot value:</label>
         <select id="value" name="value">
+            <option value="{{ value }}">{{ value }}</option>
             <option value="BW">Black/White</option>
             <option value="BCYM">Colored</option>
             <option value="TonerBK">TonerBK</option>
@@ -42,10 +44,10 @@
             <option value="TonerM">TonerM</option>
         </select>
     <label for="filter"> > filter : </label>
-        <input id="filter" type="text" name="filter">
+        <input id="filter" type="text" name="filter" value="{{ filter }}">
+        <input type="hidden" id="user" name="user" value="{{ user }}">
         <input type="submit" value=">>">
-            </br>
-            <p style="align:center"> {{ last }} </p>
+
         </div>
     </form>
 

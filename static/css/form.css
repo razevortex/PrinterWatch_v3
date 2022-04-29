@@ -1,0 +1,58 @@
+body{
+  background-color: darkgray;
+}
+
+label {
+  padding: 0px 5px;
+  margin-top: 2px;
+  width: 30%;
+  background-color: black;
+  color: darkorange;
+  font-weight: bold;
+
+
+}
+select {
+  padding: 0px 4px;
+  background-color: gray;
+  width: 70%;
+  font-weight: bold;
+  outline: 2px solid;
+  outline-color: black;
+}
+
+input.text {
+  padding: 0px 4px;
+  background-color: gray;
+  width: 70%;
+  font-weight: bold;
+  outline: 2px solid;
+  outline-color: black;
+}
+
+input.submit {
+  background-color: darkorange;
+  float: right;
+  border: 1px solid black;
+  font-weight: bold;
+  height: 100%;
+  border-radius: 10px;
+}
+
+div.inputs {
+  padding: 3px;
+  background-color: black;
+  float: left;
+
+}
+div.form {
+  padding: 2px;
+  float: left;
+  width: 95%;
+  justify-content: space-evenly;
+  text-align: center;
+  background-color: black;
+  border: 2px solid gray;
+  border-style: outset;
+  border-radius: 14px;
+}

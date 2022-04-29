@@ -21,10 +21,11 @@
 
 <form action="http://printerwatch/subsite/monitor/">
     <div  class="headInput">
-    <label class="label">Search for Printer with </label>
-    <input type="text" id="filter" name="filter">
-    <label  class="label"> in there dataset. </label>
-    <input type="submit" value="Go!">
+        <label class="label">Search for Printer with </label>
+        <input type="text" id="filter" name="filter" value="{{ filter }}">
+        <label class="label"> in there dataset. </label>
+        <input type="hidden" id="user" name="user" value="{{ user }}">
+        <input type="submit" value="Go!">
     </div>
 </form>
 
@@ -40,13 +41,12 @@
 			<td>Status</td>
             <td>Notes</td>
 			<td>Details</td></tr>
-
 		</thead>
 		<tbody id="tableBody">
 
         </tbody>
-
-        </table></div>
+        </table>
+</div>
      <script>
 		function insertRow(){
 		const db = JSON.parse("{{data|escapejs}}");
@@ -77,9 +77,9 @@
 
         var notesCell = row.insertCell(6);
 		notesCell.innerHTML = i.notes;
-
+        var link = "http://printerwatch/subsite/details?id='+i.id+'";
 		var infoCell = row.insertCell(7);
-		infoCell.innerHTML = '<div class="detailLink"><a href="http://printerwatch/subsite/details?id='+i.id+'" target="content_frame">i</a></div>';
+		infoCell.innerHTML = '<a href="http://printerwatch/subsite/details?id='+i.id+'&user={{user}}" target="content_frame"><div class="detailLink" style="background-color:'+i.uptodate+'" onclick="location.href="'+link+'">i</div></a>';
 		}}
 
 

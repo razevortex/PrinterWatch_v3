@@ -37,8 +37,8 @@
         </select>
         <label for="vals"> grouped values :</label>
         <select id="vals" name="vals" title="">
-            <option value="grouped">grouped</option>
             <option value="seperated">seperated</option>
+            <option value="grouped">grouped</option>
         </select>
 
         <input type="hidden" id="user" name="user" value="{{ user }}">
@@ -65,7 +65,9 @@
             <td>Pages BW</td>
 			<td>Pages BCYM</td>
 			<td>Toner BK</td>
-			<td>Toner CYM</td>
+			<td>Toner C</td>
+            <td>Toner Y</td>
+            <td>Toner M</td>
         </tr>
 
 		</thead>
@@ -95,8 +97,14 @@
 		var BKCell = row.insertCell(3);
         BKCell.innerHTML = i.TonerBK;
 
-		var CYMCell = row.insertCell(4);
-		CYMCell.innerHTML = i.TonerCYM;
+		var CCell = row.insertCell(4);
+		CCell.innerHTML = i.TonerC;
+
+		var YCell = row.insertCell(5);
+		YCell.innerHTML = i.TonerY;
+
+		var MCell = row.insertCell(6);
+		MCell.innerHTML = i.TonerM;
 		}}
 
 

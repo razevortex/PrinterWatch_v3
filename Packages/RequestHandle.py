@@ -54,6 +54,7 @@ class ClientGet(object):
                    'Serial_No': '1.3.6.1.2.1.43.5.1.1.17.1'}
             for key in ['Model', 'Serial_No']:
                 oid[key] = self.run_snmp(self.dict['IP'], oid[key])
+            self.dict.update(oid)
             get_kyocera = KyoceraDefault(self.dict)
             self.dict.update(get_kyocera.return_dict())
             return self.dict
@@ -62,6 +63,7 @@ class ClientGet(object):
                    'Serial_No': '1.3.6.1.2.1.43.5.1.1.17.1'}
             for key in ['Model', 'Serial_No']:
                 oid[key] = self.run_snmp(self.dict['IP'], oid[key])
+            self.dict.update(oid)
             specs_lib = SpecsLib(self.dict['Manufacture'])
             for i in specs_lib.ClientData:
                 if i['Model'] in self.dict['Model']:

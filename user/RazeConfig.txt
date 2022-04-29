@@ -1,0 +1,4 @@
+printer_monitor=filter:*
+printer_details=time:total;vals:seperated
+cart_monitor=days:15
+analytics=group:Serial_No;value:BCYM;filter:

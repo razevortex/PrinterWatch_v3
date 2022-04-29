@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>PrinterMonitor</title>
+    <title>CartridgeMonitor</title>
     <link rel="stylesheet" href="http://printerwatch/static/css/style.css">
         <style>
            .headInput{
@@ -28,8 +28,9 @@
 <form action="http://printerwatch/subsite/storage_tracker/">
     <div class="headInput">
     <label class="label">Enter time window</label>
-    <input type="text" id="days" name="days" title='default are 10 days'>
+    <input type="text" id="days" name="days" title='default are 10 days' value="{{ days }}">
     <label  class="label"> in days. </label>
+    <input type="hidden" id="user" name="user" value="{{ user }}">
     <input type="submit" value="Go!">
     </div>
 </form>
@@ -37,51 +38,6 @@
     <div class="canvas">
     <canvas id="myChart" width="400" height="200"></canvas>
      </div>
-
-<script>
-
-
-    const config = {
-    type: 'line',
-    data: {
-        labels: {{ index|safe }},
-        datasets: {{ sets|safe }}
-        },
-    options: {}
-    };
-	function insertRow(){
-		const db = JSON.parse("{{data|escapejs}}");
-
-		for(let i of db){
-		var tBody = document.getElementById("tableBody");
-		var row = tBody.insertRow(0);
-		row.className = "tBodyRow"
-
-		var typCell = row.insertCell(0);
-		typCell.innerHTML = i.cTyp;
-
-		var storeCell = row.insertCell(1);
-        storeCell.innerHTML = i.cStore;
-
-		var lowCell = row.insertCell(2);
-        lowCell.innerHTML = i.cLow;
-
-		var newCell = row.insertCell(3);
-        newCell.innerHTML = i.cNew;
-
-		var addCell = row.insertCell(4);
-
-        addCell.innerHTML = '<form action="http://printerwatch/subsites/storage_tracker/"><input type="text" id="'+i.cTyp+'" name="num"><input type="hidden" id="'+i.cTyp+'" name="cart" value="'+i.cTyp+'"><input type="submit" value="[+]"></form>' ;
-		}}
-</script>
-<script>
-    window.onload= function make_chart(){
-    var ctx = document.getElementById('myChart').getContext('2d');
-    window.myChart = new Chart(ctx, config);
-    insertRow()
-    };
-
-</script>
 
 <div class='scoreboard'>
         <table id="myTable" class='monitorTable'>
@@ -99,19 +55,33 @@
 
         </tbody>
 
-        </table></div>
+        </table>
+</div>
 
-   <!--  <script>
-		function insertRow(){
+<script>
+
+
+    const config = {
+    type: 'line',
+    data: {
+        labels: {{ index|safe }},
+        datasets: {{ sets|safe }}
+        },
+    options: {}
+    };
+	function insertRow(){
+
 		const db = JSON.parse("{{data|escapejs}}");
 
 		for(let i of db){
+
 		var tBody = document.getElementById("tableBody");
 		var row = tBody.insertRow(0);
 		row.className = "tBodyRow"
 
 		var typCell = row.insertCell(0);
-		typCell.innerHTML = i.cTyp;
+		typCell.innerHTML = "<a href='http://printerwatch/subsite/monitor?filter="+i.cTyp+"&user={{ user }}' target='content_frame'>\
+		<div class='detailLink' style='background-color:black'>"+i.cTyp+"</div></a>";
 
 		var storeCell = row.insertCell(1);
         storeCell.innerHTML = i.cStore;
@@ -123,14 +93,24 @@
         newCell.innerHTML = i.cNew;
 
 		var addCell = row.insertCell(4);
-
-        addCell.innerHTML = '<form action="http://printerwatch/cartridges/"><input type="text" id="'+i.cTyp+'" name="num"><input type="hidden" id="'+i.cTyp+'" name="cart" value="'+i.cTyp+'"><input type="submit" value="[+]"></form>' ;
+        addCell.innerHTML = '<form action="http://printerwatch/subsites/storage_tracker/">\
+        <input type="text" id="'+i.cTyp+'" name="num">\
+        <input type="hidden" id="'+i.cTyp+'" name="cart" value="'+i.cTyp+'">\
+        <input type="hidden" id="user" name="user" value="{{ user }}">\
+        <input type="submit" value="[+]"></form>';
 		}}
+</script>
+<script>
+    window.onload= function make_chart(){
+    var ctx = document.getElementById('myChart').getContext('2d');
+    window.myChart = new Chart(ctx, config);
+    insertRow()
+    };
 
-        function xfunc(){
-        alert("Hi")
-        }
-        </script>
--->
+</script>
+
+
+
+
 </body>
 </html>

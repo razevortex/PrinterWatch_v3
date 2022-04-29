@@ -1,8 +1,11 @@
+import copy
+
 from Packages.SubPkg.const.ConstantParameter import *
 from Packages.SubPkg.csv_handles import *
 from Packages.SubPkg.storage_data_handles import *
 from Packages.SubPkg.foos import *
 import datetime as dt
+from dateutil.relativedelta import relativedelta
 import numpy as np
 from collections import defaultdict
 from math import fsum
@@ -93,27 +96,6 @@ class DataSet(object):
                 cost_dic[key] = TONER_COST_DICT[self.Static[key]][1]
         print(cost_dic)
         return cost_dic
-        '''spec = dbClientSpecs()
-        spec.updateData()
-        for line in spec.ClientData:
-            if line['Serial_No'] == self.ID:
-                for cart in ['CartBK', 'CartC', 'CartM', 'CartY']:
-                    if line[cart] != 'NaN':
-                        if comb is not False:
-                            if cart.endswith('BK'):
-                                cost = TONER_COST_DICT[line[cart]]
-                                t_dic[cart] = cost[1]
-                            else:
-                                cost = TONER_COST_DICT[line[cart]]
-                                t_dic['CartCYM'] += cost[1]
-                        else:
-                            cost = TONER_COST_DICT[line[cart]]
-                            t_dic[cart] = cost[1]
-                if comb is not False:
-                    t = t_dic['CartCYM'] / 3
-                    t = str(t)[:6]
-                    t_dic['CartCYM'] = float(t)
-                return t_dic'''
 
     def get_struc_data(self, id, only_recent=False):
         db = dbRequest(id)
@@ -206,20 +188,54 @@ class DataSet(object):
         self.processing = True
         self.ProcessedData = arr_t
 
-    def sum_data(self):
+    def sum_data(self, periode='total'):
+        arr_t = []
         if self.processing is not False:
             data = self.ProcessedData
         else:
             data = self.Data
-        first = data[0][1]
-        dic_t = {}
-        for key in first.keys():
-            dic_t[key] = 0
-        arr_t = []
-        for index, dic in data:
-            for key in dic.keys():
-                dic_t[key] += dic[key]
-            arr_t.append((index, copy.deepcopy(dic_t)))
+        if periode == 'total':
+            first = data[0][1]
+            dic_t = {}
+            for key in first.keys():
+                dic_t[key] = 0
+            for index, dic in data:
+                for key in dic.keys():
+                    dic_t[key] += dic[key]
+                arr_t.append((index, copy.deepcopy(dic_t)))
+        else:
+            if periode == 'week':
+                add = dt.timedelta(weeks=1)
+            if periode == 'month':
+                add = relativedelta(months=1)
+
+
+            dic_t = {}
+            for key in data[0][1]:
+                dic_t[key] = 0
+            date = dt.date.fromisoformat(data[0][0])
+            #day = date.weekday()
+            day = date + add
+            last = dt.date.fromisoformat(data[-1][0]) if len(data) > 2 else date
+            sum_dic = data[0][1]
+            index = str(date)
+            while date <= last:
+                end_index = str(date)
+                date = date + dt.timedelta(days=1)
+                #if date.weekday() == day:
+                if date == day:
+                    index += f' - {end_index}'
+                    arr_t.append((index, sum_dic))
+                    sum_dic = copy.deepcopy(dic_t)
+                    index = str(date)
+                    day = date + add
+                for t, d in data:
+                    if dt.date.fromisoformat(t) == date:
+                        for key in d.keys():
+                            sum_dic[key] += d[key]
+            index += f' - {end_index}'
+            arr_t.append((index, sum_dic))
+            print(arr_t)
         self.processing = True
         self.ProcessedData = arr_t
 
@@ -247,7 +263,7 @@ class DataSet(object):
 fuse = [('TonerC', 'TonerM', 'TonerY'),
          ('Printed_BW', 'Copied_BW'),
          ('Printed_BCYM', 'Copied_BCYM')]
-to = ['TonerCYM', 'BW', 'BCYM']
+to = ['TonerCYM', 'PagesBW', 'PagesBCYM']
 ttt = {'BCYM': 0, 'BW': 0, 'TonerCYM': 0, 'TonerBK': 0}
 
 class CartStoreTracker(object):
@@ -314,15 +330,15 @@ class CartStoreTracker(object):
             t_dic = {}
             t_dic['label'] = key
             t_dic['data'] = [date[1][key] for date in self.data]
-            #if len(set(t_dic['data'])) > 1:
+            if len(set(t_dic['data'])) > 1:
 
-            for k in self.colors.keys():
-                if k in key:
-                    t_dic['borderColor'] = self.colors[k]
-            t_dic['pointRadius'] = 1
+                for k in self.colors.keys():
+                    if k in key:
+                        t_dic['borderColor'] = self.colors[k]
+                t_dic['pointRadius'] = 1
 
-            t_dic['lineTension'] = 0.2
-            self.plot.append(t_dic)
+                t_dic['lineTension'] = 0.2
+                self.plot.append(t_dic)
         return self.plot_timeline, self.plot
 
 
@@ -366,35 +382,6 @@ def get_group_id_set(filter='', filter_for='Manufacture'):
         for key, val in temp.items():
             group_dict[key].append(val)
     return group_dict
-
-    '''    arr_t = []
-        for line in cli.ClientData:
-            specs = dbClientSpecs()
-            specs.updateData()
-            t_dic = line
-            for spe in specs.ClientData:
-                if spe['Serial_No'] == line['Serial_No']:
-                    t_dic.update(spe)
-                    t_dic['ID'] = t_dic['Serial_No']
-                    override = LibOverride()
-                    t_dic = override.updateDict(t_dic)
-            for key, val in t_dic.items():
-                if filter.casefold() in val.casefold():
-                    arr_t.append(line)
-        clients = arr_t
-    arr_t = []
-    for line in clients:
-        arr_t.append(line[filter_for])
-    arr_t = list(set(arr_t))
-    arr_t = sorted(arr_t)
-    for key in arr_t:
-        grouped = []
-        for line in cli.ClientData:
-            if line[filter_for] == key:
-           
-                grouped.append(line['Serial_No'])
-        dic_t[key] = grouped
-    return dic_t'''
 
 
 def create_group_data(id_set, data_key, time_line, slim=True):
@@ -461,17 +448,17 @@ def create_plot_data(group, filter, data_key):
         data.append(dic)
     return data
 
+###
+### CREATING A PRE-HANDLED DATABASE DURING BACKGROUND-REQUEST
+
 def update_recentCache():
     cli = dbClient()
     cli.updateData()
     arr = []
     for line in cli.ClientData:
         recent = DataSet(line['Serial_No'], only_recent=True)
-        t_recent = recent.get_all()
+        t_recent = recent.get_all(customized=True)
         oRide = LibOverride()
-        t_recent['ID'] = t_recent['Serial_No']
-        t_recent['Notes'] = 'NaN'
-        t_recent = oRide.updateDict(t_recent)
         container = DataSet(line['Serial_No'], only_recent=False)
         if 'Brother' in container.Const['Device']:
             cache = Cached('client_stats')
@@ -508,13 +495,6 @@ def update_recentCache():
     cache.ClientData = arr
     cache.updateCSV()
 
-def create_eff_stats(group, filter, toner='all'):
-    '''
-    toner= 'all'/'bk'/'cym'
-    '''
-    key_dict = {'all': ('TonerBK', 'CYM', 'BW', 'BCYM'),
-                'bk': ('TonerBK', 'BW'),
-                 'cym': ('CYM', 'BCYM')}
 
 def calculate_tonerPer(toner, pages, to):
     t_dic = {to: 0}
@@ -608,12 +588,16 @@ def create_stat_db():
     cache.ClientData = t_arr
     cache.updateCSV()
 
+
+###
+### PRINTER MONITOR SPECIFIC FOO´s
+
 def get_table_data(filter):
     cache = Cached('recentCached')
     cache.updateData()
     arr = []
     for line in cache.ClientData:
-        if filter != '':
+        if filter != '*':
             for val in line.values():
                 if filter.casefold() in val.casefold():
                     arr.append(line)
@@ -627,6 +611,11 @@ def data_struc4JSON(dic_list):
     result_list = []
     for entry in dic_list:
         t_dic = {'sno': entry['Serial_No']}
+        t_dic['uptodate'] = 'green'
+        if dt.datetime.fromisoformat(entry['Time_Stamp']) + dt.timedelta(days=3) < dt.datetime.now():
+            t_dic['uptodate'] = 'red'
+        elif dt.datetime.fromisoformat(entry['Time_Stamp']) + dt.timedelta(days=1) < dt.datetime.now():
+            t_dic['uptodate'] = 'orange'
         t_dic['id'] = entry['ID']
         t_dic['device'] = entry['Device']
         t_dic['ip'] = entry['IP']
@@ -655,50 +644,39 @@ def data_struc4JSON(dic_list):
             t_dic['notes'] = ''
         result_list.append(t_dic)
     return result_list
+###
+### END OF PRINTER MONITOR VIEW FOO´s
+
+###
+### PRINTER DETAILS SPECIFIC FOO´s
+
+
+def get_details_data(id, config, fuseing):
+
+    container = DataSet(id)
+    container.light_Data()
+    container.diff_Data()
+    if fuseing == 'grouped':
+        fuse = [('TonerC', 'TonerM', 'TonerY'),
+                ('Printed_BW', 'Copied_BW'),
+                ('Printed_BCYM', 'Copied_BCYM')]
+        to = ['TonerCYM', 'PagesBW', 'PagesBCYM']
+        for i in range(len(fuse)):
+            container.combine_keys(fuse[i], to[i])
+    if fuseing == 'seperated':
+        fuse = [('Printed_BW', 'Copied_BW'),
+                ('Printed_BCYM', 'Copied_BCYM')]
+        to = ['PagesBW', 'PagesBCYM']
+        for i in range(len(fuse)):
+            container.combine_keys(fuse[i], to[i])
+    container.sum_data(periode=config)
+    return container.table_data(), container.head_data
 
 if __name__ == '__main__':
-    group = 'Manufacture'
-    value = 'BW'
-    filter = ''
-    data_arr = create_plot_data(group, filter, value)
-    print(data_arr)
-    tracker = CartStoreTracker()
-    print(tracker.data_list)
+    cli = dbClient()
+    cli.updateData()
+    line = cli.ClientData[2]
+    data, head = get_details_data(line['Serial_No'], fuse, 'week')
+    print(data, head)
 
-    time, data = tracker.process_time(20)
-    print(tracker.table_data)
-    '''days = 10
-    cache = Cached('recentCached')
-    cache.updateData()
-    stat = Cached('client_stats')
-    stat.updateData()
-    arr = []
-    for line in cache.ClientData:
-        print(line)
-        t_dic = line
-        for sline in stat.ClientData:
-            if line['ID'] == sline['Serial_No']:
-                t_dic.update(sline)
-                print(line['ID'], sline['Serial_No'])
-                arr.append(t_dic)
-    for day in range(days):
-        string = ''
-        for line in arr:
-            for toner in ['TonerBK', 'TonerC', 'TonerY', 'TonerM']:
-                tpd = f'{toner}PerDay'
-                if line[tpd] != 'NaN' and line[toner] != 'NaN':
-                    if int(line[toner]) - (day * float(line[tpd])) < 0:
-                        string += line[toner.replace('Toner', 'Cart')]
-        print(string)
-'''
 
-    '''cache = Cached('recentCached')
-    cache.updateData()
-    arr = []
-    for line in cache.ClientData:
-        if filter != '':
-            if filter in line.values():
-                arr.append(line)
-        else:
-            arr.append(line)
-    [print(line) for line in arr]'''

@@ -257,6 +257,8 @@ TONER_COST_DICT = {'TN-2000': ('57,61 €', 57.61), 'TN-3030': ('59,78 €', 59.
                    'TK-8705C': ('169,62 €', 169.62), 'TK-8705M': ('169,62 €', 169.62), 'TK-8705Y': ('176,31 €', 176.31),
                    'TK-8725K': ('101,81 €', 101.81), 'TK-8725C': ('179,88 €', 179.88), 'TK-8725M': ('179,88 €', 179.88),
                    'TK-8725Y': ('179,88 €', 179.88), 'TK-435': ('66,81 €', 66.81), 'TK-6325K': ('99,71 €', 99.71)}
+
+
 statistics_variable_grouping_method = {'single_val': ['CostBK', 'CostCYM'],
                                        'sum_val': ['UsedBK', 'UsedCYM', 'PagesBK', 'PagesCYM', 'UsedBK_daily', 'UsedCYM_daily'],
                                        'average_val': ['PagesBK_daily',	'PagesCYM_daily', 'CostPerBK',

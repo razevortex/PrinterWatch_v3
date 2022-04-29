@@ -14,7 +14,7 @@ def coffee_break(min, start):
     print('run & early', running_for, early)
     create_stat_db()
     update_recentCache()
-    '''arr = get_pending_ip()
+    arr = get_pending_ip()
     t_arr = []
     for t_dic in arr:
         cli = {'IP': t_dic['IP']}
@@ -32,14 +32,12 @@ def coffee_break(min, start):
                         t_dic['TRIED'] = int(t_dic['TRIED']) + 1
                         t_arr.append(t_dic)
                         break
+                data_dict_to_store(data)
             except:
                 t_dic['TRIED'] = int(t_dic['TRIED']) + 1
                 t_arr.append(t_dic)
                 break
-        if data_dict_to_store(data) is not True:
-            t_dic['TRIED'] = int(t_dic['TRIED']) + 1
-            t_arr.append(t_dic)
-    update_ip_form(t_arr)'''
+    update_ip_form(t_arr)
     if early < 0:
         now = write_timestamp_to_com()
         print(f'wrote {now} to com')

@@ -143,6 +143,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/db/{'Serial_No': 'LW16945225', 'IP': '172.20.20.71', 'Manufacture': 'Kyocera', 'Model': 'ECOSYS M2535dn', 'Time_Stamp': '2022-05-02 14:29:19.658066'}.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/lib/NaN_ModelSpecs.csv">
           <value>
             <Attribute>

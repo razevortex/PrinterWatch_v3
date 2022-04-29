@@ -3,6 +3,8 @@
     from csv_handles import *
     from Dev.data_validation import DataValidation
 else:'''
+import os.path
+
 '''from .const.ConstantParameter import *
 from .Brother import *
 from .Kyocera import *
@@ -26,14 +28,14 @@ def foo():
 
 #
 #                                       END OF IMPORT
-
+'''     CHECK IF CAN BE REMOVED
 def update_override(wjw_dic_list):
     cli = dbClient()
     cli.updateData()
-    arr = []
+    arr = []              
     for line in cli.ClientData:
         arr.append(line['Serial_No'])
-    oRide = LibOverride()
+    oRide = LibOverride() 
     or_list = []
     non_list = []
     for dic in wjw_dic_list:
@@ -50,8 +52,9 @@ def update_override(wjw_dic_list):
     print(or_list)
     print(non_list)
     print(oRide.ClientData)
-
+'''
 # get_recent_data is used up on start to get the last stored data of the monitored clients
+''' CHECK IF NEEDED
 def get_filter():
     client = dbClient()
     client.updateData()
@@ -59,7 +62,7 @@ def get_filter():
     for line in client.ClientData:
         for x in ['Manufacture', 'Model']:
             filter_dic[x].append(line[x])
-
+'''
 
 def get_recent_data(temp):
     clients = dbClient()
@@ -113,10 +116,9 @@ def running(disable):
         else:
             return False
 
-def run_background_requests(request_active):
-    if request_active == False:
-        request_active = Popen(["python", "Background_Request.py"], creationflags=sp.CREATE_NEW_CONSOLE)
-        return request_active
+def run_background_requests(last_update):
+    if timestamp_from_com(diff=last_update, with_string=False) is not True:
+        sp.call(["gnome-terminal", "-x", "python", f"{ROOT}Background_Request.py"])
 
 def check_on_requests(request_active):
     if request_active == False:
@@ -230,6 +232,50 @@ def Storage2Dict():
                 t_dic[item[0]] = item[1]
                 print(t_dic)
     return t_dic
+
+def create_new_conf(user):
+    if not os.path.exists(f'{ROOT}user/{user}Config.txt'):
+        with open(f'{ROOT}user/defaultConfig.txt', 'r') as default:
+            lines = [line.strip() + '\n' for line in default.readlines()]
+        with open(f'{ROOT}user/{user}Config.txt', 'w') as new_file:
+            new_file.writelines(lines)
+        os.chmod(f'{ROOT}user/{user}Config.txt', 0o777)
+
+def read_conf(user, page):
+    t_dic = {}
+    string = ''
+    create_new_conf(user)
+    with open(f'{ROOT}user/{user}Config.txt', 'r') as conf:
+        for line in conf.readlines():
+            if page in line:
+                string = line.replace(f'{page}=', '')
+    if string != '':
+        arr = [[key.strip(), val.strip()] for key, val in [entry.split(':') for entry in string.split(';')]]
+        for pair in arr:
+            t_dic[pair[0]] = pair[1]
+    return t_dic
+
+
+
+def write_conf(user, page, dict):
+    newline = f'{page}='
+    for key, val in dict.items():
+        newline += f'{key}:{val};'
+    newline = newline.rstrip(';')
+    arr = []
+    line_exists = False
+    with open(f'{ROOT}user/{user}Config.txt', 'r') as conf:
+        for line in conf.readlines():
+            if page in line:
+                arr.append(newline)
+                line_exists = True
+            else:
+                arr.append(line.strip())
+        if line_exists is not True:
+            arr.append(newline)
+    with open(f'{ROOT}user/{user}Config.txt', 'w') as conf:
+        conf.writelines(line + '\n' for line in arr)
+
 
 
 def UpdateStorage(dic):
@@ -395,15 +441,20 @@ def write_timestamp_to_com():
         update.write(str(now))
     return now
 
-def timestamp_from_com(diff=10):
+def timestamp_from_com(diff=10, with_string=True):
     with open(f'{ROOT}static/com/last_update.txt', 'r') as update:
         string = update.read()
     string = string.strip()
     now = dt.datetime.now()
-    if dt.datetime.fromisoformat(string) + dt.timedelta(minutes=diff) > now:
-        return 1, string
+    if with_string is not False:
+        if dt.datetime.fromisoformat(string) + dt.timedelta(minutes=diff) > now:
+            return 1, string
+        else:
+            return 0, string
     else:
-        return 0, string
-
+        if dt.datetime.fromisoformat(string) + dt.timedelta(minutes=diff) > now:
+            return True
+        else:
+            return False
 #if __name__ == '__main__':
 #    update_override(wjw_data_dic)
