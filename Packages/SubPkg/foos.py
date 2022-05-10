@@ -28,42 +28,8 @@ def foo():
 
 #
 #                                       END OF IMPORT
-'''     CHECK IF CAN BE REMOVED
-def update_override(wjw_dic_list):
-    cli = dbClient()
-    cli.updateData()
-    arr = []              
-    for line in cli.ClientData:
-        arr.append(line['Serial_No'])
-    oRide = LibOverride() 
-    or_list = []
-    non_list = []
-    for dic in wjw_dic_list:
-        if dic['Serial_No'] in arr:
-            id = dic['Serial_No']
-            dic['Serial_No'] = dic['WJW']
-            for key in dic.keys():
-                if dic[key] == 'default' or dic[key] == 'aaaa_wjw_allgemain noname':
-                    dic[key] = ''
-            oRide.addEntry(id, dic)
-            or_list.append(dic)
-        else:
-            non_list.append(dic)
-    print(or_list)
-    print(non_list)
-    print(oRide.ClientData)
-'''
-# get_recent_data is used up on start to get the last stored data of the monitored clients
-''' CHECK IF NEEDED
-def get_filter():
-    client = dbClient()
-    client.updateData()
-    filter_dic = {'Manufacture': [], 'Model': []}
-    for line in client.ClientData:
-        for x in ['Manufacture', 'Model']:
-            filter_dic[x].append(line[x])
-'''
 
+'''
 def get_recent_data(temp):
     clients = dbClient()
     client_list_of_dicts = []
@@ -86,7 +52,7 @@ def get_recent_data(temp):
                 clients.update(override.getEntry(temp['Serial_No']))
             data.append(clients)
         return data
-
+'''
 
 def list_of_dicts_sorting(list, sort_key):
     def takeKey(elem):
@@ -119,7 +85,7 @@ def running(disable):
 def run_background_requests(last_update):
     if timestamp_from_com(diff=last_update, with_string=False) is not True:
         sp.call(["gnome-terminal", "-x", "python", f"{ROOT}Background_Request.py"])
-
+'''
 def check_on_requests(request_active):
     if request_active == False:
         request_active = Popen(["python", "Background_Request.py"], creationflags=sp.CREATE_NEW_CONSOLE)
@@ -130,13 +96,14 @@ def check_on_requests(request_active):
             request_active = False
             return request_active
 
+'''
 
 def method_selector(specs_lib, manufacture, model):
     Specs = specs_lib.getEntry('id', model)
     if manufacture == 'Brother':
         return methodsBrother(Specs['MethodIndex'])
 
-
+'''
 def add_ip(pending, get_class):
     if pending != '':
         ip = pending[0]
@@ -145,6 +112,7 @@ def add_ip(pending, get_class):
         status = data_dict_to_store(data)
         pending.remove(ip)
         return pending, len(pending), (ip['IP'], status)
+'''
 
 def DataValidation(func):
     @wraps(func)
@@ -163,12 +131,10 @@ def DataValidation(func):
             return 'len'
         for key, val in data.items():
             if key not in list(reference.keys()):
-
                 return f'{key} not in reference keys'
             elif val is None or val == '':
                 data[key] = 'NaN'
         data_handle = func(data)
-
         return data_handle
     return data_validation
 
@@ -210,12 +176,12 @@ def toner_replaced(last_line, new_line):
                 cart = key.replace('Toner', 'Cart')
                 temp = add_to_Storage(new_line[cart], "-1", Storage2Dict())
                 UpdateStorage(temp)
-
+'''
 def calc(store, low):
     new = int(store) - int(low)
     return str(new)
 
-
+'''
 def add_to_Storage(typ, num, db_dict):
     new = int(db_dict[typ]) + int(num)
     db_dict[typ] = str(new)
@@ -232,6 +198,15 @@ def Storage2Dict():
                 t_dic[item[0]] = item[1]
                 print(t_dic)
     return t_dic
+
+def UpdateStorage(dic):
+    string = ''
+    for key, val in dic.items():
+        string += f'{key}:{val},'
+    string.rstrip(',')
+    with open(f'{ROOT}db/cartStorage.txt', 'w') as storage:
+        storage.write(string)
+
 
 def create_new_conf(user):
     if not os.path.exists(f'{ROOT}user/{user}Config.txt'):
@@ -278,14 +253,6 @@ def write_conf(user, page, dict):
 
 
 
-def UpdateStorage(dic):
-    string = ''
-    for key, val in dic.items():
-        string += f'{key}:{val},'
-    string.rstrip(',')
-    with open(f'{ROOT}db/cartStorage.txt', 'w') as storage:
-        storage.write(string)
-
 
 def float_depth(float_num, depth=3):
     try:
@@ -297,7 +264,7 @@ def float_depth(float_num, depth=3):
     except:
         return float_num
 
-
+'''
 def read_snmp_response(file):
     with open(file) as infile:
         arr = []
@@ -316,7 +283,7 @@ def read_snmp_response(file):
                     arr.append(t)
     return arr
 
-
+'''
 def valid_ip(ip):
     t = ip.split('.')
     num = int(t[0])
@@ -344,27 +311,6 @@ def handle_ip_form(input):
             with open(f'{ROOT}db/includeIP.txt', 'a') as ips:
                 ips.write(string)
 
-'''
-def get_pending_ip(to_json=False):
-    with open(f'{ROOT}db/includeIP.txt', 'r') as ips:
-        data = ips.read()
-        split = data.split(';')
-        if to_json is not True:
-            data = {}
-        else:
-            data = []
-        for t in split:
-            if to_json is not True:
-                if t != '':
-                    temp = t.split(':')
-                    data[temp[0]] = temp[1]
-            else:
-                if t != '':
-                    temp = t.split(':')
-                    data.append({'IP': temp[0], 'TRIED': temp[1]})
-    return data
-
-'''
 
 def get_pending_ip():
     with open(f'{ROOT}db/includeIP.txt', 'r') as ips:

@@ -16,11 +16,13 @@ function createSubmitObject(submitObj){
 
 function createHiddenObject(hiddenObj){
 		let formObj = document.getElementById(hiddenObj.formId);
-			let input = document.createElement('input');
-      input.type = 'hidden';
-      input.name = hiddenObj.name;
-      input.id = hiddenObj.name;
-      input.value = hiddenObj.value;
+		let hiddenInput = document.createElement('input');
+      hiddenInput.type = 'hidden';
+      hiddenInput.form = hiddenObj.formId;
+      hiddenInput.name = hiddenObj.inName;
+      hiddenInput.id = hiddenObj.inId;
+      hiddenInput.value = hiddenObj.inValue;
+      formObj.appendChild(hiddenInput);
 }
 
 function createSelectObject(selObj){
@@ -54,7 +56,7 @@ function createTextObject(inputObj){
   	container.style.width = inputObj.width;
   	formObj.appendChild(container);
   let inLabel = document.createElement('label');
-  	inLabel.for = inputObj.selId;
+  	inLabel.for = inputObj.inId;
     inLabel.className = inputObj.inLabelClass;
   	inLabel.innerHTML = inputObj.inLabelText;
     	container.appendChild(inLabel);
@@ -75,7 +77,7 @@ function createForm(formObj){
       	site.appendChild(formCont);
       let form = document.createElement('form');
       	form.action = formObj.link;
-        form.id = formObj.formId;
+        form.id = 'inputForm';
         	formCont.appendChild(form);
       	for (var obj of formObj.inputs){
         	if (obj.objType == 'select'){

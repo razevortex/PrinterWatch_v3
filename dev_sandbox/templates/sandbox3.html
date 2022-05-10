@@ -8,6 +8,7 @@
 </head>
 <body id="content"> <!-- style="padding:0px; margin:0px"><div style="position:relative; top:0px; left:0px; width:100%; height:100%"> -->
 <script> createForm({{ form|safe }}); </script>
+<input type="hidden" form="inputForm" name="user" id="user" value="{{ user }}">
 <!--
 <div style="position:absolute; padding:4px; width:100%; height:100%;">
     <iframe src="{{frame}}" name="content_frame" height="100%" width="100%" id="content_frame"></iframe>
