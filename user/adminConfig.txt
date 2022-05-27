@@ -1,4 +1,4 @@
 printer_monitor=filter:*
 printer_details=time:total;vals:seperated
 cart_monitor=days:14
-analytics=group:Serial_No;value:BW;filter:TN
+analytics=group:Serial_No;value:CostPerBW;filter:*

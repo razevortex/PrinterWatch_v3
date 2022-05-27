@@ -4,6 +4,24 @@
     <meta charset="UTF-8">
     <title>details</title>
 
+    <link rel="stylesheet" href="http://printerwatch/static/css/datasheet.css">
+    <script src="{% static 'js/formcreator.js' %}"></script>
+</head>
+
+<body>
+
+<script> detailDatasheet({{ form|safe }}); </script>
+<input type="hidden" form="detailOR" name="user" id="user" value="{{ user }}">
+</body>
+</html>
+
+<!--
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>details</title>
+
     <link rel="stylesheet" href="http://printerwatch/static/css/style.css">
     <style>
            .headInput{
@@ -107,3 +125,4 @@
 
 </body>
 </html>
+-->

@@ -5,6 +5,7 @@ from json import dumps
 from Packages.running_out_of_toner import *
 from Packages.SubPkg.foos import *
 from Packages.PlotData import *
+from Packages.FormObjClass import *
 from Packages.StrucData import *
 
 
@@ -18,22 +19,12 @@ def PrintMonitor(request):
         else:
             t_dic = read_conf(user, 'printer_monitor')
             filter = t_dic['filter']
+        form = CreateForm('PrinterMonitor')
+        formObj = form.PrinterMonitor(t_dic)
 
-        data2json = dumps(get_table_data(filter))
-        return render(request, 'monitor.html', {'data': data2json, 'user': user, 'filter': filter})  #data2json})
+        data2json = dumps(get_table_data(t_dic['filter']))
+        return render(request, 'monitor.html', {'data': data2json, 'user': user, 'form': formObj}) #'filter': filter})  #data2json})
 
-'''
-def PrintMonitor(request):
-    filter = request.GET.get('filter', '')
-
-    if request.GET.get('user'):
-        user = request.GET.get('user')
-        if filter == '':
-            t_dic = read_conf(user, 'printer_monitor')
-            filter
-        data2json = dumps(get_table_data(filter))
-        return render(request, 'monitor.html', {'data': data2json, 'user': user, 'filter': filter})  # data2json})
-'''
 
 def details(request):
     if request.GET.get('user'):
@@ -73,47 +64,6 @@ def details(request):
                                                 'id': id})
 
 
-'''
-def details(request):
-    override_entry = False
-    try:
-        if request.GET.get('override-this'):
-            key = request.GET.get('override-this')
-            if request.GET.get('with'):
-                val = request.GET.get('with')
-                override_entry = {key: val}
-            else:
-                override_entry = {key: ''}
-    except:
-        override_entry = False
-    fuse = [('TonerC', 'TonerM', 'TonerY'),
-            ('Printed_BW', 'Copied_BW'),
-            ('Printed_BCYM', 'Copied_BCYM')]
-    to = ['TonerCYM', 'PagesBW', 'PagesBCYM']
-    id = request.GET.get('id', '')
-    if override_entry is not False:
-        override = LibOverride()
-        override.addEntry(id, override_entry)
-
-    conf = 'total'
-    if request.GET.get('user'):
-        user = request.GET['user']
-        conf = read_conf(user)
-        conf = conf['details']
-    data, head = get_details_data(id, conf)
-    container = DataSet(id)
-    container.light_Data()
-    container.diff_Data()
-    for i in range(len(fuse)):
-        container.combine_keys(fuse[i], to[i])
-    container.sum_data()
-    data2json = dumps(data)#container.table_data())
-    return render(request, 'details.html', {'data': data2json,
-                                            'h1': container.head_data(),
-                                            'h2': container.head_data(line='2'),
-                                            'id': id})
-
-'''
 def cartTrack(request):
     if request.GET.get('user'):
         user = request.GET['user']
@@ -148,11 +98,13 @@ def cartTrack(request):
         else:
             days = int(days)
         write_conf(user, 'cart_monitor', t_dic)
-
+        form = CreateForm('CartridgeStorage')
+        formObj = form.CartStorage(t_dic)
         tracker = CartStoreTracker()
         index, arr = tracker.process_time(int(days))
         data2json = dumps(tracker.table_data)
-        return render(request, 'cartTracker.html', {'index': index, 'sets': arr, 'data': data2json, 'days': days, 'user': user,})
+        return render(request, 'cartTracker.html', {'index': index, 'sets': arr, 'data': data2json, 'user': user,
+                                                    'form': formObj}) # 'days': days, })
 
 
 def analytics(request):
@@ -169,10 +121,17 @@ def analytics(request):
             t_dic['filter'] = request.GET['filter']
 
         write_conf(user, 'analytics', t_dic)
-        data_arr = create_plot_data(t_dic['group'], t_dic['filter'], t_dic['value'])
-        index = get_global_timeline()
-
-        return render(request, 'analytics.html', {'user': user, 'index': index, 'sets': data_arr, 'group': t_dic['group'], 'filter': t_dic['filter'], 'value': t_dic['value']})
+        if t_dic['value'] in ['BW', 'BCYM']:
+            data_arr = create_plot_data(t_dic['group'], t_dic['filter'], t_dic['value'])
+            index = get_global_timeline()
+            conf = {'type': 'line', 'data': {'labels': index, 'datasets': data_arr}, 'options': {}}
+        else:
+            conf = create_bar_data(t_dic['group'], t_dic['filter'], t_dic['value'])
+        form = CreateForm('Analytics')
+        formObj = form.Analytics(t_dic)
+        return render(request, 'analytics.html', {'user': user, #'index': index, 'sets': data_arr,
+                                                   'conf': conf, 'form': formObj})
+                                                  #'group': t_dic['group'], 'filter': t_dic['filter'], 'value': t_dic['value']})
 
 def config(request):
     if request.GET.get('user'):

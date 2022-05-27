@@ -257,6 +257,18 @@ class DataSet(object):
         if line == '2':
             return f"{self.Static['Contact']}, {self.Static['Location']}, {self.Static['IP']}"
 
+    def detail_og_or_data(self):
+        og_dic = copy.deepcopy(self.Const)
+        og_dic.update(self.Static)
+        og_dic['Notes'] = 'Notes'
+        or_dic = copy.deepcopy(og_dic)
+        orData = LibOverride()
+        orData.updateDict(or_dic)
+        og_or = {}
+        for key in ['Serial_No', 'IP', 'Device', 'Contact', 'Location', 'Notes']:
+            og_or[key] = [og_dic[key], or_dic[key]]
+        return og_or
+
     def back2raw(self):
         self.processing = False
 
@@ -367,7 +379,7 @@ def get_group_id_set(filter='', filter_for='Manufacture'):
     cli = dbClient()
     cli.updateData()
     dic_t = {}
-    if filter == '':
+    if filter == '' or filter == '*':
         clients = cli.ClientData
     else:
         clients = []
@@ -426,6 +438,42 @@ def create_group_data(id_set, data_key, time_line, slim=True):
 
 colors = ['#000054', '#5400fe', '#a90000', '#a9a9fe', '#fe5454', '#0000fe', '#5454a9', '#a900a9', '#a9fe54', '#fe54fe', '#005454', '#54a900', '#a95400', '#a9fefe', '#fea954', '#0054fe', '#54a9a9', '#a954a9', '#fe0054', '#fea9fe', '#00a954', '#54fea9', '#a9a900', '#fe00fe', '#fefe54']
 
+def create_bar_data(group, filter, data_key):
+    id_set = get_group_id_set(filter=filter, filter_for=group)
+    labels = list(id_set.keys())
+    chached_stats = Cached('client_stats')
+    chached_stats.updateData()
+    t_dic = {}
+    for key in labels:
+        t_dic[key] = []
+        for id in id_set[key]:
+            for line in chached_stats.ClientData:
+                if id == line['Serial_No']:
+                    if line[data_key].casefold() != 'NaN'.casefold():
+                       t_dic[key].append(float(line[data_key]))
+    data = {}
+    for key, value in t_dic.items():
+
+        if type(value) == list:
+            data[key] = sum(value) / int(len(value) + 1)
+        else:
+            if value.casefold() != 'NaN'.casefold():
+                data[key] = value
+    labels = []
+    t_data = []
+    color = []
+    i = 0
+    for key, value in data.items():
+
+        if value > 0.0:
+            labels.append(key)
+            t_data.append(value)
+            color.append(colors[i % len(colors)])
+            i += 1
+    dataset = [{'label': data_key, 'data': t_data, 'backgroundColor': color, 'borderWidth': 1}]
+    plot_type = 'bar'
+    conf = {'type': plot_type, 'data': {'labels': labels, 'datasets': dataset}, 'options': {}}
+    return conf
 
 def create_plot_data(group, filter, data_key):
     id_set = get_group_id_set(filter=filter, filter_for=group)
@@ -651,6 +699,19 @@ def data_struc4JSON(dic_list):
 ### PRINTER DETAILS SPECIFIC FOO´s
 
 
+def get_detail(id):
+    container = DataSet(id)
+    container.light_Data()
+    container.diff_Data()
+    head_data = container.detail_og_or_data()
+    fuse = [('Printed_BW', 'Copied_BW'),
+                ('Printed_BCYM', 'Copied_BCYM')]
+    to = ['PagesBW', 'PagesBCYM']
+    for i in range(len(fuse)):
+        container.combine_keys(fuse[i], to[i])
+    container.sum_data()
+    return head_data, container.table_data()
+
 def get_details_data(id, config, fuseing):
 
     container = DataSet(id)
@@ -673,10 +734,15 @@ def get_details_data(id, config, fuseing):
     return container.table_data(), container.head_data
 
 if __name__ == '__main__':
+    #data = create_bar_data('Model', '', 'CostPerBW')
+    #print(data)
     cli = dbClient()
     cli.updateData()
-    line = cli.ClientData[2]
-    data, head = get_details_data(line['Serial_No'], fuse, 'week')
-    print(data, head)
+    for line in cli.ClientData:
+        head, body = get_detail(line['Serial_No'])
+        print(head)
+    #line = cli.ClientData[2]
+    #data, head = get_details_data(line['Serial_No'], fuse, 'week')
+    #print(data, head)
 
 

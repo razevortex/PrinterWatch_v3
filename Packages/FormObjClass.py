@@ -2,8 +2,22 @@ import copy
 
 formObjDict = {'PrinterMonitor': 'http://printerwatch/subsite/monitor/',
                'CartridgeStorage': 'http://printerwatch/subsite/storage_tracker/',
-               'Sandbox': 'http://printerwatch/sandbox/'}
+               'Sandbox': 'http://printerwatch/sandbox/',
+               'Analytics': 'http://printerwatch/subsite/analytics/',
+               'Details': 'http://printerwatch/details/'}
 
+def detail_form_obj(head, access):
+    formObj = {
+        'formId': 'detailOR',
+        'access': access,
+        'formAction': formObjDict['Details']}
+    a = head['Device']
+    b = head['IP']
+    fixed = [a[0], b[0]]
+    temp = {'fixed': fixed, 'editable': {'deviceId': head['Serial_No'], 'location': head['Location'], 'contact': head['Contact'], 'notes': head['Notes']},
+         'inputIds': ['deviceId', 'location', 'contact', 'notes']}
+    formObj.update(temp)
+    return formObj
 
 class CreateForm(object):
     def __init__(self, site):
@@ -15,7 +29,7 @@ class CreateForm(object):
         self.inputObjects = []
 
     def PrinterMonitor(self, data_dict):
-        textInput = AddTextInput('Filter : ', 'filter', data_dict['filter_value'])
+        textInput = AddTextInput('Filter : ', 'filter', data_dict['filter'])
         self.inputObjects.append(textInput.object)
         #hiddenInput = AddHiddenInput('test')
         #self.inputObjects.append(hiddenInput.object)
@@ -25,7 +39,7 @@ class CreateForm(object):
         return self.formObj
 
     def CartStorage(self, data_dict):
-        textInput = AddTextInput('Track days : ', 'days', data_dict['days'])
+        textInput = AddTextInput('Days : ', 'days', data_dict['days'])
         self.inputObjects.append(textInput.object)
         # hiddenInput = AddHiddenInput('test')
         # self.inputObjects.append(hiddenInput.object)
@@ -38,12 +52,12 @@ class CreateForm(object):
         data_dict = {'group': 'Serial_No', 'value': 'BW', 'filter': ''}
         data_dict.update(dict)
         group_list = ['Serial_No', 'Manufacture', 'Model']
-        value_list = ['BCYM', 'BW']
+        value_list = ['BCYM', 'BW', 'CostPerBW', 'CostPerBCYM', 'PpBK', 'PpC', 'PpM', 'PpY']
         group_sel = AddSelectInput('Grouping : ', 'group', group_list, data_dict['group'], width='20%')
         self.inputObjects.append(group_sel.object)
-        value_sel = AddSelectInput('Plotted value : ', 'value', value_list, data_dict['value'], width='20%')
+        value_sel = AddSelectInput('Plot Val : ', 'value', value_list, data_dict['value'], width='20%')
         self.inputObjects.append(value_sel.object)
-        filter_input = AddTextInput('Filter : ', 'filter', data_dict['filter'], width='20%')
+        filter_input = AddTextInput('Filter : ', 'filter', data_dict['filter'], width='30%')
         self.inputObjects.append(filter_input.object)
         submitButton = AddSubmitButton()
         self.inputObjects.append(submitButton.object)

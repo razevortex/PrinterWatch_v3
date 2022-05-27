@@ -1,16 +1,22 @@
 <!DOCTYPE html>
+{% load static %}
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>PrinterMonitor</title>
 
     <link rel="stylesheet" href="http://printerwatch/static/css/style.css">
+    <script src="{% static 'js/formcreator.js' %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/form.css' %}">
+
     <style>
            .headInput{
             padding: 0;
 			margin: auto;
 			width: 90%;
-			background-color: lightgrey;
+
+			background-color: darkgrey;
             text-align: center;#text-size: 14;
             color: lightorange;
 			}
@@ -18,17 +24,21 @@
 
 </head>
 <body onload="insertRow()" id="body">
-
+<div  class="headInput" id="formContainer">
+<script> createForm({{ form|safe }}); </script>
+<input type="hidden" form="inputForm" name="user" id="user" value="{{ user }}">
+</div>
+<!--
 <form action="http://printerwatch/subsite/monitor/">
-    <div  class="headInput">
+
         <label class="label">Search for Printer with </label>
         <input type="text" id="filter" name="filter" value="{{ filter }}">
         <label class="label"> in there dataset. </label>
         <input type="hidden" id="user" name="user" value="{{ user }}">
         <input type="submit" value="Go!">
-    </div>
-</form>
 
+</form>
+-->
 <div class='scoreboard'>
         <table id="myTable" class='monitorTable'>
 		<thead id="aHeader">

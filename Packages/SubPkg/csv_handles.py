@@ -29,10 +29,11 @@ class HandleDB(object):
             self.Empty = self.create_file()
 
     def create_file(self):
-        if os.path.exists(f'{self.CSV}') is not True:
+        if not os.path.exists(f'{self.CSV}'):
             with open(f'{self.CSV}', 'x', newline='') as csvfile:
                 file_writer = csv.DictWriter(csvfile, fieldnames=self.Header)
                 file_writer.writeheader()
+            os.chmod(f'{self.CSV}', 0o777)
             return True
         else:
             return False

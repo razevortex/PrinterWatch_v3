@@ -402,5 +402,15 @@ def timestamp_from_com(diff=10, with_string=True):
             return True
         else:
             return False
+
+def view_request_2_dict(t_dic, request):
+    for key in t_dic.keys():
+        if request.GET.get(key):
+            t_dic[key] = request.GET.get(key)
+        else:
+            t_dic[key] = False
+    return t_dic
+
+
 #if __name__ == '__main__':
 #    update_override(wjw_data_dic)

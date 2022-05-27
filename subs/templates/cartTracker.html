@@ -1,22 +1,30 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>CartridgeMonitor</title>
     <link rel="stylesheet" href="http://printerwatch/static/css/style.css">
+    <script src="{% static 'js/formcreator.js' %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/form.css' %}">
+
         <style>
            .headInput{
             padding: 0;
 			margin: auto;
 			width: 90%;
-			background-color: lightgrey;
+
+			background-color: grey;
             text-align: center;#text-size: 14;
             color: lightorange;
 			}
 			.canvas{
             margin: auto;
+            top: 20px;
             padding-top: 5px;
             width: 90%;
+                border: 0px solid lightgrey;
+            border-radius: 4px;
             background-color: lightgrey;
             }
     </style>
@@ -24,8 +32,13 @@
 </head>
 
 <body onload="insertRow()">
-
+<div  class="headInput" id="formContainer">
+<script> createForm({{ form|safe }}); </script>
+<input type="hidden" form="inputForm" name="user" id="user" value="{{ user }}">
+</div>
+<!--
 <form action="http://printerwatch/subsite/storage_tracker/">
+
     <div class="headInput">
     <label class="label">Enter time window</label>
     <input type="text" id="days" name="days" title='default are 10 days' value="{{ days }}">
@@ -34,9 +47,9 @@
     <input type="submit" value="Go!">
     </div>
 </form>
-
+-->
     <div class="canvas">
-    <canvas id="myChart" width="400" height="200"></canvas>
+    <canvas id="myChart" width="400" height="200" style="padding-top:20px"></canvas>
      </div>
 
 <div class='scoreboard'>

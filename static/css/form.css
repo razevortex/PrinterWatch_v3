@@ -5,16 +5,19 @@ body{
 label {
   padding: 0px 5px;
   margin-top: 2px;
-  width: 30%;
+  width: 25%;
+  float:left;
   background-color: black;
   color: darkorange;
   font-weight: bold;
-
-
 }
+
+
+
 select {
   padding: 0px 4px;
   background-color: gray;
+  float:left;
   width: 70%;
   font-weight: bold;
   outline: 2px solid;
@@ -24,6 +27,7 @@ select {
 input.text {
   padding: 0px 4px;
   background-color: gray;
+  float:left;
   width: 70%;
   font-weight: bold;
   outline: 2px solid;
@@ -43,16 +47,28 @@ div.inputs {
   padding: 3px;
   background-color: black;
   float: left;
-
 }
+
 div.form {
   padding: 2px;
-  float: left;
-  width: 95%;
+  width: 100%;
+  float:left;
   justify-content: space-evenly;
   text-align: center;
   background-color: black;
-  border: 2px solid gray;
+  border: 2px solid lightgray;
+  border-style: outset;
+  border-radius: 14px;
+}
+
+div.login {
+  margin: auto;
+  width: 50%;
+  float:left;
+  justify-content: space-evenly;
+  text-align: center;
+  background-color: black;
+  border: 2px solid lightgray;
   border-style: outset;
   border-radius: 14px;
 }
