@@ -1,29 +1,42 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Analytics</title>
-    <link rel="stylesheet" href="http://printerwatch/static/css/style.css">
+        <link rel="stylesheet" href="http://printerwatch/static/css/style.css">
+    <script src="{% static 'js/formcreator.js' %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/form.css' %}">
+
     <style>
            .headInput{
             padding: 0;
 			margin: auto;
+
 			width: 90%;
-			background-color: lightgrey;
-            text-align: center;#text-size: 14;
+			background-color: grey;
+
             color: lightorange;
 			}
             .canvas{
             margin: auto;
             padding-top: 5px;
             width: 90%;
+            border: 0px solid lightgrey;
+            border-radius: 4px;
             background-color: lightgrey;
             }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 </head>
-<body>
+<body id="body">
+<div  class="headInput" id="formContainer">
+<script> createForm({{ form|safe }}); </script>
+<input type="hidden" form="inputForm" name="user" id="user" value="{{ user }}">
+</div>
+
+<!--
     <form action="http://printerwatch/subsite/analytics/">
         <div class="headInput">
     <label for="group"> grouped by:</label>
@@ -38,8 +51,8 @@
             <option value="{{ value }}">{{ value }}</option>
             <option value="BW">Black/White</option>
             <option value="BCYM">Colored</option>
-            <option value="TonerBK">TonerBK</option>
-            <option value="TonerC">TonerC</option>
+            <option value="CostPerBW">CostPerBW</option>
+            <option value="CostPerBCYM">CostPerBCYM</option>
             <option value="TonerY">TonerY</option>
             <option value="TonerM">TonerM</option>
         </select>
@@ -50,6 +63,7 @@
 
         </div>
     </form>
+    -->
 
     <div class="canvas">
     <canvas id="myChart" width="400" height="200"></canvas>
@@ -58,14 +72,8 @@
 <script>
 
 
-    const config = {
-    type: 'line',
-    data: {
-        labels: {{ index|safe }},
-        datasets: {{ sets|safe }}
-        },
-    options: {}
-    };
+    const config = {{ conf|safe }};
+
 
 </script>
 <script>

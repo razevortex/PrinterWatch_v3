@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+{% load static %}
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Device Detail</title>
+
+    <link rel="stylesheet" href="http://printerwatch/static/css/style.css">
+    <script src="{% static 'js/formcreator.js' %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/datasheet.css' %}">
+
+    <style>
+           .headInput{
+            padding: 0;
+			margin: auto;
+			width: 90%;
+
+			background-color: darkgrey;
+            text-align: center;#text-size: 14;
+            color: lightorange;
+			}
+    </style>
+
+</head>
+<body onload="insertRow()">
+<p>{{ debug }}</p>
+<script> detailDatasheet({{ form|safe }}); </script>
+<input type="hidden" form="detailOR" name="user" id="user" value="{{ user }}">
+<input type="hidden" form="detailOR" name="id" id="id" value="{{ id }}">
+<div class='scoreboard'>
+        <table id="myTable" class='monitorTable'>
+		<thead id="aHeader">
+        <tr id="headRow">
+            <td>Time</td>
+            <td>Pages BW</td>
+			<td>Pages BCYM</td>
+			<td>Toner BK</td>
+			<td>Toner C</td>
+            <td>Toner Y</td>
+            <td>Toner M</td>
+        </tr>
+
+		</thead>
+		<tbody id="tableBody">
+
+        </tbody>
+
+        </table></div>
+     <script>
+		function insertRow(){
+		const db = JSON.parse("{{data|escapejs}}");
+
+		for(let i of db){
+		var tBody = document.getElementById("tableBody");
+		var row = tBody.insertRow(0);
+		row.className = "tBodyRow"
+
+		var TimeCell = row.insertCell(0);
+		TimeCell.innerHTML = i.Time_Stamp;
+
+		var BWCell = row.insertCell(1);
+        BWCell.innerHTML = i.PagesBW;
+
+		var BCYMCell = row.insertCell(2);
+        BCYMCell.innerHTML = i.PagesBCYM
+
+		var BKCell = row.insertCell(3);
+        BKCell.innerHTML = i.TonerBK;
+
+		var CCell = row.insertCell(4);
+		CCell.innerHTML = i.TonerC;
+
+		var YCell = row.insertCell(5);
+		YCell.innerHTML = i.TonerY;
+
+		var MCell = row.insertCell(6);
+		MCell.innerHTML = i.TonerM;
+		}}
+
+
+        function xfunc(){
+        alert("Hi")
+        }
+        </script>
+
+</body>
+</html>

@@ -29,10 +29,11 @@ class HandleDB(object):
             self.Empty = self.create_file()
 
     def create_file(self):
-        if os.path.exists(f'{self.CSV}') is not True:
+        if not os.path.exists(f'{self.CSV}'):
             with open(f'{self.CSV}', 'x', newline='') as csvfile:
                 file_writer = csv.DictWriter(csvfile, fieldnames=self.Header)
                 file_writer.writeheader()
+            os.chmod(f'{self.CSV}', 0o777)
             return True
         else:
             return False
@@ -368,6 +369,29 @@ class LibOverride(HandleDB):
                         if val != 'NaN':
                             data_dict[key] = val
         return data_dict
+
+    def updateDB(self, data_dict, id):
+        entry_exists = False
+        t_arr = []
+        for line in self.ClientData:
+            t_dic = line
+            if id == line['ID']:
+                entry_exists = True
+                for key in line.keys():
+                    if key in data_dict.keys():
+                        t_dic[key] = data_dict[key]
+                    else:
+                        t_dic[key] = 'NaN'
+            t_arr.append(t_dic)
+        if entry_exists is not True:
+            t_dic = {}
+            for key in self.Header:
+                if key in data_dict.keys():
+                    t_dic[key] = data_dict[key]
+                else:
+                    t_dic[key] = 'NaN'
+        self.ClientData = t_arr
+        self.updateCSV()
 
     def getEntry(self, key_val):
         for row in self.ClientData:

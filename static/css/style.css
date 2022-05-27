@@ -1,5 +1,5 @@
 			body {
-			background-color: grey;
+			background-color: darkgrey;
             text-size: 14px;
             color: lightorange;
 			}
@@ -8,16 +8,31 @@
             text-size: 14;
             color: lightorange;
             }
-
+    .label{text-size: 14;
+            text-color: lightorange;
+            }
             .headInput{
-            padding: 0;
+            padding: 3px;
 			margin: auto;
 			width: 90%;
-			background-color: lightgrey;
+			display: flex;
+			flex-direction: row;
+			background-color: grey;
             text-align: center;#text-size: 14;
             color: lightorange;
 			}
+div.login {
+  width:40%;
+  margin-left:30%;
 
+
+  justify-content: space-evenly;
+  text-align: center;
+  background-color: black;
+  border: 2px solid lightgray;
+  border-style: outset;
+  border-radius: 14px;
+}
 			.monitorTable {
 			padding: 0;
 			margin: auto;

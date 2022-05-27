@@ -1,4 +1,6 @@
-printer_monitor=filter:*
+PrinterMonitor=filter:*
 printer_details=time:total;vals:seperated
-cart_monitor=days:15
-analytics=group:Serial_No;value:BCYM;filter:
+CartStorage=days:31
+Analytics=group:Model;value:BW;filter:*
+analytics=group:Model;value:BCYM;filter:
+DeviceDetails=access:true

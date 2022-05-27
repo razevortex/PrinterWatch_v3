@@ -188,6 +188,30 @@ def add_to_Storage(typ, num, db_dict):
     return db_dict
 
 
+def dict_key_translate(key_translation, dic, way=(0, 1)):
+    b, a = way
+    t_dic = {}
+    for key_pair in key_translation:
+        t_dic[key_pair[a]] = dic[key_pair[b]]
+    return t_dic
+
+
+def data_view_request_CartStorage(data_dict):
+    #for val in data_dict.values():
+    #    if val is not True:
+    #        return
+    t_dic = {}
+    if data_dict != t_dic:
+        with open(f'{ROOT}db/cartStorage.txt', 'r') as storage:
+            string = storage.readline()
+            item_list = string.split(',')
+            for item in [entry.split(':') for entry in [t for t in item_list if t != '']]:
+                if type(item) == list and len(item) == 2:
+                    t_dic[item[0]] = item[1]
+        new = int(t_dic[data_dict['cart']]) + int(data_dict['num'])
+        t_dic[data_dict['cart']] = str(new)
+        UpdateStorage(t_dic)
+
 def Storage2Dict():
     t_dic = {}
     with open(f'{ROOT}db/cartStorage.txt', 'r') as storage:
@@ -402,5 +426,15 @@ def timestamp_from_com(diff=10, with_string=True):
             return True
         else:
             return False
+
+def view_request_2_dict(t_dic, request):
+    for key in t_dic.keys():
+        if request.GET.get(key):
+            t_dic[key] = request.GET.get(key)
+        else:
+            t_dic[key] = False
+    return t_dic
+
+
 #if __name__ == '__main__':
 #    update_override(wjw_data_dic)

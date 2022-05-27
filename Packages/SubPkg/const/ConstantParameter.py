@@ -269,5 +269,16 @@ wjw_data_dic = [{'WJW': 'WJW4145', 'Serial_No': 'E79028J1N561471', 'Location': '
 
 run_interval = 5
 
+page_modifier_dict_templates = {'PrinterMonitor': {'filter': '*'},
+                                'CartStorage': {'days': False},
+                                'Analytics': {'filter': '*', 'group': False, 'value': False},
+                                'DeviceDetails': {'time': False, 'vals': False, 'access': 'false'}}
+
+data_modifier_dict_templates = {'CartStorage': {'cart': False, 'num': False},
+                                'DeviceDetails': {'deviceId': False, 'location': False, 'contact': False,
+                                                  'notes': False}
+                                }
+
+
 if __name__ == '__main__':
     print(ROOT)
