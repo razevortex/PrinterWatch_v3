@@ -1,30 +1,34 @@
 <!DOCTYPE html>
+{% load static %}
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Device Manager</title>
+    <title>PrinterMonitor</title>
 
     <link rel="stylesheet" href="http://printerwatch/static/css/style.css">
+    <script src="{% static 'js/formcreator.js' %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/form.css' %}">
+
     <style>
            .headInput{
             padding: 0;
 			margin: auto;
 			width: 90%;
-			background-color: lightgrey;
+
+			background-color: darkgrey;
             text-align: center;#text-size: 14;
             color: lightorange;
 			}
     </style>
 
 </head>
-<body onload="insertRow()">
-<form action="http://printerwatch/subsite/deviceMgr/">
-    <div  class="headInput">
-    <label class="label">Add Ip:</label>
-    <input type="text" id="add_ip" name="add_ip">
-    <input type="submit" value="[+]">
-        </div>
-    </form>
+<body onload="insertRow()" id="body">
+<div  class="headInput" id="formContainer">
+<script> createForm({{ form|safe }}); </script>
+<input type="hidden" form="inputForm" name="user" id="user" value="{{ user }}">
+</div>
+<input type="hidden" form="rem" name="user" value="{{ user }}">
 
 <div class='scoreboard'>
         <table id="myTable" class='monitorTable'>
@@ -57,7 +61,7 @@
         triedCell.innerHTML = i.TRIED;
 
 		var delCell = row.insertCell(2);
-        delCell.innerHTML = '<form action="http://printerwatch/subsite/deviceMgr/"><input type="text" id="remove" name="remove" value="'+i.IP+'"><input type="submit" value="[-]"></form>' ;
+        delCell.innerHTML = '<form action="http://printerwatch/subsite/deviceMgr/" id="rem"><input type="text" form="rem" id="remove" name="remove" value="'+i.IP+'"><input type="submit" value="[-]"></form>' ;
 }}
 
 

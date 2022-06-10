@@ -261,13 +261,20 @@ class DataSet(object):
         og_dic = copy.deepcopy(self.Const)
         og_dic.update(self.Static)
         og_dic['Notes'] = 'Notes'
-        or_dic = copy.deepcopy(og_dic)
+        for key in ['Serial_No', 'IP', 'Device', 'Contact', 'Location', 'Notes']:
+            if og_dic[key] == '':
+                og_dic[key] = key
+
+        '''or_dic = copy.deepcopy(og_dic)
         orData = LibOverride()
         orData.updateDict(or_dic)
         og_or = {}
         for key in ['Serial_No', 'IP', 'Device', 'Contact', 'Location', 'Notes']:
+            if og_dic[key] == '':
+                og_dic[key] = key
             og_or[key] = [og_dic[key], or_dic[key]]
-        return og_or
+        return og_or'''
+        return og_dic
 
     def back2raw(self):
         self.processing = False

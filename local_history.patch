@@ -1,0 +1,12 @@
+Index: lib/override_log.txt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/lib/override_log.txt b/lib/override_log.txt
+--- a/lib/override_log.txt	
++++ b/lib/override_log.txt	(date 1654175551420)
+@@ -1,3 +1,0 @@
+-Raze : {'ID': 'Q630304940', 'Serial_No': 'trash', 'Location': 'dump', 'Contact': 'none', 'Notes': 'removed'} --> {'fixed': 'Kyocera FS-1320D  /  IP: 172.20.10.107', 'deviceIdLabel': 'Q630304940', 'deviceId': 'trash', 'locationLabel': 'Location', 'location': 'dump', 'contactLabel': 'Contact', 'contact': 'none', 'notesLabel': 'Notes', 'notes': 'removed', 'ID': 'Q630304940'}
+-Raze : {'ID': 'Q630304940', 'Serial_No': 'trash', 'Location': 'dump', 'Contact': 'none', 'Notes': 'removed'} --> {'fixed': 'Kyocera FS-1320D  /  IP: 172.20.10.107', 'deviceIdLabel': 'Q630304940', 'deviceId': 'trash', 'locationLabel': 'Location', 'location': 'dump', 'contactLabel': 'Contact', 'contact': 'none', 'notesLabel': 'Notes', 'notes': 'removed', 'ID': 'Q630304940'}
+-Raze : {'ID': 'Q630304940', 'Serial_No': 'trash', 'Location': 'dump', 'Contact': 'none', 'Notes': 'removed'} --> {'ID': 'Q630304940', 'Serial_No': ' ', 'Location': ' ', 'Contact': ' ', 'Notes': ' '}

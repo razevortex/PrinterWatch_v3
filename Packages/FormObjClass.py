@@ -1,10 +1,12 @@
 import copy
-
+from Packages.SubPkg.foos import dict_key_translate
+from Packages.SubPkg.csv_handles import LibOverride
 formObjDict = {'PrinterMonitor': 'http://printerwatch/subsite/monitor/',
                'CartridgeStorage': 'http://printerwatch/subsite/storage_tracker/',
                'Sandbox': 'http://printerwatch/sandbox/',
                'Analytics': 'http://printerwatch/subsite/analytics/',
-               'Details': 'http://printerwatch/subsite/details/'}
+               'Details': 'http://printerwatch/subsite/details/',
+               'DeviceManager': 'http://printerwatch/subsite/deviceMgr/'}
 
 def device_detail_form_obj(head, access):
     formObj = {
@@ -18,6 +20,29 @@ def device_detail_form_obj(head, access):
          'inputIds': ['deviceId', 'location', 'contact', 'notes']}
     formObj.update(temp)
     return formObj
+
+def ddf(head):
+    device_details_key = [('deviceId', 'Serial_No'), ('location', 'Location'), ('contact', 'Contact'),
+                          ('notes', 'Notes')]
+    a = head['Device']
+    b = head['IP']
+    fixed = f'{a}  /  IP: {b}'
+    temp = {'fixed': fixed}
+    head_dup = copy.deepcopy(head)
+    or_lib = LibOverride()
+    or_lib.updateDict(head_dup)
+    for key in head_dup.keys():
+        if head_dup[key] == '':
+            head_dup[key] = 'NaN'
+    head = dict_key_translate(device_details_key, head, way=(1, 0))
+    head_dup = dict_key_translate(device_details_key, head_dup, way=(1, 0))
+    for key in ['deviceId', 'location', 'contact', 'notes']:
+        label = f'{key}Label'
+        temp[label] = head[key]
+        temp[key] = head_dup[key] if temp[label] != head_dup[key] else ''
+
+    temp['ID'] = temp['deviceIdLabel']
+    return temp
 
 class CreateForm(object):
     def __init__(self, site):
@@ -33,6 +58,14 @@ class CreateForm(object):
         self.inputObjects.append(textInput.object)
         #hiddenInput = AddHiddenInput('test')
         #self.inputObjects.append(hiddenInput.object)
+        submitButton = AddSubmitButton()
+        self.inputObjects.append(submitButton.object)
+        self.formObj['inputs'] = self.inputObjects
+        return self.formObj
+
+    def DeviceManager(self):
+        textInput = AddTextInput('Add IP : ', 'add_ip', '')
+        self.inputObjects.append(textInput.object)
         submitButton = AddSubmitButton()
         self.inputObjects.append(submitButton.object)
         self.formObj['inputs'] = self.inputObjects

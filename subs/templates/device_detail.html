@@ -24,10 +24,37 @@
 
 </head>
 <body onload="insertRow()">
+
 <p>{{ debug }}</p>
-<script> detailDatasheet({{ form|safe }}); </script>
-<input type="hidden" form="detailOR" name="user" id="user" value="{{ user }}">
-<input type="hidden" form="detailOR" name="id" id="id" value="{{ id }}">
+
+
+<div class="datasheet" id="datasheetDiv" style="margin:auto">
+<p class="datasheetHead" id="headDetail"> {{ fixed }} </p>
+<form action="http://printerwatch/subsite/details/" method="GET" id="detailOR">
+<div class="inputs" style="display:flex; flex-direction:row">
+    <label for="deviceId" id="deviceIdLabel"> {{ deviceIdLabel }}  </label>
+    <input type="text" name="deviceId" id="deviceId" value="{{ deviceId }}">
+</div>
+<div class="inputs" style="display:flex; flex-direction:row">
+    <label for="location" id="locationLabel"> {{ locationLabel }} </label>
+    <input type="text" name="location" id="location" value="{{ location }}">
+</div>
+<div class="inputs" style="display:flex; flex-direction:row">
+    <label for="contact" id="contactLabel"> {{ contactLabel }} </label>
+    <input type="text" name="contact" id="contact" value="{{ contact }}">
+</div>
+<div class="inputs" style="display:flex; flex-direction:row">
+    <label for="notes"> Notes </label>
+    <input type="text" name="notes" id="notes" value="{{ notes }}">
+</div>
+<div class="inputs" style="display:flex; flex-direction:row">
+    <label for="access_check"> accessable </label>
+    <input type="checkbox" name="access" id="access_check" value="true">
+    <input type="hidden" name="user" value="{{ user }}">
+    <input type="hidden" name="id" value="{{ id }}">
+    <input type="submit" class="submit" value=">>">
+    </div></form></div>
+
 <div class='scoreboard'>
         <table id="myTable" class='monitorTable'>
 		<thead id="aHeader">

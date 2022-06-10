@@ -16,10 +16,12 @@ def coffee_break(min, start):
     update_recentCache()
     arr = get_pending_ip()
     t_arr = []
+    created_ip = []
     for t_dic in arr:
         cli = {'IP': t_dic['IP']}
         get = ClientGet(cli)
-
+        db = dbClient()
+        db.updateData()
         data = get.snmp_run_main()
         if data is not False:
             try:
@@ -33,11 +35,13 @@ def coffee_break(min, start):
                         t_arr.append(t_dic)
                         break
                 data_dict_to_store(data)
+                created_ip.append(data['IP'])
             except:
                 t_dic['TRIED'] = int(t_dic['TRIED']) + 1
                 t_arr.append(t_dic)
                 break
     update_ip_form(t_arr)
+    [remove_ip(i) for i in created_ip]
     if early < 0:
         now = write_timestamp_to_com()
         print(f'wrote {now} to com')

@@ -97,6 +97,7 @@ function createForm(formObj){
         }
     }
 
+
 function detailDatasheet(datasheetObj){
 	let container = document.createElement('div');
   	container.className = 'datasheet';
@@ -168,7 +169,7 @@ function oRideLine(lineId, og, or, access){
   inputField.className = 'text';
   inputField.form = 'detailOr';
   inputField.id = lineId;
-  inputField.name = '' + lineId ;
+  inputField.name = lineId;
 
   inputField.value = or;
   cont.appendChild(inputField);

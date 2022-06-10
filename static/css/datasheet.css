@@ -3,7 +3,7 @@ body{
 }
 
 label{
-  width: 45%;
+  width: 100%;
   padding: 10px;
   text-align: center;
   color: orange;
@@ -16,7 +16,7 @@ p.datasheetHead{
 
 input.text{
   background-color: gray;
-  width: 45%;
+  width: 100%;
   float: right;
   font-weight: bold;
   outline: 2px solid;
@@ -28,8 +28,9 @@ input.submit{
   float: right;
   border: 1px solid black;
   font-weight: bold;
+  width: 30%
   height: 100%;
-  border-radius: 10px 0 0 10px;
+  border-radius: 10px;
 }
 
 div.inputs{

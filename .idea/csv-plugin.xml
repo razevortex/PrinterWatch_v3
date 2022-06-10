@@ -31,6 +31,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/db/E69498J2J353611.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/db/E69498K0J129772.csv">
           <value>
             <Attribute>
@@ -115,6 +122,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/db/LW16945225.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/db/Q630304940.csv">
           <value>
             <Attribute>
@@ -150,7 +164,7 @@
             </Attribute>
           </value>
         </entry>
-        <entry key="/lib/NaN_ModelSpecs.csv">
+        <entry key="/lib/Kyocera_ModelSpecs.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
@@ -158,6 +172,13 @@
           </value>
         </entry>
         <entry key="/lib/override.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/test/override.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />

@@ -14,13 +14,7 @@ def PrintMonitor(request):
         user = request.GET.get('user')
         request_handle = ViewRequestHandler(user, 'PrinterMonitor')
         request_handle.get_request(request)
-        #if request.GET.get('filter'):
-        #    filter = request.GET.get('filter')
-        #    t_dic = {'filter': filter}
-        #    write_conf(user, 'printer_monitor', t_dic)
-        #else:
-        #    t_dic = read_conf(user, 'printer_monitor')
-        #    filter = t_dic['filter']
+
         form = CreateForm('PrinterMonitor')
         #formObj = form.PrinterMonitor(t_dic)
         formObj = form.PrinterMonitor(request_handle.page_modifier)
@@ -36,49 +30,15 @@ def details(request):
         user = request.GET['user']
         id = request.GET.get('id', '')
         head, data = get_device_detail(id)
-        request_handle = ViewRequestHandler(user, 'DeviceDetails', data_mod=head)
+        head['ID'] = id
+        request_handle = ViewRequestHandler(user, 'DeviceDetails', data_mod=ddf(head))
         request_handle.get_request(request)
         head, data = get_device_detail(id)
         data2json = dumps(data)
-        formOR = device_detail_form_obj(head, request_handle.page_modifier['access'])
-        return render(request, 'device_detail.html', {'user': user,
-                                                      'data': data2json,
-                                                      'form': formOR, 'id': id,
-                                                      'debug': request_handle.debug})
-'''override_entry = False
-        try:
-            if request.GET.get('override-this'):
-                key = request.GET.get('override-this')
-                if request.GET.get('with'):
-                    val = request.GET.get('with')
-                    override_entry = {key: val}
-                else:
-                    override_entry = {key: ''}
-        except:
-            override_entry = False
-        id = request.GET.get('id', '')
-        if override_entry is not False:
-            override = LibOverride()
-            override.addEntry(id, override_entry)
-        t_dic = read_conf(user, 'printer_details')
-        time = t_dic['time']
-        vals = t_dic['vals']
-        if request.GET.get('time'):
-            time = request.GET.get('time')
-            t_dic['time'] = time
-        if request.GET.get('vals'):
-            vals = request.GET.get('vals')
-            t_dic['vals'] = vals
-        write_conf(user, 'printer_details', t_dic)
-        data, head = get_details_data(id, time, vals)
-        data2json = dumps(data)
-        page = 'details.html' if vals == 'grouped' else 'details2.html'
-        return render(request, page, {'user': user, 'times': time,
-                                                'data': data2json,
-                                                'h1': head(),
-                                                'h2': head(line='2'),
-                                                'id': id})
-        '''
+        #formOR = device_detail_form_obj(head, request_handle.page_modifier['access'])
+        send = {'user': user, 'data': data2json, 'id': id, 'debug': request_handle.debug}
+        send.update(ddf(head))
+        return render(request, 'device_detail.html', send)
 
 def cartTrack(request):
     if request.GET.get('user'):
@@ -88,7 +48,7 @@ def cartTrack(request):
         form = CreateForm('CartridgeStorage')
         formObj = form.CartStorage(request_handle.page_modifier)
         tracker = CartStoreTracker()
-        index, arr = tracker.process_time(int(request_handle.page_modifier['days']))
+        index, arr = tracker.process_time(int(request_handle.CartStoreDays()))  #page_modifier['dd']))
         data2json = dumps(tracker.table_data)
         return render(request, 'cartTracker.html', {'index': index, 'sets': arr,
                                                     'data': data2json, 'user': user,
@@ -129,6 +89,17 @@ def config(request):
         return render(request, 'config.html', {'user': user})
 
 def dmgr(request):
+    if request.GET.get('user'):
+        user = request.GET['user']
+        request_handle = ViewRequestHandler(user, 'DeviceManager')
+        request_handle.get_request(request)
+        data2json = dumps(get_pending_ip())
+        form = CreateForm('DeviceManager')
+        formObj = form.DeviceManager()
+        return render(request, 'devMgr.html', {'user': user, 'data': data2json, 'form':formObj})
+
+'''
+
     ip = request.GET.get('add_ip', '')
     if ip != '':
         handle_ip_form(ip)
@@ -143,5 +114,5 @@ def dmgr(request):
             update_ip_form(t_arr)
     except:
         remove = ''
-    data2json = dumps(get_pending_ip())
-    return render(request, 'devMgr.html', {'data': data2json})
+    '''
+

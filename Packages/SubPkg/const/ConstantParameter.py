@@ -272,11 +272,13 @@ run_interval = 5
 page_modifier_dict_templates = {'PrinterMonitor': {'filter': '*'},
                                 'CartStorage': {'days': False},
                                 'Analytics': {'filter': '*', 'group': False, 'value': False},
-                                'DeviceDetails': {'time': False, 'vals': False, 'access': 'false'}}
+                                'DeviceDetails': {'time': False, 'vals': False, 'access': 'false'},
+                                'DeviceManager': {}}
 
 data_modifier_dict_templates = {'CartStorage': {'cart': False, 'num': False},
                                 'DeviceDetails': {'deviceId': False, 'location': False, 'contact': False,
-                                                  'notes': False}
+                                                  'notes': False},
+                                'DeviceManager': {'add_ip': False, 'remove': False}
                                 }
 
 

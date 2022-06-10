@@ -1,14 +1,4 @@
-'''if __name__ == '__main__':
-    from const.ConstantParameter import *
-    from csv_handles import *
-    from Dev.data_validation import DataValidation
-else:'''
 import os.path
-
-'''from .const.ConstantParameter import *
-from .Brother import *
-from .Kyocera import *
-from .csv_handles import *'''
 from Packages.SubPkg.const.ConstantParameter import *
 from Packages.SubPkg.Brother import *
 from Packages.SubPkg.Kyocera import *
@@ -29,30 +19,6 @@ def foo():
 #
 #                                       END OF IMPORT
 
-'''
-def get_recent_data(temp):
-    clients = dbClient()
-    client_list_of_dicts = []
-    # checking if there are already stored data or is it maybe the first run this might get obsolete when a
-    # initial setup dialog up on first start gets implemented
-    if clients.Empty is not True:
-        data = []
-        client = dbClient()
-        client.updateData()
-        for clients in client.ClientData:
-            db = dbRequest(clients['Serial_No'])
-            temp = db.getEntry('recent')
-            clients.update(temp)
-            spec = dbClientSpecs()
-            spec.updateData()
-            temp = spec.getEntry('id', clients['Serial_No'])
-            clients.update(temp)
-            override = LibOverride()
-            if override.getEntry(temp['Serial_No']):
-                clients.update(override.getEntry(temp['Serial_No']))
-            data.append(clients)
-        return data
-'''
 
 def list_of_dicts_sorting(list, sort_key):
     def takeKey(elem):
@@ -65,6 +31,17 @@ def list_of_dicts_sorting(list, sort_key):
     for entry in temp:
         sorted_list.append(entry[0])
     return sorted_list
+
+
+def float_depth(float_num, depth=3):
+    try:
+        string = str(float_num)
+        string += '00000'
+        point = string.index('.') + depth
+        string = string[0:point]
+        return float(string)
+    except:
+        return float_num
 
 
 def running(disable):
@@ -82,37 +59,17 @@ def running(disable):
         else:
             return False
 
+
 def run_background_requests(last_update):
     if timestamp_from_com(diff=last_update, with_string=False) is not True:
         sp.call(["gnome-terminal", "-x", "python", f"{ROOT}Background_Request.py"])
-'''
-def check_on_requests(request_active):
-    if request_active == False:
-        request_active = Popen(["python", "Background_Request.py"], creationflags=sp.CREATE_NEW_CONSOLE)
-        return request_active
-    else:
-        if request_active.poll():
-            #print(request_active.poll())
-            request_active = False
-            return request_active
 
-'''
 
 def method_selector(specs_lib, manufacture, model):
     Specs = specs_lib.getEntry('id', model)
     if manufacture == 'Brother':
         return methodsBrother(Specs['MethodIndex'])
 
-'''
-def add_ip(pending, get_class):
-    if pending != '':
-        ip = pending[0]
-        get = get_class(ip)
-        data = get.snmp_run_main()
-        status = data_dict_to_store(data)
-        pending.remove(ip)
-        return pending, len(pending), (ip['IP'], status)
-'''
 
 def DataValidation(func):
     @wraps(func)
@@ -159,7 +116,10 @@ def data_dict_to_store(data_dict):
         request[key] = data_dict[key]
     print(f'data for its {data_dict["Serial_No"]}.csv: {request}')
     db = dbRequest(data_dict['Serial_No'])
-    toner_replaced(db.ClientData[-1], data_dict)
+    try:
+        toner_replaced(db.ClientData[-1], data_dict)
+    except:
+        print('not enough entries for foo toner replacement')
     db.addingEntry(request)
     for key in header['client_specs']:
         specs[key] = data_dict[key]
@@ -167,6 +127,22 @@ def data_dict_to_store(data_dict):
     db = dbClientSpecs()
     db.addingEntry(specs)
     return True
+
+
+def dict_key_translate(key_translation, dic, way=(0, 1)):
+    b, a = way
+    t_dic = {}
+    try:
+        for key_pair in key_translation:
+            t_dic[key_pair[a]] = dic[key_pair[b]]
+    except:
+        for key_pair in key_translation:
+            t_dic[key_pair[b]] = dic[key_pair[a]]
+    return t_dic
+
+'''
+Functions handling CartridgeStorage 
+'''
 
 def toner_replaced(last_line, new_line):
     replaced_toner = {'TonerBK', 'TonerC', 'TonerM', 'TonerY'}
@@ -176,24 +152,12 @@ def toner_replaced(last_line, new_line):
                 cart = key.replace('Toner', 'Cart')
                 temp = add_to_Storage(new_line[cart], "-1", Storage2Dict())
                 UpdateStorage(temp)
-'''
-def calc(store, low):
-    new = int(store) - int(low)
-    return str(new)
 
-'''
+
 def add_to_Storage(typ, num, db_dict):
     new = int(db_dict[typ]) + int(num)
     db_dict[typ] = str(new)
     return db_dict
-
-
-def dict_key_translate(key_translation, dic, way=(0, 1)):
-    b, a = way
-    t_dic = {}
-    for key_pair in key_translation:
-        t_dic[key_pair[a]] = dic[key_pair[b]]
-    return t_dic
 
 
 def data_view_request_CartStorage(data_dict):
@@ -212,6 +176,7 @@ def data_view_request_CartStorage(data_dict):
         t_dic[data_dict['cart']] = str(new)
         UpdateStorage(t_dic)
 
+
 def Storage2Dict():
     t_dic = {}
     with open(f'{ROOT}db/cartStorage.txt', 'r') as storage:
@@ -223,6 +188,7 @@ def Storage2Dict():
                 print(t_dic)
     return t_dic
 
+
 def UpdateStorage(dic):
     string = ''
     for key, val in dic.items():
@@ -232,6 +198,11 @@ def UpdateStorage(dic):
         storage.write(string)
 
 
+'''
+END Cartridge Storage
+START User Config / User Default Values (Forms)
+'''
+
 def create_new_conf(user):
     if not os.path.exists(f'{ROOT}user/{user}Config.txt'):
         with open(f'{ROOT}user/defaultConfig.txt', 'r') as default:
@@ -239,6 +210,7 @@ def create_new_conf(user):
         with open(f'{ROOT}user/{user}Config.txt', 'w') as new_file:
             new_file.writelines(lines)
         os.chmod(f'{ROOT}user/{user}Config.txt', 0o777)
+
 
 def read_conf(user, page):
     t_dic = {}
@@ -253,7 +225,6 @@ def read_conf(user, page):
         for pair in arr:
             t_dic[pair[0]] = pair[1]
     return t_dic
-
 
 
 def write_conf(user, page, dict):
@@ -275,39 +246,12 @@ def write_conf(user, page, dict):
     with open(f'{ROOT}user/{user}Config.txt', 'w') as conf:
         conf.writelines(line + '\n' for line in arr)
 
-
-
-
-def float_depth(float_num, depth=3):
-    try:
-        string = str(float_num)
-        string += '00000'
-        point = string.index('.') + depth
-        string = string[0:point]
-        return float(string)
-    except:
-        return float_num
-
 '''
-def read_snmp_response(file):
-    with open(file) as infile:
-        arr = []
-        temp = []
-        for line in infile:
-            line = line.rstrip('\n')
-            arr_proc = re.split(' = |::|: ', line)
-            temp.append(arr_proc)
-        for a in range(0, len(temp)):
-            if len(temp[a]) == 4 and temp[a][3]:
-                if temp[a][2] == 'STRING':
-                    t = (str(temp[a][1]), str(temp[a][3].replace('"', '')))
-                    arr.append(t)
-                if temp[a][2] == 'Counter32' or temp[a][2] == 'INTEGER':
-                    t = (str(temp[a][1]), str(int(re.search(r'\d+', temp[a][3]).group())))
-                    arr.append(t)
-    return arr
-
+END User Config
+START Function for Handling IPs
 '''
+
+
 def valid_ip(ip):
     t = ip.split('.')
     num = int(t[0])
@@ -315,6 +259,7 @@ def valid_ip(ip):
         return True
     else:
         return False
+
 
 def handle_ip_form(input):
     client = dbClient()
@@ -349,6 +294,7 @@ def get_pending_ip():
                 arr.append(dic)
     return arr
 
+
 def update_ip_form(ip_arr):
     string = ''
     for ip_dict in ip_arr:
@@ -356,45 +302,14 @@ def update_ip_form(ip_arr):
     with open(f'{ROOT}db/includeIP.txt', 'w') as ips:
         ips.write(string)
 
-def test(file):
-    string = ''
-    with open(file, 'r') as t:
-        for l in t:
-            string += l
-    with open(f'{ROOT}db/includeIP.txt', 'a') as ips:
-        ips.write(string)
+def remove_ip(ip):
+    arr = get_pending_ip()
+    t_arr = []
+    for val in arr:
+        if ip != val['IP']:
+            t_arr.append(val)
+    update_ip_form(t_arr)
 
-def import_ip_file(file):
-    client = dbClient()
-    client.updateData()
-    already_existing = client.getEntry('col', 'IP')
-    # opening and reading the file
-    with open(file) as txt:
-        string = txt.readlines()
-
-    # declaring the regex patterns for IP addresses
-    ip_pattern = re.compile(r'(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})')
-
-    valid_store = []
-    # extracting the IP addresses
-    temp = []
-    for line in string:
-        line = line.rstrip()
-        print(line)
-        x = True
-        while x:
-            try:
-                t = ip_pattern.search(line)[0]
-                print(t)
-                temp.append(t)
-                line = line.replace(t, '')
-            except:
-                x = False
-    for ip in temp:
-        if valid_ip(ip):
-            if ip not in already_existing['IP']:
-                valid_store.append(ip)
-    return list(set(valid_store))
 
 def calculate_diff(key, old, new, diff):
     if key.startswith('Toner'):
@@ -404,6 +319,11 @@ def calculate_diff(key, old, new, diff):
         diff[key] = new[key] - old[key]
     old[key] = new[key]
     return old, diff
+
+'''
+END IP Functions
+START Last Background Request Run Timestamp 
+'''
 
 def write_timestamp_to_com():
     now = dt.datetime.now()
@@ -427,13 +347,6 @@ def timestamp_from_com(diff=10, with_string=True):
         else:
             return False
 
-def view_request_2_dict(t_dic, request):
-    for key in t_dic.keys():
-        if request.GET.get(key):
-            t_dic[key] = request.GET.get(key)
-        else:
-            t_dic[key] = False
-    return t_dic
 
 
 #if __name__ == '__main__':

@@ -92,6 +92,8 @@ class HandleDB(object):
             writeing.writeheader()
             writeing.writerows(t_arr)
 
+
+
     def updateCSV(self):
         with open(self.CSV, 'w', newline='', encoding='ISO-8859-1') as client_csv:
             writeing = csv.DictWriter(client_csv, fieldnames=self.Header)
@@ -359,27 +361,110 @@ class LibOverride(HandleDB):
         super().__init__(_for_ini)
         self.updateData()
 
+    def updateData(self):
+        #ISO-8859-1
+        with open(self.CSV, 'r', newline='', encoding='ISO-8859-1') as client_csv:
+            reading = csv.DictReader(client_csv, fieldnames=self.Header)
+            t_arr = []
+            for row in reading:
+                print(row)
+                t_dic = {}
+                for col in self.Header:
+                    if col != row[col]:
+                        t_dic[col] = row[col]
+                if len(t_dic) == len(self.Header):
+                    t_arr.append(t_dic)
+        self.ClientData = t_arr
+        self.ClientPack = (self.Header, self.ClientData)
 
+    def log_changes(self, user, dict):
+        string = f'{user} : {str(dict)}'
+        string += '\n'
+        #string = string.decode('utf8')
+        log_path = self.CSV.replace('.csv', '_log.txt')
+        if not os.path.exists(log_path):
+            with open(log_path, 'w+', encoding='ISO-8859-1') as file:
+                file.write(string)
+            os.chmod(f'{log_path}', 0o777)
+        else:
+            with open(log_path, 'a', encoding='ISO-8859-1') as file:
+                file.write(string)
+
+
+
+    # old foo to return updated version of the passed dict
+    # propably replaced with orDict
     def updateDict(self, data_dict):
+        t_dic = self.entry_template()
         for line in self.ClientData:
             if data_dict['Serial_No'] == line['ID']:
                 for key, val in line.items():
+                    t_dic.update(line)
                     data_dict['ID'] = line['ID']
+
                     if key in list(data_dict.keys()):
                         if val != 'NaN':
-                            data_dict[key] = val
+                            data_dict[key] = t_dic[key]
         return data_dict
 
-    def updateDB(self, data_dict, id):
+    def orDict(self, og):
+        og['ID'] = og['Serial_No']
+        if self.idExists(og['Serial_No']) is not False:
+            or_line = self.idExists(og['Serial_No'])
+            for key in self.Header:
+                if or_line[key] != 'NaN':
+                    og[key] = or_line[key]
+        return og
+
+    def idExists(self, id):
+        for line in self.ClientData:
+            if line['ID'] == id:
+                return line
+        return False
+
+    def dbEntryLine(self, id):
+        if self.idExists(id) is not False:
+            return self.idExists(id)
+        else:
+            t_dic = {}
+            for key in self.Header:
+                t_dic[key] = 'NaN'
+            t_dic['ID'] = id
+            return t_dic
+
+    def dataToDb(self, id, entry):
+        t_dic = self.dbEntryLine(id)
+        for key in self.Header:
+            if key in list(entry.keys()):
+                if entry[key] is not False:
+                    t_dic[key] = entry[key]
+        self.updateClientData(id, t_dic)
+        self.updateCSV()
+
+    # internal foo
+    def updateClientData(self, id, new):
+        found_entry = False
+        for line in self.ClientData:
+            if line['ID'] == id:
+                found_entry = True
+                self.ClientData[self.ClientData.index(line)] = new
+        if found_entry is not True:
+            self.ClientData.append(new)
+
+    # start of a group of foos that are going to replaced
+    def updateDB(self, data_dict):
         entry_exists = False
         t_arr = []
         for line in self.ClientData:
             t_dic = line
-            if id == line['ID']:
+            if data_dict['ID'] == line['ID']:
                 entry_exists = True
                 for key in line.keys():
                     if key in data_dict.keys():
-                        t_dic[key] = data_dict[key]
+                        if data_dict[key] == '':
+                            t_dic[key] = 'NaN'
+                        else:
+                            t_dic[key] = data_dict[key]
                     else:
                         t_dic[key] = 'NaN'
             t_arr.append(t_dic)
@@ -388,8 +473,11 @@ class LibOverride(HandleDB):
             for key in self.Header:
                 if key in data_dict.keys():
                     t_dic[key] = data_dict[key]
+                elif data_dict[key] == '':
+                    t_dic[key] = 'NaN'
                 else:
                     t_dic[key] = 'NaN'
+            t_arr.append(t_dic)
         self.ClientData = t_arr
         self.updateCSV()
 
@@ -425,7 +513,7 @@ class LibOverride(HandleDB):
                 for key, val in add.items():
                     if val != 'NaN':
                         line[key] = val
-                    if val == '':
+                    if val == ' ':
                         line[key] = 'NaN'
             arr_t.append(line)
         if id_found is not True:
@@ -433,22 +521,15 @@ class LibOverride(HandleDB):
         self.ClientData = arr_t
         self.updateCSV()
 
+    # end of foos that going to be replaced
 
-        '''
-        add.update(entry)
-        data = []
-        
-            data.append(line)
-            if line[self.Entry_ID] == add['ID']:
-                add.update(line)
-                add.update(entry)
-                line.update(add)
-                self.updateCSV()
-                print('override updated')
-                return
-        data.append(add)
-        self.ClientData = data
-        self.updateCSV()'''
+    def updateCSV(self):
+        #with open(self.CSV, 'w+', newline='', encoding='utf_32') as client_csv:
+        with open(self.CSV, 'w', newline='', encoding='ISO-8859-1') as client_csv:
+            writeing = csv.DictWriter(client_csv, fieldnames=self.Header)
+            writeing.writeheader()
+            writeing.writerows(self.ClientData)
+
 
 class dbStats(HandleDB):
     def __init__(self):
@@ -501,5 +582,23 @@ class Cached(HandleDB):
         #if self.create_file():
         #    self.updateData()
 
+    def updateData(self):
+        with open(self.CSV, 'r', newline='', encoding='ISO-8859-1') as client_csv:
+            reading = csv.DictReader(client_csv, fieldnames=self.Header)
+            t_arr = []
+            for row in reading:
+                t_dic = {}
+                for col in self.Header:
+                    if col != row[col]:
+                        t_dic[col] = row[col]
+                if len(t_dic) == len(self.Header):
+                    t_arr.append(t_dic)
+        self.ClientData = t_arr
+        self.ClientPack = (self.Header, self.ClientData)
 
-
+    def updateCSV(self):
+        #with open(self.CSV, 'w', newline='', encoding='ISO-8859-1') as client_csv:
+        with open(self.CSV, 'w+', newline='', encoding='ISO-8859-1') as client_csv:
+            writeing = csv.DictWriter(client_csv, fieldnames=self.Header)
+            writeing.writeheader()
+            writeing.writerows(self.ClientData)

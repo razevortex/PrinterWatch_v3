@@ -1,6 +1,7 @@
 PrinterMonitor=filter:*
 printer_details=time:total;vals:seperated
-CartStorage=days:31
+CartStorage=days:31.12.2022
 Analytics=group:Model;value:BW;filter:*
-analytics=group:Model;value:BCYM;filter:
+analytics=group:Serial_No;value:BW;filter:
 DeviceDetails=access:true
+DeviceManager=
