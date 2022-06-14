@@ -32,7 +32,9 @@
 </head>
 
 <body onload="insertRow()">
-
+<!--
+<p>{{ debug }}</p>
+-->
 <div  class="headInput" id="formContainer">
 <script> createForm({{ form|safe }}); </script>
 <input type="hidden" form="inputForm" name="user" id="user" value="{{ user }}">

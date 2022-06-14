@@ -161,19 +161,9 @@ def add_to_Storage(typ, num, db_dict):
 
 
 def data_view_request_CartStorage(data_dict):
-    #for val in data_dict.values():
-    #    if val is not True:
-    #        return
-    t_dic = {}
-    if data_dict != t_dic:
-        with open(f'{ROOT}db/cartStorage.txt', 'r') as storage:
-            string = storage.readline()
-            item_list = string.split(',')
-            for item in [entry.split(':') for entry in [t for t in item_list if t != '']]:
-                if type(item) == list and len(item) == 2:
-                    t_dic[item[0]] = item[1]
-        new = int(t_dic[data_dict['cart']]) + int(data_dict['num'])
-        t_dic[data_dict['cart']] = str(new)
+    t_dic = Storage2Dict()
+    if data_dict['cart'] in list(t_dic.keys()):
+        t_dic[data_dict['cart']] = int(data_dict['num']) + int(t_dic[data_dict['cart']])
         UpdateStorage(t_dic)
 
 

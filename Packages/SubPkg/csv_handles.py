@@ -10,7 +10,6 @@ else:
     from .const.ConstantParameter import *
 
 
-
 class HandleDB(object):
     _for_ini = ('timestamps(bool)', 'csv.file', 'header', 'id_key')
 
@@ -91,8 +90,6 @@ class HandleDB(object):
             writeing = csv.DictWriter(client_csv, fieldnames=self.Header)
             writeing.writeheader()
             writeing.writerows(t_arr)
-
-
 
     def updateCSV(self):
         with open(self.CSV, 'w', newline='', encoding='ISO-8859-1') as client_csv:
@@ -246,7 +243,7 @@ class dbRequest(HandleDB):
             if temp_date_sum[-1][1] != temp[1]:
                 temp_date_sum.append(temp)
         return temp_date_sum
-
+    '''
     def getPlottingData(self, req_val, *args):
         t_dict = {}
         if args:
@@ -277,7 +274,7 @@ class dbRequest(HandleDB):
                     prep = 'relative'
                 t_dict[re_da] = self.sum_col(sum_val, preprocessing=prep)
         return t_dict
-
+    '''
     def addingEntry(self, add):
         self.updateData()
         if len(self.ClientData) == 0:
@@ -349,7 +346,6 @@ class ConfigLib(HandleDB):
         self.updateData()
 
 
-
 class LibOverride(HandleDB):
     def __init__(self):
         csv = fr'{ROOT}lib/override.csv'
@@ -362,7 +358,6 @@ class LibOverride(HandleDB):
         self.updateData()
 
     def updateData(self):
-        #ISO-8859-1
         with open(self.CSV, 'r', newline='', encoding='ISO-8859-1') as client_csv:
             reading = csv.DictReader(client_csv, fieldnames=self.Header)
             t_arr = []
@@ -378,9 +373,9 @@ class LibOverride(HandleDB):
         self.ClientPack = (self.Header, self.ClientData)
 
     def log_changes(self, user, dict):
-        string = f'{user} : {str(dict)}'
+        timestamp = str(dt.datetime.now())
+        string = f'{user} : {timestamp} : {str(dict)}'
         string += '\n'
-        #string = string.decode('utf8')
         log_path = self.CSV.replace('.csv', '_log.txt')
         if not os.path.exists(log_path):
             with open(log_path, 'w+', encoding='ISO-8859-1') as file:
@@ -390,10 +385,9 @@ class LibOverride(HandleDB):
             with open(log_path, 'a', encoding='ISO-8859-1') as file:
                 file.write(string)
 
-
-
     # old foo to return updated version of the passed dict
     # propably replaced with orDict
+
     def updateDict(self, data_dict):
         t_dic = self.entry_template()
         for line in self.ClientData:
@@ -524,7 +518,6 @@ class LibOverride(HandleDB):
     # end of foos that going to be replaced
 
     def updateCSV(self):
-        #with open(self.CSV, 'w+', newline='', encoding='utf_32') as client_csv:
         with open(self.CSV, 'w', newline='', encoding='ISO-8859-1') as client_csv:
             writeing = csv.DictWriter(client_csv, fieldnames=self.Header)
             writeing.writeheader()
@@ -569,6 +562,7 @@ class dbStats(HandleDB):
         self.updateCSV()
         print('data updated')
 
+
 class Cached(HandleDB):
     def __init__(self, data):
         csv = '/home/razevortex/django_printerwatch/chached_data/'
@@ -579,8 +573,6 @@ class Cached(HandleDB):
                     )
 
         super().__init__(_for_ini)
-        #if self.create_file():
-        #    self.updateData()
 
     def updateData(self):
         with open(self.CSV, 'r', newline='', encoding='ISO-8859-1') as client_csv:
@@ -597,8 +589,7 @@ class Cached(HandleDB):
         self.ClientPack = (self.Header, self.ClientData)
 
     def updateCSV(self):
-        #with open(self.CSV, 'w', newline='', encoding='ISO-8859-1') as client_csv:
-        with open(self.CSV, 'w+', newline='', encoding='ISO-8859-1') as client_csv:
+         with open(self.CSV, 'w+', newline='', encoding='ISO-8859-1') as client_csv:
             writeing = csv.DictWriter(client_csv, fieldnames=self.Header)
             writeing.writeheader()
             writeing.writerows(self.ClientData)

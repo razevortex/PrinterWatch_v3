@@ -52,7 +52,7 @@ def cartTrack(request):
         data2json = dumps(tracker.table_data)
         return render(request, 'cartTracker.html', {'index': index, 'sets': arr,
                                                     'data': data2json, 'user': user,
-                                                    'form': formObj}) # 'days': days, })
+                                                    'form': formObj, 'debug': request_handle.debug}) # 'days': days, })
 
 def analytics(request):
     if request.GET.get('user'):
@@ -97,22 +97,4 @@ def dmgr(request):
         form = CreateForm('DeviceManager')
         formObj = form.DeviceManager()
         return render(request, 'devMgr.html', {'user': user, 'data': data2json, 'form':formObj})
-
-'''
-
-    ip = request.GET.get('add_ip', '')
-    if ip != '':
-        handle_ip_form(ip)
-    try:
-        if request.GET.get('remove'):
-            remove = request.GET.get('remove')
-            arr = get_pending_ip()
-            t_arr = []
-            for i in arr:
-                if remove != i['IP']:
-                    t_arr.append(i)
-            update_ip_form(t_arr)
-    except:
-        remove = ''
-    '''
 
