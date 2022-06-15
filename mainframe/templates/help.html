@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>details</title>
+    <style>
+        button.unselected{
+        background-color: #e7e7e7;
+        color: 'black';
+        border-radius: 50%;
+        }
+        button.selected{
+        background-color: #4caf50;
+        color: 'black';
+        border-radius: 50%;
+        }
+        .img_cont{
+        width: 100%;
+        height: 80%;
+        float: top;
+        }
+        .ctrl{
+        width: 100%;
+        height: 20%;
+        float: top;
+        }
+    </style>
+    <script>
+    function imgSwitch(n, c) {
+        const imageLinks = ['http://printerwatch/static/img/Help/Login.png',
+        'http://printerwatch/static/img/Help/PrinterMonitor.png',
+        'http://printerwatch/static/img/Help/CartridgeStorage.png',
+        'http://printerwatch/static/img/Help/Analytics.png',
+        'http://printerwatch/static/img/Help/DeviceManager.png'];
+
+        const indexList = ['0', '1', '2', '3', '4']
+        for ( var i of indexList ) {
+            if ( i != c ) {
+                document.getElementById(i).className = 'unselected';
+                }
+            else {
+                document.getElementById(i).className = 'selected';
+                document.getElementById("help").src = imageLinks[n];
+                }
+            }
+        }
+    </script>
+</head>
+
+<body>
+<div class="img_cont">
+<img src="http://printerwatch/static/img/Help/Login.png" style="width:100%; height:100%;" id="help" alt="something went wrong">
+</div>
+<div class="ctrl">
+
+
+
+    <button id="0" class="selected" name="next" onclick="imgSwitch(0, '0')"> . </button>
+    <button id="1" class="unselected" name="next" onclick="imgSwitch(1, '1')"> . </button>
+    <button id="2" class="unselected" name="next" onclick="imgSwitch(2, '2')"> . </button>
+    <button id="3" class="unselected" name="next" onclick="imgSwitch(3, '3')"> . </button>
+    <button id="4" class="unselected" name="next" onclick="imgSwitch(4, '4')"> . </button>
+</div>
+</body>
+</html>

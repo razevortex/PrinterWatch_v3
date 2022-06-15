@@ -25,3 +25,8 @@ def mainframeset(request, safe=True):
     else:
         color, time = timestamp_from_com()
         return render(request, 'mainframeset.html', {'cc': color, 'ts': time})
+
+
+def help(request):
+    return render(request, 'help.html', {})
+
