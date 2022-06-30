@@ -1,12 +1,15 @@
 import copy
+from Packages.StrucData import CartStoreTracker
 from Packages.SubPkg.foos import dict_key_translate
 from Packages.SubPkg.csv_handles import LibOverride
+
 formObjDict = {'PrinterMonitor': 'http://printerwatch/subsite/monitor/',
                'CartridgeStorage': 'http://printerwatch/subsite/storage_tracker/',
                'Sandbox': 'http://printerwatch/sandbox/',
                'Analytics': 'http://printerwatch/subsite/analytics/',
                'Details': 'http://printerwatch/subsite/details/',
                'DeviceManager': 'http://printerwatch/subsite/deviceMgr/'}
+
 
 def device_detail_form_obj(head, access):
     formObj = {
@@ -20,6 +23,7 @@ def device_detail_form_obj(head, access):
          'inputIds': ['deviceId', 'location', 'contact', 'notes']}
     formObj.update(temp)
     return formObj
+
 
 def ddf(head):
     device_details_key = [('deviceId', 'Serial_No'), ('location', 'Location'), ('contact', 'Contact'),
@@ -40,9 +44,9 @@ def ddf(head):
         label = f'{key}Label'
         temp[label] = head[key]
         temp[key] = head_dup[key] if temp[label] != head_dup[key] else ''
-
     temp['ID'] = temp['deviceIdLabel']
     return temp
+
 
 class CreateForm(object):
     def __init__(self, site):
@@ -56,8 +60,6 @@ class CreateForm(object):
     def PrinterMonitor(self, data_dict):
         textInput = AddTextInput('Filter : ', 'filter', data_dict['filter'])
         self.inputObjects.append(textInput.object)
-        #hiddenInput = AddHiddenInput('test')
-        #self.inputObjects.append(hiddenInput.object)
         submitButton = AddSubmitButton()
         self.inputObjects.append(submitButton.object)
         self.formObj['inputs'] = self.inputObjects
@@ -74,8 +76,13 @@ class CreateForm(object):
     def CartStorage(self, data_dict):
         textInput = AddTextInput('Days : ', 'days', data_dict['days'])
         self.inputObjects.append(textInput.object)
-        # hiddenInput = AddHiddenInput('test')
-        # self.inputObjects.append(hiddenInput.object)
+        carts = CartStoreTracker()
+        filter_mode_list = carts.list_of_cart_types()
+
+        filter_mode_list.append('Only changing')
+        filter_mode = AddSelectInput('Filter/Mode : ', 'filter_mode', filter_mode_list, data_dict['filter_mode'])
+        self.inputObjects.append(filter_mode.object)
+
         submitButton = AddSubmitButton()
         self.inputObjects.append(submitButton.object)
         self.formObj['inputs'] = self.inputObjects
@@ -85,7 +92,9 @@ class CreateForm(object):
         data_dict = {'group': 'Serial_No', 'value': 'BW', 'filter': ''}
         data_dict.update(dict)
         group_list = ['Serial_No', 'Manufacture', 'Model']
-        value_list = ['BCYM', 'BW', 'CostPerBW', 'CostPerBCYM', 'PpBK', 'PpC', 'PpM', 'PpY']
+        value_list = ['BCYM', 'BW', 'CostPerBW', 'CostPerBCYM',
+                      'PpBK', 'PpC', 'PpM', 'PpY', 'Total_BW',
+                      'Total_BCYM', 'Total_Output']
         group_sel = AddSelectInput('Grouping : ', 'group', group_list, data_dict['group'], width='20%')
         self.inputObjects.append(group_sel.object)
         value_sel = AddSelectInput('Plot Val : ', 'value', value_list, data_dict['value'], width='20%')
@@ -119,6 +128,7 @@ class CreateForm(object):
         self.inputObjects.append(with_value)
         return self.formObj
 
+
 class AddTextInput(object):
     def __init__(self, label, value_name, value, width='30%'):
         self.object = {
@@ -134,6 +144,7 @@ class AddTextInput(object):
             'inValue': value
             }
         }
+
 
 class AddSelectInput(object):
     def __init__(self, label, name, val_list, value, width='30%'):
@@ -152,6 +163,7 @@ class AddSelectInput(object):
             'selOptions': val_list
         }
     }
+
 
 class AddHiddenInput(object):
     def __init__(self, value):
@@ -177,6 +189,7 @@ class AddSubmitButton(object):
             'subText': '>>'
         }
     }
+
 
 if __name__ == '__main__':
     data_dict = {'user': 'Raze', 'filter_value': 'test'}

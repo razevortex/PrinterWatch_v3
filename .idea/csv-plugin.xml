@@ -157,6 +157,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/db/log.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/db/model_statistics.csv">
           <value>
             <Attribute>

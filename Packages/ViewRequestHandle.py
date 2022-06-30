@@ -3,7 +3,7 @@ import datetime as dt
 from django.http import HttpResponse, QueryDict
 from Packages.SubPkg.const.ConstantParameter import page_modifier_dict_templates, data_modifier_dict_templates
 from Packages.SubPkg.foos import read_conf, write_conf, data_view_request_CartStorage, dict_key_translate, handle_ip_form, remove_ip
-from Packages.SubPkg.csv_handles import LibOverride
+from Packages.SubPkg.csv_handles import LibOverride, Logging
 
 
 device_details_key = [('ID', 'ID'), ('deviceId', 'Serial_No'), ('location', 'Location'), ('contact', 'Contact'), ('notes', 'Notes')]
@@ -11,11 +11,17 @@ device_details_key = [('ID', 'ID'), ('deviceId', 'Serial_No'), ('location', 'Loc
 
 class ViewRequestHandler(object):
     def __init__(self, user, view_page, data_mod=False):
+        # get the basic values needed like the actual page user and the expected values
         self.user = user
         self.view_page = view_page
+        # the expected values are stored in a dict in ConstantParameter.py
         self.page_modifier_default = page_modifier_dict_templates[view_page]
+        # exclude the DeviceManager from gather last used values
         if self.view_page != 'DeviceManager':
             self.page_modifier = read_conf(self.user, view_page)
+        # data_modifier only used on some pages hand handle respons values that make some
+        # changes to or will create stored values in cartStorage.txt, override.csv, includeIP.txt
+        # all these inputs should get logged with user time and input information
         self.data_modifier_default = False
         self.data_modifier = {}
         self.debug = 'val = '
@@ -23,16 +29,16 @@ class ViewRequestHandler(object):
             self.data_modifier_default = data_modifier_dict_templates[view_page]
         if data_mod is not False:
             self.data_modifier_default['ID'] = data_mod['deviceIdLabel']
+        self.log_entry = {'User': self.user, 'Page': self.view_page}
 
     def get_request(self, request_obj):
         t_get_dic = request_obj.GET.copy()
         if self.view_page != 'DeviceManager':
-
-            # loop to get GET for page modifier
+            # loop to get GET for page modifier values
             for get_key, value in self.page_modifier_default.items():
                 if t_get_dic.get(get_key, value):
                     self.page_modifier[get_key] = t_get_dic.get(get_key, value)
-            # store changes for user
+            # store changes to users last used values
             write_conf(self.user, self.view_page, self.page_modifier)
             self.page_modifier['user'] = self.user
         if self.view_page == 'DeviceDetails':
@@ -57,8 +63,9 @@ class ViewRequestHandler(object):
                 else:
                     modified = False
             if modified:
-                dbOR = LibOverride()
-                dbOR.log_changes(self.user, self.data_modifier_default)
+                self.log_entry['Data'] = str(self.data_modifier_default)
+                log = Logging()
+                log.newLogEntry(self.log_entry)
             data_view_request_CartStorage(self.data_modifier_default)
             return
 
@@ -77,12 +84,14 @@ class ViewRequestHandler(object):
                 self.data_modifier_default[get_key] = t_get_dic.get(get_key, value)
                 self.debug += string
         if modified is not False:
-            dbOR.log_changes(self.user, self.data_modifier_default)
+            self.log_entry['Data'] = str(self.data_modifier_default)
+            log = Logging()
+            log.newLogEntry(self.log_entry)
+            #dbOR.log_changes(self.user, self.data_modifier_default)
         self.data_modifier_default = dict_key_translate(device_details_key, self.data_modifier_default, way=(0, 1))
         dbOR.dataToDb(self.data_modifier_default['ID'], self.data_modifier_default)
 
     def CartStoreDays(self):
-
         got = str(self.page_modifier['days'])
         if '.' in got:
             now = dt.date.today()

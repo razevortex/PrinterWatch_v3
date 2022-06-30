@@ -1,2 +1,4 @@
 Raze : 2022-06-14 09:42:50.861129 : {'ID': 'E69498J1J225635', 'deviceId': False, 'location': False, 'contact': False, 'notes': False}
 Raze : 2022-06-15 11:17:10.568561 : {'ID': 'W2J8718286', 'deviceId': False, 'location': False, 'contact': False, 'notes': False}
+Raze : 2022-06-23 10:17:32.673925 : {'ID': 'E79028J1N561476', 'deviceId': False, 'location': False, 'contact': False, 'notes': False}
+Raze : 2022-06-23 10:18:10.652563 : {'ID': 'E79028J1N561476', 'deviceId': False, 'location': 'HA 1.OG Raum18', 'contact': 'Herr Zimmerschied', 'notes': False}

@@ -1,8 +1,11 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>PrinterWatch Main</title>
+    <link rel="stylesheet" href="http://printerwatch/static/css/mainframe.css">
+    <!--
     <style>
         body {
         background-color: rgba(0, 0, 0, 0.9);
@@ -81,35 +84,39 @@
 
 
     </style>
+    -->
     <script>
         function onHover()
         {
-        let cc = {{ cc|safe }}
-        if ( cc == 1 ){
-        document.getElementById('running').style="background-color:green; text-align:center; display:block";
-        }
-        else if ( cc == 0 ){
-        document.getElementById('running').style="background-color:green; text-align:center; display:block";
-        }
+            let cc = {{ cc|safe }}
+            if ( cc == 1 )
+            {
+                document.getElementById('running').style="background-color:green; text-align:center; display:block";
+            }
+            else if ( cc == 0 )
+            {
+                document.getElementById('running').style="background-color:green; text-align:center; display:block";
+            }
         }
 
         function nonHover()
         {
-        document.getElementById('running').style.display = "none";
-        document.getElementById('running').style.visibility = "hidden";
+            document.getElementById('running').style.display = "none";
+            document.getElementById('running').style.visibility = "hidden";
         }
 
-    function run(){
-    let cc = {{ cc|safe }}
-    if ( cc == 1 ){
-
-    document.getElementById('pw-logo').src='http://printerwatch/static/img/logo.png';}
-    else if ( cc == 0 ){
-
-    document.getElementById('pw-logo').src='http://printerwatch/static/img/logo_bw.png';}
-}
-
-</script>
+        function run()
+        {
+            let cc = {{ cc|safe }}
+            if ( cc == 1 )
+            {
+                document.getElementById('pw-logo').src='http://printerwatch/static/img/logo.png';
+            }
+            else if ( cc == 0 )
+            {
+                document.getElementById('pw-logo').src='http://printerwatch/static/img/logo_bw.png';}
+            }
+    </script>
 </head>
 <body onload="run()">
     <div style="position:absolute; top:0px; left:0px; width: 10%">

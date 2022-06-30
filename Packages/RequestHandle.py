@@ -5,10 +5,10 @@ import os
 from Packages.SubPkg.Kyocera import KyoceraDefault
 
 if __name__ == '__main__':
-    from subs.const.ConstantParameter import *
-    from subs.Brother import *
-    from subs.csv_handles import *
-    from subs.foos import *
+    from SubPkg.const.ConstantParameter import *
+    from SubPkg.Brother import *
+    from SubPkg.csv_handles import *
+    from SubPkg.foos import *
 else:
     from .SubPkg.const.ConstantParameter import *
     from .SubPkg.Brother import *

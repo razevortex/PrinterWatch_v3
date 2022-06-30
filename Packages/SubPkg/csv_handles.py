@@ -593,3 +593,20 @@ class Cached(HandleDB):
             writeing = csv.DictWriter(client_csv, fieldnames=self.Header)
             writeing.writeheader()
             writeing.writerows(self.ClientData)
+
+
+class Logging(HandleDB):
+    def __init__(self):
+        csv = fr'{ROOT}db/log.csv'
+        _for_ini = (False,
+                    csv,
+                    header['log_data'],
+                    'Time'
+                    )
+        super().__init__(_for_ini)
+        self.updateData()
+
+    def newLogEntry(self, dict):
+        dict['Time'] = str(dt.datetime.now())
+        self.ClientData.append(dict)
+        self.updateCSV()

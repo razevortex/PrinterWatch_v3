@@ -26,14 +26,16 @@ header = {'request_db': ['TonerBK', 'TonerC', 'TonerM', 'TonerY',
                                'CostPerCYM', 'PagesPerBK', 'PagesPerCYM'],
           'ext': ['CostBK', 'CostCYM', 'UsedBK', 'UsedCYM',
                          'PagesBK', 'PagesCYM', 'PagesPerBK', 'PagesPerCYM', 'DaysTotal',
-                         'UsedBK_daily', 'UsedCYM_daily', 'PagesBK_daily', 'PagesCYM_daily', 'CostPerBK', 'CostPerCYM']
+                         'UsedBK_daily', 'UsedCYM_daily', 'PagesBK_daily', 'PagesCYM_daily', 'CostPerBK', 'CostPerCYM'],
 
+          'log_data': ['Time', 'User', 'Page', 'Data']
           }
 
-cache_header = {'client_stats': ['Serial_No', 'Device', 'DaysMonitored', 'TonerYPerDay', 'PpY', 'BCYMPerDay',
+cache_header = {
+                'client_stats': ['Serial_No', 'Device', 'DaysMonitored', 'TonerYPerDay', 'PpY', 'BCYMPerDay',
                                 'CostPerBCYM', 'PpC', 'TonerBKPerDay', 'PpBK',
                                 'PpM', 'CostPerBW', 'TonerCPerDay', 'TonerMPerDay', 'BWPerDay'],
-               'device_stats': ['Device', '#', 'DaysMonitored', 'TonerYPerDay', 'PpY', 'BCYMPerDay', 'CostPerBCYM',
+                'device_stats': ['Device', '#', 'DaysMonitored', 'TonerYPerDay', 'PpY', 'BCYMPerDay', 'CostPerBCYM',
                                 'PpC', 'TonerBKPerDay', 'PpBK', 'PpM', 'CostPerBW', 'TonerCPerDay', 'TonerMPerDay',
                                 'BWPerDay'],
                 'recentCached': ['Serial_No', 'Device', 'IP', 'Contact', 'Location', 'Carts', 'UsedBK_daily',
@@ -42,7 +44,7 @@ cache_header = {'client_stats': ['Serial_No', 'Device', 'DaysMonitored', 'TonerY
                                  'TonerM',
                                  'TonerY', 'Printed_BW', 'Printed_BCYM', 'Copied_BW', 'Copied_BCYM', 'Status_Report',
                                  'Time_Stamp', 'ID', 'CartBK', 'CartM', 'CartY', 'CartC', 'Notes']
-                }
+               }
 
 statistics_key_type = {'Serial_No': 'string', 'IP': 'string', 'Manufacture': 'string', 'Model': 'string',
                        'CostBK': 'float', 'CostCYM': 'float',
@@ -270,7 +272,7 @@ wjw_data_dic = [{'WJW': 'WJW4145', 'Serial_No': 'E79028J1N561471', 'Location': '
 run_interval = 5
 
 page_modifier_dict_templates = {'PrinterMonitor': {'filter': '*'},
-                                'CartStorage': {'days': False},
+                                'CartStorage': {'days': False, 'filter_mode': False},
                                 'Analytics': {'filter': '*', 'group': False, 'value': False},
                                 'DeviceDetails': {'time': False, 'vals': False, 'access': 'false'},
                                 'DeviceManager': {}}

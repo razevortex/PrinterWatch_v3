@@ -313,6 +313,18 @@ class CartStoreTracker(object):
                                 t_arr.append(t_dic)
         return t_arr
 
+    def list_of_cart_types(self):
+        self.create_table_data()
+        t_arr = []
+        for line in self.table_data:
+            t_arr.append(line['cTyp'])
+        for color in ['BK', 'C', 'M', 'Y', 'S', 'K']:
+            if color == 'K':
+                t_arr = [typ.rstrip(color) for typ in t_arr]
+            else:
+                t_arr = [typ.replace(color, '') for typ in t_arr]
+        return list(set(t_arr))
+
     def process_line(self, line):
         for key, val in line.items():
             a, b = val
@@ -332,7 +344,7 @@ class CartStoreTracker(object):
             t_dic = {'cTyp': key, 'cStore': start[key], 'cLow': str(start[key] - end[key]), 'cNew': end[key]}
             self.table_data.append(t_dic)
 
-    def process_time(self, days):
+    def process_time(self, days, filter_mode='Only changing'):
         self.data.append((self.date, copy.deepcopy(self.storage_handle.virtual_storage)))
         for day in range(days):
             self.date = self.date + dt.timedelta(days=1)
@@ -349,7 +361,8 @@ class CartStoreTracker(object):
             t_dic = {}
             t_dic['label'] = key
             t_dic['data'] = [date[1][key] for date in self.data]
-            if len(set(t_dic['data'])) > 1:
+            self.filter_mode_condition(key, t_dic, filter_mode)
+            '''if len(set(t_dic['data'])) > 1:
 
                 for k in self.colors.keys():
                     if k in key:
@@ -358,7 +371,25 @@ class CartStoreTracker(object):
 
                 t_dic['lineTension'] = 0.2
                 self.plot.append(t_dic)
+            '''
         return self.plot_timeline, self.plot
+
+    def filter_mode_condition(self, key, t_dic, filter_mode):
+        if filter_mode == 'Only changing':
+            if len(set(t_dic['data'])) > 1:
+                self.create_plot(key, t_dic)
+        else:
+            if filter_mode in key:
+                self.create_plot(key, t_dic)
+
+    def create_plot(self, key, t_dic):
+        for k in self.colors.keys():
+            if k in key:
+                t_dic['borderColor'] = self.colors[k]
+        t_dic['pointRadius'] = 1
+
+        t_dic['lineTension'] = 0.2
+        self.plot.append(t_dic)
 
 
 
@@ -443,7 +474,87 @@ def create_group_data(id_set, data_key, time_line, slim=True):
         fused.append(val)
     return fused
 
+####
+######      Start of the CHART.JS object creation functions and needed vars like color tables
+
 colors = ['#000054', '#5400fe', '#a90000', '#a9a9fe', '#fe5454', '#0000fe', '#5454a9', '#a900a9', '#a9fe54', '#fe54fe', '#005454', '#54a900', '#a95400', '#a9fefe', '#fea954', '#0054fe', '#54a9a9', '#a954a9', '#fe0054', '#fea9fe', '#00a954', '#54fea9', '#a9a900', '#fe00fe', '#fefe54']
+
+### creating a pie chart object
+# data_key/s plotted values = BW_Total, BCYM_Total, Output_Total
+#Printed_BW,Printed_BCYM,Copied_BW,Copied_BCYM
+pie_chart_key_dict = {'Total_BW': ('Printed_BW', 'Copied_BW'),
+                      'Total_BCYM': ('Printed_BCYM', 'Copied_BCYM'),
+                      'Total_Output': ('Printed_BW', 'Copied_BW',
+                                       'Printed_BCYM', 'Copied_BCYM')}
+
+
+def create_pie_chart(group, filter, data_key):
+    id_set = get_group_id_set(filter=filter, filter_for=group)
+    labels = list(id_set.keys())
+    t_dic = {}
+    for label in labels:
+        t_dic[label] = 0
+    time_line = neutral_timeline()
+    for key in id_set.keys():
+        for keys in pie_chart_key_dict[data_key]:
+            if type(create_group_data(id_set[key], keys, time_line)[-1]) == int:
+                t_dic[key] += create_group_data(id_set[key], keys, time_line)[-1]
+    color = []
+    for i in range(0, len(list(t_dic.keys()))):
+        color.append(colors[i % len(colors)])
+    dataset = [{'label': data_key, 'data': list(t_dic.values()), 'backgroundColor': color, 'hoverOffset': 4}]
+    plot_type = 'pie'
+    conf = {'type': plot_type, 'data': {'labels': list(t_dic.keys()), 'datasets': dataset}, }
+    return conf
+
+'''# a little milestone to remember i first used the code below but noticed i got the total 
+    values of the printer not the total values of the recorded time window then i re noticed hey
+    the line plot has the values i want as the last value of the line i reused the approache 
+    of the plot and adjusted a few thinks to fit for this pie chart and OMFREAKINGOD 
+    worked 100% first try.
+    Maybe i can improve the bar chart also.
+    
+    For now i bath in the 'like a pro' sunshine of my accomplishment till, soon there will
+    be a lot of collapsing everthing around me and hours of unsuccesful bughuntin till i manage 
+    to find the stupid nooby fail i managed to sneak in somehow and didnt noticed the issue hours of
+    codeing later ahh that joy :)
+   #################################################################################     
+    for key in labels:
+        t_dic[key] = []
+        for id in id_set[key]:
+            for line in chached_lib.ClientData:
+                if id == line['Serial_No']:
+                    for keys in pie_chart_key_dict[data_key]:
+                        val = 0
+                        if line[keys].casefold() != 'NaN'.casefold():
+                            val += int(line[keys])
+                        t_dic[key].append(val)
+    data = {}
+    for key, value in t_dic.items():
+
+        if type(value) == list:
+            data[key] = sum(value)# / int(len(value) + 1)
+        else:
+            if value.casefold() != 'NaN'.casefold():
+                data[key] = value
+    labels = []
+    t_data = []
+    color = []
+    i = 0
+    for key, value in data.items():
+
+        if value > 0.0:
+            labels.append(key)
+            t_data.append(value)
+            color.append(colors[i % len(colors)])
+            i += 1
+
+    dataset = [{'label': data_key, 'data': t_data, 'backgroundColor': color, 'hoverOffset': 4}]
+    plot_type = 'pie'
+    conf = {'type': plot_type, 'data': {'labels': labels, 'datasets': dataset}, }
+    return conf
+    '''
+
 
 def create_bar_data(group, filter, data_key):
     id_set = get_group_id_set(filter=filter, filter_for=group)
@@ -741,15 +852,7 @@ def get_details_data(id, config, fuseing):
     return container.table_data(), container.head_data
 
 if __name__ == '__main__':
-    #data = create_bar_data('Model', '', 'CostPerBW')
-    #print(data)
-    cli = dbClient()
-    cli.updateData()
-    for line in cli.ClientData:
-        head, body = get_device_detail(line['Serial_No'])
-        print(head)
-    #line = cli.ClientData[2]
-    #data, head = get_details_data(line['Serial_No'], fuse, 'week')
-    #print(data, head)
+    store = CartStoreTracker()
+    print(store.list_of_cart_types())
 
 

@@ -9,19 +9,15 @@ from Packages.FormObjClass import *
 from Packages.StrucData import *
 from Packages.ViewRequestHandle import *
 
+
 def PrintMonitor(request):
     if request.GET.get('user'):
         user = request.GET.get('user')
         request_handle = ViewRequestHandler(user, 'PrinterMonitor')
         request_handle.get_request(request)
-
         form = CreateForm('PrinterMonitor')
-        #formObj = form.PrinterMonitor(t_dic)
         formObj = form.PrinterMonitor(request_handle.page_modifier)
-        #data2json = dumps(get_table_data(t_dic['filter']))
         data2json = dumps(get_table_data(request_handle.page_modifier['filter']))
-
-        #return render(request, 'monitor.html', {'data': data2json, 'user': user, 'form': formObj}) #'filter': filter})  #data2json})
         return render(request, 'monitor.html', {'data': data2json, 'user': user, 'form': formObj}) #'filter': filter})  #data2json})
 
 
@@ -35,10 +31,10 @@ def details(request):
         request_handle.get_request(request)
         head, data = get_device_detail(id)
         data2json = dumps(data)
-        #formOR = device_detail_form_obj(head, request_handle.page_modifier['access'])
         send = {'user': user, 'data': data2json, 'id': id, 'debug': request_handle.debug}
         send.update(ddf(head))
         return render(request, 'device_detail.html', send)
+
 
 def cartTrack(request):
     if request.GET.get('user'):
@@ -48,11 +44,12 @@ def cartTrack(request):
         form = CreateForm('CartridgeStorage')
         formObj = form.CartStorage(request_handle.page_modifier)
         tracker = CartStoreTracker()
-        index, arr = tracker.process_time(int(request_handle.CartStoreDays()))  #page_modifier['dd']))
+        index, arr = tracker.process_time(int(request_handle.CartStoreDays()), filter_mode=request_handle.page_modifier['filter_mode'])
         data2json = dumps(tracker.table_data)
         return render(request, 'cartTracker.html', {'index': index, 'sets': arr,
                                                     'data': data2json, 'user': user,
-                                                    'form': formObj, 'debug': request_handle.debug}) # 'days': days, })
+                                                    'form': formObj, 'debug': request_handle.debug})
+
 
 def analytics(request):
     if request.GET.get('user'):
@@ -66,19 +63,19 @@ def analytics(request):
             t_dic['value'] = request.GET['value']
         if request.GET.get('filter'):
             t_dic['filter'] = request.GET['filter']
-
         write_conf(user, 'analytics', t_dic)
         if t_dic['value'] in ['BW', 'BCYM']:
             data_arr = create_plot_data(t_dic['group'], t_dic['filter'], t_dic['value'])
             index = get_global_timeline()
             conf = {'type': 'line', 'data': {'labels': index, 'datasets': data_arr}, 'options': {}}
+        elif 'Total' in t_dic['value']:
+            conf = create_pie_chart(t_dic['group'], t_dic['filter'], t_dic['value'])
         else:
             conf = create_bar_data(t_dic['group'], t_dic['filter'], t_dic['value'])
         form = CreateForm('Analytics')
         formObj = form.Analytics(t_dic)
-        return render(request, 'analytics.html', {'user': user, #'index': index, 'sets': data_arr,
-                                                   'conf': conf, 'form': formObj})
-                                                  #'group': t_dic['group'], 'filter': t_dic['filter'], 'value': t_dic['value']})
+        return render(request, 'analytics.html', {'user': user, 'conf': conf, 'form': formObj})
+
 
 def config(request):
     if request.GET.get('user'):
@@ -87,6 +84,7 @@ def config(request):
             details = request.GET.get('details')
             write_conf(user, ('details', details))
         return render(request, 'config.html', {'user': user})
+
 
 def dmgr(request):
     if request.GET.get('user'):

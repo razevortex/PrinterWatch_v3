@@ -1,0 +1,4 @@
+Time,User,Page,Data
+2022-06-23 10:17:14.144385,Raze,CartStorage,"{'cart': 'TK-8515K', 'num': '1'}"
+2022-06-23 10:17:32.673761,Raze,DeviceDetails,"{'ID': 'E79028J1N561476', 'deviceId': False, 'location': False, 'contact': False, 'notes': False}"
+2022-06-23 10:18:10.652292,Raze,DeviceDetails,"{'ID': 'E79028J1N561476', 'deviceId': False, 'location': 'HA 1.OG Raum18', 'contact': 'Herr Zimmerschied', 'notes': False}"
