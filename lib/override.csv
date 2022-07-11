@@ -1,21 +1,21 @@
 ID,Serial_No,CartBK,CartC,CartM,CartY,Location,Contact,Notes
 E69498J1J225635,WJW3019,NaN,NaN,NaN,NaN,BeSt Fr. Schulz,Schneider Silva,NaN
-W2J8718679,NaN,NaN,NaN,NaN,NaN,1. OG Coachraum,NaN,OrgaRent (Leasing Device)
+W2J8718679,NaN,NaN,NaN,NaN,NaN,1. OG Coachraum, ,OrgaRent (Leasing Device)
 N2E3508435,N2E3508435,NaN,NaN,NaN,NaN,IT Büro, , defekt
 RC68600835,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN
 LW16945225,NaN,NaN,NaN,NaN,NaN,NaN,NaN,OrgaRent (Leasing Device)
 R4Q8X09105,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN
 VNN8710351,NaN,NaN,NaN,NaN,NaN,NaN,NaN,OrgaRent (Leasing Device)
-L875533842,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN
+L875533842,NaN,NaN,NaN,NaN,NaN,NaN,NaN,OrgaRent (Leasing Device)
 W2J8718286,NaN,NaN,NaN,NaN,NaN,NaN,NaN,OrgaRent (Leasing Device)
 E74552E7J196433,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN
 E79028J1N561471,WJW4145,NaN,NaN,NaN,NaN,Fr. Frank,Frank Bahar,NaN
 E79028J1N561476,NaN,NaN,NaN,NaN,NaN,HA 1.OG Raum18,Herr Zimmerschied,NaN
-E79028J1N561477,WJW4147,NaN,NaN,NaN,NaN,NaN,Nnaji Christina,NaN
+E79028J1N561477,WJW4147,NaN,NaN,NaN,NaN,HA 1.0G Raum 10,Frau Christina Nnaji,NaN
 E79028J1N561465,WJW4148,NaN,NaN,NaN,NaN,BeSt Fr. Schoenstedt,Schoenstedt Anna,NaN
 E79015J0N198441,WJW3852,NaN,NaN,NaN,NaN,1.OG Raum 8,Zieglgänsberger Sabina,NaN
 E74555E8J891717,WJW3826,NaN,NaN,NaN,NaN,GF Büro,NaN,NaN
-RC60609776,WJW3822,NaN,NaN,NaN,NaN,Verwaltung Fr. Issiz,Papageorgiou Zoi,NaN
+RC60609776,WJW3822,NaN,NaN,NaN,NaN,HA 1.OG Verwaltung,Fr. Issiz,NaN
 E74552D6J442270,WJW3539,NaN,NaN,NaN,NaN,Dom. Gästehaus,Engelberger Simon,NaN
 E74552J7J439390,WJW3526,NaN,NaN,NaN,NaN,A4 EG , Markthalle ,NaN
 E74552J5J989713,WJW3428,NaN,NaN,NaN,NaN,Büro,Kühnl Winfried,NaN
@@ -27,3 +27,4 @@ E79028A1N380410,NaN,NaN,NaN,NaN,NaN,Büro,Frau Germann,NaN
 E79028D1N412406,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN
 E74552K5J157940,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN
 Q630304940,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN
+E79028J1N591625,NaN,NaN,NaN,NaN,NaN,HA 1.OG Raum 9,Herr Sieger,NaN

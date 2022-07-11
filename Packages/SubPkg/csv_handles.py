@@ -1,8 +1,8 @@
 import copy
 import csv
 import datetime as dt
-import os
-import pandas as pd
+#import os
+#import pandas as pd
 if __name__ == '__main__':
     from const.ConstantParameter import *
 
@@ -610,3 +610,22 @@ class Logging(HandleDB):
         dict['Time'] = str(dt.datetime.now())
         self.ClientData.append(dict)
         self.updateCSV()
+
+    def processedEntrys(self):
+        changes = []
+        for i in range(0, len(self.ClientData)):
+            entry_dic = self.ClientData[i]
+
+            if entry_dic['Page'] == 'DeviceDetails':
+                try:
+                    t_dic = self.ClientData[i + 1]
+                    if entry_dic['User'] == t_dic['User'] and entry_dic['Data'][0:10] == t_dic['Data'][0:10]:
+                        if entry_dic['Data'] != t_dic['Data']:
+                            entry_dic['Time'] = t_dic['Time']
+                            entry_dic['Changed'] = t_dic['Data']
+                            changes.append(entry_dic)
+                except:
+                    pass
+            else:
+                changes.append(entry_dic)
+        return changes

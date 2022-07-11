@@ -1,5 +1,7 @@
 from Packages.SubPkg.csv_handles import *
 import datetime as dt
+
+'''
 id = '01.05.2022'
 now = dt.date.today()
 if '.' in id:
@@ -11,3 +13,8 @@ if '.' in id:
     delta = ts - now
     print(delta.days)
 
+'''
+
+if __name__ == '__main__':
+    log = Logging()
+    [print(entry) for entry in log.processedEntrys()]

@@ -21,9 +21,6 @@ from subprocess import Popen
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('main/', include('mainframe.urls')),
-    #path('help/', include('mainframe.urls')),
-    #path('monitor/', include('printer_monitor.urls')),
-    #path('cartridges/', include('running_out.urls')),
     path('subsite/', include('subs.urls')),
     path('sandbox/', include('dev_sandbox.urls')),
 ]

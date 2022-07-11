@@ -9,6 +9,7 @@ PATH = '/home/razevortex/django_printerwatch/'
 def run_ext():
     os.system('python /home/razevortex/django_printerwatch/test/run.py')
 
+
 def new_client(ip):
     dic = {'IP': ip}
     get = ClientGet(dic)
@@ -16,8 +17,6 @@ def new_client(ip):
     data['Serial_No'] = dt.datetime.now()
     print(data)
 
+
 if __name__ == '__main__':
     run_background_requests(0)
-    #print(os.environ["HOME"])
-    #ip = input('IP : ')
-    #new_client('172.20.22.110')

@@ -10,7 +10,9 @@ device_details_key = [('ID', 'ID'), ('deviceId', 'Serial_No'), ('location', 'Loc
 
 
 class ViewRequestHandler(object):
-    def __init__(self, user, view_page, data_mod=False):
+    def __init__(self, user, view_page, data_mod=False, sudo=False):
+        # a true sudo val is needed to have permission to make changes
+        self.sudo = sudo
         # get the basic values needed like the actual page user and the expected values
         self.user = user
         self.view_page = view_page
@@ -41,33 +43,34 @@ class ViewRequestHandler(object):
             # store changes to users last used values
             write_conf(self.user, self.view_page, self.page_modifier)
             self.page_modifier['user'] = self.user
-        if self.view_page == 'DeviceDetails':
-            self.DeviceOR(t_get_dic)
-            return
-        elif self.view_page == 'DeviceManager':
-            try:
-                handle_ip_form(self.data_modifier['add_ip'])
-            except:
+        if self.sudo:
+            if self.view_page == 'DeviceDetails':
+                self.DeviceOR(t_get_dic)
+                return
+            elif self.view_page == 'DeviceManager':
                 try:
-                    remove_ip(self.data_modifier['remove'])
+                    handle_ip_form(self.data_modifier['add_ip'])
                 except:
-                    return
-        elif self.view_page == 'CartStorage':
-            self.debug = ''
-            modified = True
-            for get_key, value in data_modifier_dict_templates[self.view_page].items():
-                if t_get_dic.get(get_key, value):
-                    self.data_modifier_default[get_key] = t_get_dic.get(get_key, value)
-                    if self.data_modifier_default[get_key] is not False:
-                        self.debug += f'{self.user} time: {str(dt.datetime.now())}: {get_key} -> {t_get_dic.get(get_key, value)}'
-                else:
-                    modified = False
-            if modified:
-                self.log_entry['Data'] = str(self.data_modifier_default)
-                log = Logging()
-                log.newLogEntry(self.log_entry)
-            data_view_request_CartStorage(self.data_modifier_default)
-            return
+                    try:
+                        remove_ip(self.data_modifier['remove'])
+                    except:
+                        return
+            elif self.view_page == 'CartStorage':
+                self.debug = ''
+                modified = True
+                for get_key, value in data_modifier_dict_templates[self.view_page].items():
+                    if t_get_dic.get(get_key, value):
+                        self.data_modifier_default[get_key] = t_get_dic.get(get_key, value)
+                        if self.data_modifier_default[get_key] is not False:
+                            self.debug += f'{self.user} time: {str(dt.datetime.now())}: {get_key} -> {t_get_dic.get(get_key, value)}'
+                    else:
+                        modified = False
+                if modified:
+                    self.log_entry['Data'] = str(self.data_modifier_default)
+                    log = Logging()
+                    log.newLogEntry(self.log_entry)
+                data_view_request_CartStorage(self.data_modifier_default)
+                return
 
     def DeviceOR(self, t_get_dic):
         self.data_modifier_default = dict_key_translate(device_details_key, self.data_modifier_default, way=(0, 1))

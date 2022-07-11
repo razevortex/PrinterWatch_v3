@@ -15,6 +15,16 @@ db_keys = ['TonerBK', 'TonerC', 'TonerM', 'TonerY', 'Printed_BW', 'Printed_BCYM'
 for key in db_keys:
     db_dict_template[key] = 'NaN'
 
+'''
+CLASSES SECTION containing 
+DataSet Class : used for process the databases to calculate implied values
+    it has multiple functionalities to it first it gathers all data from the 
+    different datasets of a ID then there are options for pruning parts of it
+    or reduce the amount of timestamps by summarizing them, it also can preprocess
+    values to get the difference between timestamps instead of the absolute values 
+CartStoreTracker : used to process the data to evaluate the CartStored values
+'''
+
 class DataSet(object):
     def __init__(self, ID, headless=False, only_recent=False):
         if headless is not True:
@@ -116,7 +126,6 @@ class DataSet(object):
                 line['Status_Report'] = str(line['Status_Report'])[:14]
             self.Data = line
 
-
     def light_Data(self, reduce='time', key=''):
         if self.processing is not False:
             data = self.ProcessedData
@@ -131,8 +140,6 @@ class DataSet(object):
                 if date not in dates:
                     arr_t.append((date, dic))
                     dates.append(date)
-            #self.processing = True
-            #self.ProcessedData = arr_t
         elif reduce == 'keys':
             if type(key) == list:
                 for index, dic in data:
@@ -155,9 +162,6 @@ class DataSet(object):
         template = {}
         for key in v.keys():
             template[key] = 0
-        '''        template = {'TonerBK': 0, 'TonerC': 0, 'TonerM': 0, 'TonerY': 0, 'Printed_BW': 0, 'Printed_BCYM': 0,
-                    'Copied_BW': 0, 'Copied_BCYM': 0}
-        '''
         index, dic_1 = data[0]
         arr_t = [(index, template)]
         hold = dic_1
@@ -208,13 +212,10 @@ class DataSet(object):
                 add = dt.timedelta(weeks=1)
             if periode == 'month':
                 add = relativedelta(months=1)
-
-
             dic_t = {}
             for key in data[0][1]:
                 dic_t[key] = 0
             date = dt.date.fromisoformat(data[0][0])
-            #day = date.weekday()
             day = date + add
             last = dt.date.fromisoformat(data[-1][0]) if len(data) > 2 else date
             sum_dic = data[0][1]
@@ -222,7 +223,6 @@ class DataSet(object):
             while date <= last:
                 end_index = str(date)
                 date = date + dt.timedelta(days=1)
-                #if date.weekday() == day:
                 if date == day:
                     index += f' - {end_index}'
                     arr_t.append((index, sum_dic))
@@ -264,26 +264,11 @@ class DataSet(object):
         for key in ['Serial_No', 'IP', 'Device', 'Contact', 'Location', 'Notes']:
             if og_dic[key] == '':
                 og_dic[key] = key
-
-        '''or_dic = copy.deepcopy(og_dic)
-        orData = LibOverride()
-        orData.updateDict(or_dic)
-        og_or = {}
-        for key in ['Serial_No', 'IP', 'Device', 'Contact', 'Location', 'Notes']:
-            if og_dic[key] == '':
-                og_dic[key] = key
-            og_or[key] = [og_dic[key], or_dic[key]]
-        return og_or'''
         return og_dic
 
     def back2raw(self):
         self.processing = False
 
-fuse = [('TonerC', 'TonerM', 'TonerY'),
-         ('Printed_BW', 'Copied_BW'),
-         ('Printed_BCYM', 'Copied_BCYM')]
-to = ['TonerCYM', 'PagesBW', 'PagesBCYM']
-ttt = {'BCYM': 0, 'BW': 0, 'TonerCYM': 0, 'TonerBK': 0}
 
 class CartStoreTracker(object):
     def __init__(self):
@@ -362,16 +347,6 @@ class CartStoreTracker(object):
             t_dic['label'] = key
             t_dic['data'] = [date[1][key] for date in self.data]
             self.filter_mode_condition(key, t_dic, filter_mode)
-            '''if len(set(t_dic['data'])) > 1:
-
-                for k in self.colors.keys():
-                    if k in key:
-                        t_dic['borderColor'] = self.colors[k]
-                t_dic['pointRadius'] = 1
-
-                t_dic['lineTension'] = 0.2
-                self.plot.append(t_dic)
-            '''
         return self.plot_timeline, self.plot
 
     def filter_mode_condition(self, key, t_dic, filter_mode):
@@ -392,6 +367,15 @@ class CartStoreTracker(object):
         self.plot.append(t_dic)
 
 
+'''
+FUNCTION SECTION 
+Function that handle the stored data and process them to be presented in the web application
+most of them depending on the classes above
+'''
+
+# **_timeline functions generate a array of timestamps for presentations that include a
+# over time aspect like line plots
+
 
 def get_global_timeline():
     cli = dbClient()
@@ -407,16 +391,20 @@ def get_global_timeline():
     time_index = sorted(time_index)
     return time_index
 
+
 def neutral_timeline():
     arr_t = []
     for i in get_global_timeline():
         arr_t.append((i, 0))
     return arr_t
 
+
+# if there are a multiple of ids data needed this function gets the grouped ids
+# for the used textinput/filter and/or the chosen filter for manufactures, models
+# and generates list/s with the according ids
 def get_group_id_set(filter='', filter_for='Manufacture'):
     cli = dbClient()
     cli.updateData()
-    dic_t = {}
     if filter == '' or filter == '*':
         clients = cli.ClientData
     else:
@@ -427,13 +415,22 @@ def get_group_id_set(filter='', filter_for='Manufacture'):
                 if filter.casefold() in val.casefold():
                     clients.append(line)
     group_dict = defaultdict(list)
-
     for temp in [{line[filter_for]: line['Serial_No']} for line in clients]:
         for key, val in temp.items():
             group_dict[key].append(val)
     return group_dict
 
+# these are used in the following function if the grouped ids values need to fuse
+# certain values like colored toner or Printed/Copied
+fuse = [('TonerC', 'TonerM', 'TonerY'),
+        ('Printed_BW', 'Copied_BW'),
+        ('Printed_BCYM', 'Copied_BCYM')]
+to = ['TonerCYM', 'PagesBW', 'PagesBCYM']
+ttt = {'BCYM': 0, 'BW': 0, 'TonerCYM': 0, 'TonerBK': 0}
 
+
+# uses the id-groups lists from the previous function and merges the
+# data_key values to a single dataset
 def create_group_data(id_set, data_key, time_line, slim=True):
     fuse = to = False
     if data_key == 'BW':
@@ -457,31 +454,53 @@ def create_group_data(id_set, data_key, time_line, slim=True):
         arr_sub_t = []
         # create list with timeline consistent differential values of each id
         for time, val in time_line:
-            v = 0 # is inserted if no timeline entry exists to keep consistency
+            v = 0    # is inserted if no timeline entry exists to keep consistency
             for index, dic in container.ProcessedData:
                 if index == time:
-                    v = dic[data_key] # the value on the current timestamp
+                    v = dic[data_key]     # the value on the current timestamp
             arr_sub_t.append(v)
-        arr_t.append(arr_sub_t) # bundel all timeline listed values
-
+        arr_t.append(arr_sub_t)    # bundel all timeline listed values
     # sum vals of each timestamp together and add it to previous to create a progressive list of the value
     fused = []
     val = 0
     for summing in zip(*arr_t):
-
         val += sum(summing)
-
         fused.append(val)
     return fused
+
 
 ####
 ######      Start of the CHART.JS object creation functions and needed vars like color tables
 
-colors = ['#000054', '#5400fe', '#a90000', '#a9a9fe', '#fe5454', '#0000fe', '#5454a9', '#a900a9', '#a9fe54', '#fe54fe', '#005454', '#54a900', '#a95400', '#a9fefe', '#fea954', '#0054fe', '#54a9a9', '#a954a9', '#fe0054', '#fea9fe', '#00a954', '#54fea9', '#a9a900', '#fe00fe', '#fefe54']
+colors = ['#000054', '#5400fe', '#a90000', '#a9a9fe', '#fe5454', '#0000fe', '#5454a9',
+          '#a900a9', '#a9fe54', '#fe54fe', '#005454', '#54a900', '#a95400', '#a9fefe',
+          '#fea954', '#0054fe', '#54a9a9', '#a954a9', '#fe0054', '#fea9fe', '#00a954',
+          '#54fea9', '#a9a900', '#fe00fe', '#fefe54']
 
 ### creating a pie chart object
-# data_key/s plotted values = BW_Total, BCYM_Total, Output_Total
-#Printed_BW,Printed_BCYM,Copied_BW,Copied_BCYM
+
+
+def create_plot_data(group, filter, data_key):
+    id_set = get_group_id_set(filter=filter, filter_for=group)
+    time_line = neutral_timeline()
+    arr_t = []
+    for key in id_set.keys():
+        dic_t = {}
+        group_data = create_group_data(id_set[key], data_key, time_line)
+        dic_t['data'] = group_data
+        dic_t['label'] = key
+        arr_t.append(dic_t)
+    data = []
+    for i in range(len(arr_t)):
+        dic = arr_t[i]
+        dic['borderColor'] = colors[i % len(colors)]
+        dash = i // len(colors) * 2
+        dic['borderDash'] = [10, int(dash)]
+        dic['pointRadius'] = 1
+        dic['lineTension'] = 0.2
+        data.append(dic)
+    return data
+
 pie_chart_key_dict = {'Total_BW': ('Printed_BW', 'Copied_BW'),
                       'Total_BCYM': ('Printed_BCYM', 'Copied_BCYM'),
                       'Total_Output': ('Printed_BW', 'Copied_BW',
@@ -593,30 +612,9 @@ def create_bar_data(group, filter, data_key):
     conf = {'type': plot_type, 'data': {'labels': labels, 'datasets': dataset}, 'options': {}}
     return conf
 
-def create_plot_data(group, filter, data_key):
-    id_set = get_group_id_set(filter=filter, filter_for=group)
-    time_line = neutral_timeline()
-    arr_t = []
-    for key in id_set.keys():
-        dic_t = {}
-        group_data = create_group_data(id_set[key], data_key, time_line)
-        dic_t['data'] = group_data
-        dic_t['label'] = key
-        arr_t.append(dic_t)
-    data = []
-    for i in range(len(arr_t)):
-        dic = arr_t[i]
-        dic['borderColor'] = colors[i % len(colors)]
-        dash = i // len(colors) * 2
-        dic['borderDash'] = [10, int(dash)]
-        dic['pointRadius'] = 1
-        dic['lineTension'] = 0.2
-        data.append(dic)
-    return data
 
 ###
 ### CREATING A PRE-HANDLED DATABASE DURING BACKGROUND-REQUEST
-
 def update_recentCache():
     cli = dbClient()
     cli.updateData()
@@ -675,6 +673,7 @@ def calculate_tonerPer(toner, pages, to):
         else:
             t_dic = {to: pagesPer}
     return t_dic
+
 
 def calculate_pageCost(pagesPer, cartPrice, to):
     t_dic = {to: 0}
@@ -770,8 +769,8 @@ def get_table_data(filter):
                     break
         else:
             arr.append(line)
-
     return data_struc4JSON(arr)
+
 
 def data_struc4JSON(dic_list):
     result_list = []
@@ -813,6 +812,7 @@ def data_struc4JSON(dic_list):
 ###
 ### END OF PRINTER MONITOR VIEW FOO´s
 
+
 ###
 ### PRINTER DETAILS SPECIFIC FOO´s
 
@@ -829,6 +829,7 @@ def get_device_detail(id):
         container.combine_keys(fuse[i], to[i])
     container.sum_data()
     return head_data, container.table_data()
+
 
 def get_details_data(id, config, fuseing):
 
@@ -850,6 +851,7 @@ def get_details_data(id, config, fuseing):
             container.combine_keys(fuse[i], to[i])
     container.sum_data(periode=config)
     return container.table_data(), container.head_data
+
 
 if __name__ == '__main__':
     store = CartStoreTracker()

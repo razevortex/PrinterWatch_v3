@@ -1,3 +1,9 @@
+'''
+EVERYTHING SHOULD BE NOT IN USE ANYMORE SINCE THE APPLICATION OF IT WAS REWORKED
+IN THE StrucData.py test if it can be deleted without issues
+'''
+
+
 import copy
 
 from Packages.SubPkg.csv_handles import *
@@ -7,7 +13,7 @@ import plotly.graph_objects as go
 import plotly.offline as opy
 from Packages.SubPkg.foos import list_of_dicts_sorting as lods
 
-
+'''
 def filteredTableContent(filter, json=True, **kwargs):
     cli = dbClient()
     cli.updateData()
@@ -62,6 +68,8 @@ def filteredTableContent(filter, json=True, **kwargs):
                 arr.append(line['Serial_No'])
             return get_timetrack_dict(arr)
 
+'''
+'''
 def data_struc4JSON(dic_list):
     result_list = []
     for entry in dic_list:
@@ -90,8 +98,8 @@ def data_struc4JSON(dic_list):
         result_list.append(t_dic)
     return result_list
 
-
-def string_carts(dic):
+'''
+'''def string_carts(dic):
     string = ''
     for cart in ['CartBK', 'CartC', 'CartM', 'CartY']:
         if dic[cart] != 'NaN':
@@ -118,6 +126,8 @@ def string_recent_toner_fill(dic):
     except:
         return ''
 
+'''
+'''
 
 def string_recent_status(dic):
     id = dic['Serial_No']
@@ -140,9 +150,10 @@ def calculate_diff(key, old, new, diff):
         diff['BCYM'] = int(new[key]) - int(old[key])
     old[key] = new[key]
     return old, diff
-
+'''
 '''
 insert a list of Serial No 
+'''
 '''
 def get_timetrack_dict(printer_set, sort='continues'):
     data_sink = []
@@ -191,6 +202,6 @@ def get_timetrack_dict(printer_set, sort='continues'):
         return line_plot_data['index'], line_plot_data['pages']
 
 if __name__ == '__main__':
-    print(filteredTableContent('', json=False))
 
+'''
 

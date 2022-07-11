@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Login</title>
+    <title>Signin</title>
     <link rel="stylesheet" href="http://printerwatch/static/css/style.css">
 
 </head>
 <body style="background-color:rgb(33,33,33)">
 <img src="http://printerwatch/static/img/locked.png" id="pw-logo" class="logo_img" width="300" height="150" style="width:40%; margin-left:30%; top:0; padding:5px; float:top">
-<form action="http://printerwatch/main/" method="post">
+<form action="http://printerwatch/main/signup/" method="post">
     {% csrf_token %}
     <div  class="login" style="width:40%; margin:auto; padding:5px; float:top">
     <div style="margin:0 25px; float:top;">
@@ -18,12 +18,13 @@
     <div style="margin:0 25px; float:top;"><label class="label" style="float:left; color:orange">Password: </label>
     <input type="password" id="pass" name="pass" style="width:60%; padding-right:25px; float:right">
     </div>    </br>
+    <div style="margin:0 25px; float:top;"><label class="label" style="float:left; color:orange">Repeat: </label>
+    <input type="password" id="repeat" name="repeat" style="width:60%; padding-right:25px; float:right">
+    </div>    </br>
     <input type="hidden" id="frame" name="frame" value="default">
-        <input type="submit" value="Enter" style="width:100%">
-        <a href="http://printerwatch/main/signup"><span style="text-align:center"> Request to get Signed-up </span></a>
-
+        <input type="submit" value="Request Signup" style="width:100%">
     </div>
 </form>
-
+<p style="color: {{ color }}; text-align: center"> {{ msg }} </p>
 </body>
 </html>
