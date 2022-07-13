@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-&^7&za3($7^#2uv1z6a!7ytm%1n&3xq8v)56s#csixtxx(07ne
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['printerwatch']
+ALLOWED_HOSTS = ['printerwatch', 'www.test', 'helloworld', '.localhost', '127.0.0.1']
 
 
 # Application definition

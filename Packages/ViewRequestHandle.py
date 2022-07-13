@@ -48,13 +48,19 @@ class ViewRequestHandler(object):
                 self.DeviceOR(t_get_dic)
                 return
             elif self.view_page == 'DeviceManager':
-                try:
-                    handle_ip_form(self.data_modifier['add_ip'])
-                except:
-                    try:
-                        remove_ip(self.data_modifier['remove'])
-                    except:
+                for key in ('add_ip', 'remove'):
+                    if t_get_dic.get(key):
+                        log = Logging()
+                        self.data_modifier = {key: t_get_dic.get(key)}
+                        if key == 'add_ip':
+                            self.log_entry['Data'] = str(self.data_modifier)
+                            handle_ip_form(self.data_modifier[key])
+                        else:
+                            self.log_entry['Data'] = str(self.data_modifier)
+                            remove_ip(self.data_modifier[key])
+                        log.newLogEntry(self.log_entry)
                         return
+
             elif self.view_page == 'CartStorage':
                 self.debug = ''
                 modified = True

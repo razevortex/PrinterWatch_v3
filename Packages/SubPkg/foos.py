@@ -254,7 +254,8 @@ def valid_ip(ip):
 def handle_ip_form(input):
     client = dbClient()
     client.updateData()
-    already_existing = client.getEntry('col', 'IP')
+    already_existing = [line['IP'] for line in client.ClientData]
+    #already_existing = client.getEntry('col', 'IP')
     ip_pattern = re.compile(r'(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})')
     #t = ip_pattern.search(input)[0]
     match = ip_pattern.findall(input)
@@ -339,5 +340,7 @@ def timestamp_from_com(diff=10, with_string=True):
 
 
 
-#if __name__ == '__main__':
-#    update_override(wjw_data_dic)
+if __name__ == '__main__':
+    handle_ip_form('172.20.12.189')
+    print(get_pending_ip())
+    #update_override(wjw_data_dic)
