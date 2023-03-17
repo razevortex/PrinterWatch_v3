@@ -8,7 +8,8 @@ formObjDict = {'PrinterMonitor': 'http://printerwatch/subsite/monitor/',
                'Sandbox': 'http://printerwatch/sandbox/',
                'Analytics': 'http://printerwatch/subsite/analytics/',
                'Details': 'http://printerwatch/subsite/details/',
-               'DeviceManager': 'http://printerwatch/subsite/deviceMgr/'}
+               'DeviceManager': 'http://printerwatch/subsite/deviceMgr/',
+               'UserMgr': 'http://printerwatch/subsite/userMgr/'}
 
 
 def device_detail_form_obj(head, access):
@@ -49,13 +50,14 @@ def ddf(head):
 
 
 class CreateForm(object):
-    def __init__(self, site):
+    def __init__(self, site, form_Id='inputForm'):
         self.formObj = {
             'divId': 'formId',
             'divClass': 'form',
-            'formId': 'inputForm',
+            'formId': form_Id,
             'link': formObjDict[site]}
         self.inputObjects = []
+
 
     def PrinterMonitor(self, data_dict):
         textInput = AddTextInput('Filter : ', 'filter', data_dict['filter'])
@@ -65,6 +67,7 @@ class CreateForm(object):
         self.formObj['inputs'] = self.inputObjects
         return self.formObj
 
+
     def DeviceManager(self):
         textInput = AddTextInput('Add IP : ', 'add_ip', '')
         self.inputObjects.append(textInput.object)
@@ -73,12 +76,14 @@ class CreateForm(object):
         self.formObj['inputs'] = self.inputObjects
         return self.formObj
 
+
     def CartStorage(self, data_dict):
         textInput = AddTextInput('Days : ', 'days', data_dict['days'])
         self.inputObjects.append(textInput.object)
         carts = CartStoreTracker()
         filter_mode_list = carts.list_of_cart_types()
-
+        if 'filter_mode' not in list(data_dict.keys()):
+            data_dict['filter_mode'] = 'Only changing'
         filter_mode_list.append('Only changing')
         filter_mode = AddSelectInput('Filter/Mode : ', 'filter_mode', filter_mode_list, data_dict['filter_mode'])
         self.inputObjects.append(filter_mode.object)
@@ -87,6 +92,7 @@ class CreateForm(object):
         self.inputObjects.append(submitButton.object)
         self.formObj['inputs'] = self.inputObjects
         return self.formObj
+
 
     def Analytics(self, dict):
         data_dict = {'group': 'Serial_No', 'value': 'BW', 'filter': ''}
@@ -128,6 +134,27 @@ class CreateForm(object):
         self.inputObjects.append(with_value)
         return self.formObj
 
+    def AdminApplyUser(self, user_dict, u, sudo):
+        for user in user_dict.keys():
+            state_list = ['user', 'sudo']
+            if user_dict[user] not in state_list:
+                state_list.append(user_dict[user])
+            if user_dict[user] == 'sudo':
+                state_list = ['sudo']
+                if u == user:
+                    state_list.append('delete')
+            elif sudo:
+                state_list.append('delete')
+            appling = AddSelectInput(user, user, state_list, user_dict[user], width='60%')
+            self.inputObjects.append(appling.object)
+        submit = AddSubmitButton()
+        self.inputObjects.append(submit.object)
+        for inputObj in self.inputObjects:
+            t = inputObj['objData']
+            t['formId'] = self.formObj['formId']
+        self.formObj['inputs'] = self.inputObjects
+        return self.formObj
+
 
 class AddTextInput(object):
     def __init__(self, label, value_name, value, width='30%'):
@@ -148,8 +175,9 @@ class AddTextInput(object):
 
 class AddSelectInput(object):
     def __init__(self, label, name, val_list, value, width='30%'):
-        val_list.remove(value)
-        val_list.insert(0, value)
+        vl = copy.deepcopy(val_list)
+        vl.remove(value)
+        vl.insert(0, value)
         self.object = {
         'objType': 'select',
         'objData': {
@@ -160,7 +188,7 @@ class AddSelectInput(object):
             'selId': name,
             'selName': name,
             'selClass': 'select',
-            'selOptions': val_list
+            'selOptions': vl
         }
     }
 

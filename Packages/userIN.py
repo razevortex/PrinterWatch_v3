@@ -1,5 +1,6 @@
 import bcrypt
 from Packages.SubPkg.const.ConstantParameter import ROOT
+from Packages.SubPkg.csv_handles import userDB
 import os.path
 from pathlib import Path
 from os import listdir
@@ -8,6 +9,7 @@ import codecs
 
 class StrHexCrypt(object):
     def __init__(self, text: str, salt: int, revert=False):
+        self.userDB = get_user_db(total=True)
         self.user = [f.replace('.txt', '') for f in listdir(f'{ROOT}user/') if 'Config' not in f]
         with open(f'{ROOT}user/_sudo.txt') as admins:
             self.admin = [admin.strip() for admin in admins.readlines()]
@@ -97,6 +99,17 @@ class StrHexCrypt(object):
 
     def validate(self):
         print(self.user, self.admin)
+        user = False
+        admin = False
+        for line in self.userDB:
+            if self.text in line['User']:
+                user_dict = line
+                if line['State'] != 'applied':
+                    user = line['User']
+                if line['State'] == 'sudo':
+                    admin = True
+        return user, admin
+        '''print(self.user, self.admin)
         if self.text in self.user:
             user = self.text
         else:
@@ -105,6 +118,7 @@ class StrHexCrypt(object):
             return user, True
         else:
             return user, False
+        '''
 
     def cypher(self):
         hex = self.text
@@ -229,5 +243,16 @@ def repeat_pw(pw=False):
             return pw
 
 
+def get_user_db(total=False):
+    db = userDB()
+    t_dic = {}
+    if not total:
+        for line in db.ClientData:
+            t_dic[line['User']] = line['State']
+        return t_dic
+    else:
+        return list(db.ClientData)
+
 if __name__ == '__main__':
-    print(str(bcrypt.hashpw(''.encode('utf-8'), bcrypt.gensalt())))
+    print(get_user_db())
+    #print(str(bcrypt.hashpw(''.encode('utf-8'), bcrypt.gensalt())))

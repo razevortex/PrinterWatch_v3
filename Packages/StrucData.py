@@ -25,6 +25,7 @@ DataSet Class : used for process the databases to calculate implied values
 CartStoreTracker : used to process the data to evaluate the CartStored values
 '''
 
+
 class DataSet(object):
     def __init__(self, ID, headless=False, only_recent=False):
         if headless is not True:
@@ -75,7 +76,9 @@ class DataSet(object):
                 self.Static['IP'] = line['IP']
         stat = dbStats()
         for line in stat.ClientData:
+
             if line['Serial_No'] == id:
+
                 for key in ['UsedBK_daily', 'UsedCYM_daily', 'PagesBK_daily', 'PagesCYM_daily', 'CostPerBK', 'CostPerCYM']:
                     self.Statistics[key] = line[key]
         spec = dbClientSpecs()
@@ -117,6 +120,7 @@ class DataSet(object):
                 for key in db_keys:
                     if line[key] != 'NaN':
                         dic_t[key] = int(line[key])
+                    if key == 'Status_Report':
                         if len(line['Status_Report']) > 14:
                             line['Status_Report'] = str(line['Status_Report'])[:14]
                 self.Data.append((index, dic_t))
@@ -488,7 +492,21 @@ def create_plot_data(group, filter, data_key):
         dic_t = {}
         group_data = create_group_data(id_set[key], data_key, time_line)
         dic_t['data'] = group_data
-        dic_t['label'] = key
+        spec = dbClientSpecs()
+        label = key
+        # start changes for useing loc cont as label
+
+        t_label = ''
+        for client_spec in spec.ClientData:
+            if client_spec['Serial_No'] == key:
+                if client_spec['Location'] != 'NaN':
+                    t_label += client_spec['Location']
+                if client_spec['Contact'] != 'NaN':
+                    t_label += client_spec['Contact']
+        if t_label != '':
+            label = t_label
+        # end changes useing loc cont as label
+        dic_t['label'] = label
         arr_t.append(dic_t)
     data = []
     for i in range(len(arr_t)):

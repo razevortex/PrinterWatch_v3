@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-&^7&za3($7^#2uv1z6a!7ytm%1n&3xq8v)56s#csixtxx(07ne
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['printerwatch', 'www.test', 'helloworld', '.localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['printerwatch', 'www.test', 'helloworld', '.localhost', '172.20.12.118']
 
 
 # Application definition
@@ -52,6 +52,11 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+#EMAIL_HOST = 'localhost'
+#EMAIL_PORT = 1025
+#EMAIL_USE_TLS = False
+DEFAULT_FROM_EMAIL = '<server@wjw.de>'
 ROOT_URLCONF = 'django_printerwatch_project.urls'
 
 TEMPLATES = [

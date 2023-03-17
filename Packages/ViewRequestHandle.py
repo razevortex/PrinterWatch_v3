@@ -3,7 +3,8 @@ import datetime as dt
 from django.http import HttpResponse, QueryDict
 from Packages.SubPkg.const.ConstantParameter import page_modifier_dict_templates, data_modifier_dict_templates
 from Packages.SubPkg.foos import read_conf, write_conf, data_view_request_CartStorage, dict_key_translate, handle_ip_form, remove_ip
-from Packages.SubPkg.csv_handles import LibOverride, Logging
+from Packages.SubPkg.csv_handles import LibOverride, Logging, userDB
+from Packages.userIN import get_user_db
 
 
 device_details_key = [('ID', 'ID'), ('deviceId', 'Serial_No'), ('location', 'Location'), ('contact', 'Contact'), ('notes', 'Notes')]
@@ -19,7 +20,7 @@ class ViewRequestHandler(object):
         # the expected values are stored in a dict in ConstantParameter.py
         self.page_modifier_default = page_modifier_dict_templates[view_page]
         # exclude the DeviceManager from gather last used values
-        if self.view_page != 'DeviceManager':
+        if self.view_page != 'DeviceManager' and self.view_page != 'UserManager':
             self.page_modifier = read_conf(self.user, view_page)
         # data_modifier only used on some pages hand handle respons values that make some
         # changes to or will create stored values in cartStorage.txt, override.csv, includeIP.txt
@@ -35,6 +36,19 @@ class ViewRequestHandler(object):
 
     def get_request(self, request_obj):
         t_get_dic = request_obj.GET.copy()
+        if self.view_page == 'UserManager':
+            userDatabase = get_user_db(total=True)
+            for user_entry in userDatabase:
+                user = user_entry['User']
+                if t_get_dic.get(user, False):
+                    if user_entry['State'] != t_get_dic.get(user, user_entry['State']):
+                        user_entry['State'] = t_get_dic.get(user, user_entry['State'])
+                        break
+            if self.sudo:
+                user_db = userDB()
+                user_db.ClientData = userDatabase
+                user_db.updateCSV()
+            return
         if self.view_page != 'DeviceManager':
             # loop to get GET for page modifier values
             for get_key, value in self.page_modifier_default.items():

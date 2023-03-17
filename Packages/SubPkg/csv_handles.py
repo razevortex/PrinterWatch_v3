@@ -243,38 +243,7 @@ class dbRequest(HandleDB):
             if temp_date_sum[-1][1] != temp[1]:
                 temp_date_sum.append(temp)
         return temp_date_sum
-    '''
-    def getPlottingData(self, req_val, *args):
-        t_dict = {}
-        if args:
-            arg = args[0]
-        else:
-            arg = 'absolute'
-        for re_da in req_val:
-            if re_da == 'TotalPages':
-                sum_val = ['Printed_BW', 'Printed_BCYM', 'Copied_BW', 'Copied_BCYM']
-                t_dict[re_da] = self.sum_col(sum_val, preprocessing='relative')
-            elif re_da == 'TonerAll':
-                sum_val = ['TonerBK', 'TonerC', 'TonerM', 'TonerY']
-                t_dict[re_da] = self.sum_col(sum_val, preprocessing='diff')
-            elif re_da == 'TonerCYM':
-                sum_val = ['TonerC', 'TonerM', 'TonerY']
-                t_dict[re_da] = self.sum_col(sum_val, preprocessing='diff')
-            elif re_da == 'MonochromePages':
-                sum_val = ['Printed_BW', 'Copied_BW']
-                t_dict[re_da] = self.sum_col(sum_val, preprocessing='relative')
-            elif re_da == 'ColoredPages':
-                sum_val = ['Printed_BCYM', 'Copied_BCYM']
-                t_dict[re_da] = self.sum_col(sum_val, preprocessing='relative')
-            else:
-                sum_val = [re_da]
-                if 'Toner' in sum_val:
-                    prep = 'diff'
-                else:
-                    prep = 'relative'
-                t_dict[re_da] = self.sum_col(sum_val, preprocessing=prep)
-        return t_dict
-    '''
+
     def addingEntry(self, add):
         self.updateData()
         if len(self.ClientData) == 0:
@@ -362,7 +331,7 @@ class LibOverride(HandleDB):
             reading = csv.DictReader(client_csv, fieldnames=self.Header)
             t_arr = []
             for row in reading:
-                print(row)
+                #print(row)
                 t_dic = {}
                 for col in self.Header:
                     if col != row[col]:
@@ -483,7 +452,7 @@ class LibOverride(HandleDB):
                 for k in self.Header:
                     if row[k] != 'NaN':
                         temp[k] = row[k]
-                print(temp)
+                #print(temp)
                 return temp
         return False
 
@@ -629,3 +598,15 @@ class Logging(HandleDB):
             else:
                 changes.append(entry_dic)
         return changes
+
+
+class userDB(HandleDB):
+    def __init__(self):
+        csv = fr'{ROOT}user/UserDB.csv'
+        _for_ini = (False,
+                    csv,
+                    header['user_db'],
+                    'Time'
+                    )
+        super().__init__(_for_ini)
+        self.updateData()

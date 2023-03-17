@@ -28,7 +28,8 @@ header = {'request_db': ['TonerBK', 'TonerC', 'TonerM', 'TonerY',
                          'PagesBK', 'PagesCYM', 'PagesPerBK', 'PagesPerCYM', 'DaysTotal',
                          'UsedBK_daily', 'UsedCYM_daily', 'PagesBK_daily', 'PagesCYM_daily', 'CostPerBK', 'CostPerCYM'],
 
-          'log_data': ['Time', 'User', 'Page', 'Data']
+          'log_data': ['Time', 'User', 'Page', 'Data'],
+          'user_db': ['User', 'State', 'HashedPW', 'Contact', 'AdminAction']
           }
 
 cache_header = {
@@ -275,12 +276,13 @@ page_modifier_dict_templates = {'PrinterMonitor': {'filter': '*'},
                                 'CartStorage': {'days': False, 'filter_mode': False},
                                 'Analytics': {'filter': '*', 'group': False, 'value': False},
                                 'DeviceDetails': {'time': False, 'vals': False, 'access': 'false'},
-                                'DeviceManager': {}}
+                                'DeviceManager': {}, 'UserManager': {}}
 
 data_modifier_dict_templates = {'CartStorage': {'cart': False, 'num': False},
                                 'DeviceDetails': {'deviceId': False, 'location': False, 'contact': False,
                                                   'notes': False},
-                                'DeviceManager': {'add_ip': False, 'remove': False}
+                                'DeviceManager': {'add_ip': False, 'remove': False},
+                                'UserManager': {'User': False, 'State': False}
                                 }
 
 

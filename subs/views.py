@@ -79,12 +79,21 @@ def analytics(request):
             formObj = form.Analytics(t_dic)
             return render(request, 'analytics.html', {'user': encrypt_user(user), 'conf': conf, 'form': formObj})
 
+#def avg(request):
+#    if request.GET.get('user'):
+#        user, sudo = decrypt_user(request.GET.get('user'))     #user = user_token_switch(request.GET.get('user'), got_user=False)
+#        if user is not False:
 
 def umgr(request):
     if request.GET.get('user'):
         user, sudo = decrypt_user(request.GET.get('user'))
         if user is not False:
-            return render(request, 'userMgr.html', {'user': encrypt_user(user)})
+            request_handle = ViewRequestHandler(user, 'UserManager', sudo=sudo)
+            request_handle.get_request(request)
+            db = get_user_db()
+            form = CreateForm('UserMgr')
+            formObj = form.AdminApplyUser(db, user, sudo)
+            return render(request, 'userMgr.html', {'user': encrypt_user(user), 'form': formObj})
 
 
 def dmgr(request):

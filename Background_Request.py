@@ -61,11 +61,12 @@ while running(True):
         print('<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
         print(f'request cycle progress : {progress}/{len(listed)}')
         get = ClientGet(cli)
-
         data = get.snmp_run_main()
         print(data)
+
         if data is not False:
-            print(data_dict_to_store(data))
+            if data['Serial_No'] == cli['Serial_No']:
+                print(data_dict_to_store(data))
         progress += 1
     coffee_break(run_interval, start)
 

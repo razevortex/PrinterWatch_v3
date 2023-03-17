@@ -1,0 +1,5 @@
+User,State,HashedPW,Contact,AdminAction
+Raze,sudo,$2b$12$L6r3WfRrayjgSTJo.q9dYOHoeocZ/QawXuuJg5Ij8Os0r4tA.9bcq,razevortex@googlemail.com,None
+admin,sudo,$2b$12$cUJxuNB/1rbtQuRl.dbjI.J/twtseJ29Fd2bhHJWvpeSLU9aql5ly,None,None
+Guest,user,$2b$12$fYY3KCixkxFNKyTxmVkrYe0NtUnrcONaPt6Qn2o2tRksOpnrbaREa,None,None
+test123,user,$2b$12$TSfOBK2Dqn2mkKIrdINN2O1RYqtX3VpD2FI2MKAefMLKxl9K65Bn.,None,None

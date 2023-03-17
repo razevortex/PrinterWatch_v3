@@ -8,6 +8,40 @@ from functools import wraps
 import datetime as dt
 import subprocess as sp
 from subprocess import Popen
+from django.core import mail
+from django.conf import settings
+
+
+def send_a_email(subject, msg, from_, to_):
+    with mail.get_connection() as connection:
+        write_mail = mail.EmailMessage(subject, msg, 'Server <server@wjw.de>', [to_], connection=connection).send(fail_silently=False)
+        write_mail.send()
+def check_Toner():
+    t_notifications = []
+    cli = dbClient()
+    cli.updateData()
+    for client in [row['Serial_No'] for row in cli.ClientData]:
+        data = dbRequest(client)
+        data.updateData()
+        recent = data.ClientData[-2:]
+        alert = False
+        temp = [],[]
+        for key in recent[0].keys():
+            if key.startswith('Toner'):
+                temp[0].append(recent[0][key])
+                temp[1].append(recent[-1][key])
+                if str(recent[-1][key]) == '0' and str(recent[0][key]) != '0':
+                    t_notifications.append(f'{client} {key} new empty')
+                    alert = True
+                elif str(recent[-1][key]) == '0' and str(recent[0][key]) == '0':
+                    t_notifications.append(f'{client} {key} old empty')
+                    alert = True
+        #if not alert:
+        #    print(client, 'everything fine', temp)
+    msg = ''
+    for note in t_notifications:
+        msg += note
+    send_a_email('notification', msg, 'Server', 'razevortex@googlemail.com')
 
 # from .Dev.processing_time import FooRunTime
 ''' for checking the run time of a function uncomment the import above and use the wrapper @FooRunTime on the function
@@ -114,6 +148,10 @@ def data_dict_to_store(data_dict):
     db.addingEntry(client)
     for key in header['request_db']:
         request[key] = data_dict[key]
+    # changes made
+    if len(request['Status_Report']) > 12:
+        request['Status_Report'] = 'err'
+    ##
     print(f'data for its {data_dict["Serial_No"]}.csv: {request}')
     db = dbRequest(data_dict['Serial_No'])
     try:
@@ -341,6 +379,7 @@ def timestamp_from_com(diff=10, with_string=True):
 
 
 if __name__ == '__main__':
-    handle_ip_form('172.20.12.189')
-    print(get_pending_ip())
+    check_Toner()
+    #handle_ip_form('172.20.12.189')
+    #print(get_pending_ip())
     #update_override(wjw_data_dic)

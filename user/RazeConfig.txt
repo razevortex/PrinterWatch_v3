@@ -1,7 +1,8 @@
 PrinterMonitor=filter:*
 printer_details=time:total;vals:seperated
-CartStorage=days:30;filter_mode:Only changing
+CartStorage=days:12;filter_mode:Only changing
 Analytics=group:Model;value:BW;filter:*
-analytics=group:Model;value:CostPerBW;filter:*
-DeviceDetails=access:false
+analytics=group:Serial_No;value:BW;filter:HA 1.OG
+DeviceDetails=access:true
 DeviceManager=
+UserManager=

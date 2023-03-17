@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.core.mail import send_mail
 from Packages.SubPkg.foos import *
 from Packages.userIN import *
 
@@ -14,6 +15,13 @@ def mainframeset(request, safe=True):
                 loginput = request.POST
                 _user = loginput.get('user')
                 _pass = loginput.get('pass')
+                if loginput.get('pw_lost', False):
+                    udb = get_user_db(total=True)
+                    for line in udb:
+                        if line['User'] == _user:
+                            if line['Contact'] != 'None':
+                                send_a_email('lost your pw', 'this is a test message', 'razevortex@googlemail.com', 'razevortex@googlemail.com')
+                                #send_mail('lost your pw', 'this is a test message', 'razevortex@googlemail.com', ['razevortex@googlemail.com'])
                 user = verifyU(_user, _pass)
                 user, sudo = decrypt_user(encrypt_user(user))
             if user is not False:
