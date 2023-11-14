@@ -18,7 +18,24 @@ class Printer(object):
             self.tracker = TrackerObj.load(kwargs.get('tracker'))
         else:
             self.tracker = TrackerObj.load(self.model._create_data_keys())
+            
+    def __str__(self):
+        return f'{self.serial_no}\n{self.model}\n{self.display_name}\n{self.notes}\n{self.ip}\n{self.location}\n' \
+               f'{self.contact}'
+    
+    @staticmethod
+    def string_compare(arg, self):
+        arg, self = (arg[1:-1], self) if arg[0] == arg[-1] == '"' else (arg.casefold(), self.casefold())
+        match = (arg not in self) if arg.startswith('-') else (arg in self)
+        return match
 
+    def search(self, string:str):
+        match = False
+        for arg in string.split('&&'):
+            if not self.string_compare(arg, str(self)):
+                return None
+        return self
+        
     def obj4json(self):
         t_dict = {'serial_no': self.serial_no, 'model': self.model.name, 'ip': self.ip, 'location': self.location,
                   'contact': self.contact, 'tracker': self.tracker.export()}
