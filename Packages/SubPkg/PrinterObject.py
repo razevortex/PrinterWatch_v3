@@ -2,7 +2,7 @@ from PrinterObj.PrinterModelLib import *
 from PrinterObj.TrackerMod import *
 from PrinterObj.CartridgeLib import *
 from PrinterObj.ConstantVars import *
-from TestFoo import *
+from PrinterObj.TestFoo import *
 from pathlib import Path
 
 self = Path(__file__).absolute()
@@ -47,7 +47,6 @@ class Printer(object):
         self.tracker.batch_(**kwargs)
 
 if __name__ == '__main__':
-    from TestFoo import *
     from PrinterObj.PrinterModelLib import _PrinterModel
     _PrinterModel.cart_lib = CartridgesLib
 
