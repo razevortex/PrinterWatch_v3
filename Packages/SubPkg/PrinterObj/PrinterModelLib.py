@@ -1,8 +1,3 @@
-from pathlib import Path
-
-self = Path(__file__).absolute()
-
-
 class _PrinterModel(object):
     __slots__ = 'name', 'manufacturer', 'cartridges', 'color', 'copie'
     cart_lib = None
@@ -14,9 +9,12 @@ class _PrinterModel(object):
         self.copie = copie
 
     def __str__(self):
-        cart_string = [str(cart) for cart in self.cartridges]
-        return f'{self.manufacturer} {self.name}:\n color:{self.color}\n copie:{self.copie}\nCarts:\n' \
-               f'{self.cartridges}'
+        temp = f'{self.manufacturer}\n{self.name}\n'.join([f'{cart}\n' for cart in self.cartridges])
+        if self.color:
+            temp += 'Color\n'
+        if self.copie:
+            temp += 'Copie\n'
+        return temp
     
     @classmethod
     def load(cls, name:str, manufacturer:str, cartridges:tuple, color:bool, copie:bool, cart_lib):
