@@ -2,7 +2,7 @@ from PrinterObj.PrinterModelLib import *
 from PrinterObj.TrackerMod import *
 from PrinterObj.CartridgeLib import *
 from PrinterObj.ConstantVars import *
-from PrinterObj.TestFoo import *
+from PrinterObj.MigrationFoos import *
 from pathlib import Path
 
 self = Path(__file__).absolute()
