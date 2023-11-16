@@ -12,7 +12,7 @@ else:
 
 class HandleDB(object):
     _for_ini = ('timestamps(bool)', 'csv.file', 'header', 'id_key')
-
+    __name__ = 'DB'
     def __init__(self, _for_ini):
         if _for_ini[0]:
             self.TimeStamps = True
@@ -26,6 +26,17 @@ class HandleDB(object):
         self.Empty = False
         if self.CSV:
             self.Empty = self.create_file()
+
+    def __repr__(self):
+        msg = self.__name__ + '=>\n'
+        if len(self.ClientData) < 10:
+            temp = self.ClientData
+        else:
+            temp = list(self.ClientData[:5]) + list(self.ClientData[-5:])
+        msg += f'{temp[0].keys()}\n'
+        for line in temp:
+            msg += f'{line.values()}\n'
+        return msg
 
     def create_file(self):
         if not os.path.exists(f'{self.CSV}'):
@@ -65,7 +76,10 @@ class HandleDB(object):
                 if row != last_row:
                     for col in self.Header:
                         if col != row[col]:
-                            t_dic[col] = row[col]
+                            if col == 'Status_Report':
+                                t_dic[col] = row[col] if len(row[col]) < 16 else row[col][:16]
+                            else:
+                                t_dic[col] = row[col]
                     if len(t_dic) == len(self.Header):
                         t_arr.append(t_dic)
                 last_row = row
@@ -610,3 +624,15 @@ class userDB(HandleDB):
                     )
         super().__init__(_for_ini)
         self.updateData()
+
+
+if __name__ == '__main__':
+    cli = dbClient()
+    cli.updateData()
+    print(cli)
+    for line in cli.ClientData:
+        req = dbRequest(line['Serial_No'])
+        req.updateData()
+        req.cleanCSV()
+        print(line['Serial_No'])
+        print(req)
