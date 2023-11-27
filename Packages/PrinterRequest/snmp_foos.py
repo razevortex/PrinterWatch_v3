@@ -16,3 +16,11 @@ def _snmp_get(ip, oid):
 		return response.replace('"', '').strip()
 	except:
 		return 'NaN'
+
+# the error procedure is only a placeholder solution
+def SNMP_MIB(ip, mib: dict) -> dict:
+	got = {key: _snmp_get(ip, val) for key, val in mib}
+	for val in got.values():
+		if val == 'NaN':
+			return {'error': 'NaN'}
+	return got
