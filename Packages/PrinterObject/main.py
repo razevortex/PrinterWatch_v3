@@ -1,22 +1,18 @@
 from imports import *
+from Tracker import PrinterTracker
+
+
 class Printer(object):
     def __init__(self, **kwargs):
         self.serial_no = kwargs.get('serial_no')
-        self.model = ModelLib().get(kwargs.get('model'))
+        self.model = mLib.get(kwargs.get('model'))
         self.display_name = kwargs.get('display_name', self.serial_no)
         self.notes = kwargs.get('notes', '')
         self.ip = kwargs.get('ip', '')
         self.location = kwargs.get('location', '')
         self.contact = kwargs.get('contact', '')
         self.cartridges = cLib.get(kwargs.get('cartridges', self.model.cartridges))
-        if kwargs.get('tracker', False):
-            # only the if part is needed after all db´s are properly set up
-            if path.exists(DB_DIR + '\\' + f'{self.serial_no}_tracker.json'):
-                self.tracker = Tracker.load(f'{self.serial_no}_tracker.json')
-            else:
-                self.tracker = Tracker(*kwargs.get('tracker'))
-        else:
-            self.tracker = Tracker(*[{'name': key} for key in self.model.get_tracker_keys()])
+        self.tracker = PrinterTracker(self.serial_no, self.model.name)
 
     def __str__(self):
         return f'{self.serial_no}\n{self.model}\n{self.display_name}\n{self.notes}\n{self.ip}\n{self.location}\n' \
@@ -41,12 +37,12 @@ class Printer(object):
         return self
 
     def save_tracker(self):
-        self.tracker.save(f'{self.serial_no}_tracker.json')
+        self.tracker.save()
 
     def export(self):
         self.save_tracker()
         return {'serial_no': self.serial_no, 'model': self.model.name, 'ip': self.ip, 'location': self.location,
-                'contact': self.contact, 'tracker': f'{self.serial_no}_tracker.json'}
+                'contact': self.contact}
         
     def _print(self):
         print(self.serial_no)
@@ -69,18 +65,20 @@ class Printer(object):
         @param kwargs: {tracker_keys: [value_list]}
         @return: None
         '''
-        self.tracker.batch_(self.cartridges, **kwargs)
+        for i in range(len(kwargs.get('Date', []))):
+            temp = {key: val[i] for key, val in kwargs.items()}
+            self.tracker.update(self.cartridges, **temp)
         self.save_tracker()
 
 
 class PrinterLib(object):
     obj = []
     name_index = []
-    file = DB_DIR + '\\' + 'printer.json'
+    file = Path(DB_DIR, 'printer.json')
     
     def __init__(self):
         if path.exists(PrinterLib.file):
-            self.load_()
+            self.load()
     
     def __repr__(self):
         msg = ''
@@ -93,9 +91,9 @@ class PrinterLib(object):
         new = Printer(**kwargs)
         PrinterLib.obj.append(new)
         PrinterLib.name_index.append(new.serial_no)
-        self.save_()
+        self._save()
 
-    def save_(self):
+    def _save(self):
         with open(PrinterLib.file, 'w') as f:
             f.write(dumps(self._export()))
     
@@ -111,8 +109,12 @@ class PrinterLib(object):
             with open(PrinterLib.file, 'r') as f:
                 return loads(f.read())
     
-    def load_(self):
+    def load(self):
         for obj in self._import():
             if obj['serial_no'] not in PrinterLib.name_index:
                 PrinterLib.obj += [Printer(**obj)]
                 PrinterLib.name_index += [obj['serial_no']]
+
+if __name__ == '__main__':
+    pLib = PrinterLib()
+    print(pLib)

@@ -19,9 +19,9 @@ class BaseDict(dict):
 
 
 class DataDict(BaseDict):
-	"""
- 	This dict stores the value changes over time as a dict(key:list) and has some altered functionalities
- 	"""
+    """
+    This dict stores the value changes over time as a dict(key:list) and has some altered functionalities
+    """
     def __str__(self):
         return '<DICT>\n' + ''.join([f'{key} [{len(val)}] : {val}\n' for key, val in self.items()])
     
@@ -90,9 +90,9 @@ def date_update(cur, val):
 
 
 class CurrentDict(BaseDict):
-	"""
- 	This is Dict stores the current values like dict(key, val) also it is preprocessing incoming data to the delta values and passing them on from there
-	"""
+    """
+    This is Dict stores the current values like dict(key, val) also it is preprocessing incoming data to the delta values and passing them on from there
+    """
     def update(self, **kwargs) -> dict:
         delta = {}
         for key, val in [(key, val) for key, val in kwargs.items() if key in self.keys()]:
@@ -112,21 +112,21 @@ class CurrentDict(BaseDict):
 
 
 class PrinterTracker(object):
-	"""
- 	The Main Tracker Object contains the Current and Data dict´s handles the save and load updating Cartridge Objects global_stats 
- 	"""
-    path_template = Path(DB_DIR, '*.json')
+    """
+    The Main Tracker Object contains the Current and Data dict´s handles the save and load updating Cartridge Objects global_stats
+    """
+    path_template = Path(DB_DIR, '*_tracker.json')
     dt_string_forms = ('%d.%m.%Y', '%d.%m.%Y HH:MM')
     
     def __init__(self, printer, model=''):
-        self.file = PrinterTracker.path_template.replace('*', printer)
+        self.file = str(PrinterTracker.path_template).replace('*', printer)
         if path.exists(self.file):
             data, cur = self.load()
             self.data = DataDict(**{key: val for key, val in data.items()})
             self.current = CurrentDict(**{key: val for key, val in cur.items()})
         else:
-            self.data = DataDict(**{key: [] for key in mLib.get_tracker_keys(model) + ['Date']})
-            self.current = CurrentDict(**{key: None for key in mLib.get_tracker_keys(model) + ['Date']})
+            self.data = DataDict(**{key: [] for key in mLib.get_tracker_keys(model)})
+            self.current = CurrentDict(**{key: None for key in mLib.get_tracker_keys(model)})
 
     def __repr__(self):
         return f'Tracker:\n{str(self.current)}\n{str(self.data)}\n'
@@ -135,7 +135,7 @@ class PrinterTracker(object):
         delta = self.current.update(**dict_obj)
         if not (delta is None):
             cLib.update(carts, delta)
-            cLib.save_()
+            cLib.save()
             if self.data['Date']:
                 self.data.update(**delta)
             else:

@@ -28,7 +28,7 @@ class _PrinterModel(object):
 			temp += 'Copie'
 		return temp
 	
-	def _export(self):
+	def export(self):
 		return {slot: self._export_sub(slot) for slot in self.__slots__}
 	
 	def _export_sub(self, slot):
@@ -50,11 +50,11 @@ class _PrinterModel(object):
 class ModelLib(object):
 	obj = []
 	name_index = []
-	file = DB_DIR + '\modelslib.json'
+	file = Path(DB_DIR, 'modelslib.json')
 	
 	def __init__(self):
 		if path.exists(ModelLib.file):
-			self.load_(self._import())
+			self.load()
 	
 	def __repr__(self):
 		return ''.join([f'{typ.name}:>\n{str(typ)}\n\n' for typ in ModelLib.obj])
@@ -67,23 +67,23 @@ class ModelLib(object):
 			model = _PrinterModel(**kwargs)
 			ModelLib.obj.append(model)
 			ModelLib.name_index.append(model.name)
-		self.save_(self._export())
+		self.save()
 	
-	def save_(self, port: list[dict]):
+	def save(self):
 		if ModelLib.file is not None:
 			with open(ModelLib.file, 'w') as f:
-				f.write(dumps(port))
+				f.write(dumps(self._export()))
 	
 	def _export(self):
-		return [obj._export() for obj in ModelLib.obj]
+		return [obj.export() for obj in ModelLib.obj]
 	
 	def _import(self):
 		if ModelLib.file is not None:
 			with open(ModelLib.file, 'r') as f:
 				return loads(f.read())
 	
-	def load_(self, port: list[dict]):
-		for obj in port:
+	def load(self):
+		for obj in self._import():
 			if obj['name'] not in ModelLib.name_index:
 				ModelLib.obj += [_PrinterModel(**obj)]
 		ModelLib.name_index += [obj.name for obj in ModelLib.obj]

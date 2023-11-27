@@ -24,8 +24,11 @@ class _CartridgeModel(object):
                 self.global_stats['Pages'] += val
             if key.startswith('Color'):
                 self.global_stats['Pages'] += val
-        
-    def _export(self):
+
+    def reset_stats(self):
+        self.__setattr__('global_stats', {'Pages': 0, 'Toner': 0})
+
+    def export(self):
         return {slot: self.__getattribute__(slot) for slot in self.__slots__}
 
 
@@ -33,37 +36,37 @@ class _CartridgeModel(object):
 class CartridgesLib(object):
     obj = []
     name_index = []
-    file = DB_DIR + '\cartlib.json'
+    file = Path(DB_DIR, 'cartlib.json')
     
     def __init__(self):
         if path.exists(CartridgesLib.file):
-            self.load_(self.import_())
+            self.load()
             
     def __repr__(self):
         msg = 'Cartridges Lib :\n\n'
-        for sub in [f'{str(typ)}\n' for typ in CartridgesLib.obj]:
-            msg += ' ' + sub + '\n'
+        for sub in CartridgesLib.obj:
+            msg += f'{str(sub)}\n'
         return msg
 
-    def save_(self):
+    def save(self):
         if CartridgesLib.file is not None:
             with open(CartridgesLib.file, 'w') as f:
-                f.write(dumps(self.export()))
+                f.write(dumps(self._export()))
             
-    def export(self):
+    def _export(self):
         '''
         self to obj for json
         @return: list(dict)
         '''
-        return [obj._export() for obj in CartridgesLib.obj]
+        return [obj.export() for obj in CartridgesLib.obj]
 
-    def import_(self):
+    def _import(self):
         if CartridgesLib.file is not None:
             with open(CartridgesLib.file, 'r') as f:
                 return loads(f.read())
 
-    def load_(self, port:list[dict]):
-        for obj in port:
+    def load(self):
+        for obj in self._import():
             if obj['name'] not in CartridgesLib.name_index:
                 CartridgesLib.obj += [_CartridgeModel(**obj)]
                 CartridgesLib.name_index += [obj['name']]
@@ -74,12 +77,21 @@ class CartridgesLib(object):
             cart = _CartridgeModel(**kwargs)
             CartridgesLib.obj.append(cart)
             CartridgesLib.name_index.append(cart.name)
-        self.save_(self.export())
+        self.save()
 
     def get(self, *args):
+        if args[0] == '*':
+            return CartridgesLib.obj
         return [CartridgesLib.obj[CartridgesLib.name_index.index(arg)] for arg in args if arg in CartridgesLib.name_index]
 
     def update(self, carts:tuple, data:dict) -> None:
         for i, obj in enumerate(CartridgesLib.name_index):
             if obj in carts:
                 CartridgesLib.obj[i].update(**data)
+        self.save()
+
+    def reset_stats(self, carts='*'):
+        for obj in self.get(carts):
+            obj.reset_stats()
+            CartridgesLib.obj[CartridgesLib.name_index.index(obj.name)] = obj
+        self.save()
