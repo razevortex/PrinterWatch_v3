@@ -1,5 +1,7 @@
-from imports import *
-
+from Packages.Libs.StaticVar import *
+from json import dumps, loads
+from pathlib import Path
+from os import path
 
 class _PrinterModel(object):
 	"""
@@ -91,6 +93,8 @@ class ModelLib(object):
 	def get(self, model):
 		if model in ModelLib.name_index:
 			return ModelLib.obj[ModelLib.name_index.index(model)]
+		if model == '*':
+			return ModelLib.obj
 
 	def get_tracker_keys(self, model):
 		return self.get(model).get_tracker_keys()

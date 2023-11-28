@@ -1,5 +1,8 @@
-from imports import *
-
+from json import dumps, loads
+from datetime import datetime as dt, timedelta
+from os import path
+from Packages.PrinterObject.StaticVar import *
+from Packages.Libs.main import cLib, mLib
 
 class BaseDict(dict):
     KEYS = 'B', 'C', 'Y', 'M', 'Prints', 'ColorPrints', 'Copies', 'ColorCopies', 'Date'
@@ -116,7 +119,7 @@ class PrinterTracker(object):
     The Main Tracker Object contains the Current and Data dict´s handles the save and load updating Cartridge Objects global_stats
     """
     path_template = Path(DB_DIR, '*_tracker.json')
-    dt_string_forms = ('%d.%m.%Y', '%d.%m.%Y HH:MM')
+    dt_string_forms = ('%d.%m.%Y', '%d.%m.%Y %H:%M')
     
     def __init__(self, printer, model=''):
         self.file = str(PrinterTracker.path_template).replace('*', printer)
@@ -165,7 +168,7 @@ class PrinterTracker(object):
             data[key] = val
         cur = {}
         for key, val in self.current.items():
-            if key == 'Date':
+            if key == 'Date' and val is not None:
                 val = val.strftime(PrinterTracker.dt_string_forms[1])
             cur[key] = val
         return {'data': data, 'current': cur}

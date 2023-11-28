@@ -1,9 +1,15 @@
-from imports import *
-from Tracker import PrinterTracker
+from json import dumps, loads
+from datetime import datetime as dt, timedelta
+from os import path
+from Packages.PrinterObject.StaticVar import *
+from Packages.Libs.main import cLib, mLib
+from Packages.PrinterObject.Tracker import PrinterTracker
+from Packages.PrinterObject.Logs import Logger
 
 
 class Printer(object):
     def __init__(self, **kwargs):
+        self.activ = kwargs.get('active', True)
         self.serial_no = kwargs.get('serial_no')
         self.model = mLib.get(kwargs.get('model'))
         self.display_name = kwargs.get('display_name', self.serial_no)
@@ -13,6 +19,15 @@ class Printer(object):
         self.contact = kwargs.get('contact', '')
         self.cartridges = cLib.get(kwargs.get('cartridges', self.model.cartridges))
         self.tracker = PrinterTracker(self.serial_no, self.model.name)
+        self.protect = True
+
+    def __setattr__(self, key, value):
+        if 'protect' in self.__dict__.keys():
+            if key not in ('serial_no', 'model', 'manufacturer', 'protect'):
+                Logger(self.serial_no).logging(key, self.__getattribute__(key), value)
+                super().__setattr__(key, value)
+        else:
+            super().__setattr__(key, value)
 
     def __str__(self):
         return f'{self.serial_no}\n{self.model}\n{self.display_name}\n{self.notes}\n{self.ip}\n{self.location}\n' \
@@ -40,9 +55,10 @@ class Printer(object):
         self.tracker.save()
 
     def export(self):
-        self.save_tracker()
-        return {'serial_no': self.serial_no, 'model': self.model.name, 'ip': self.ip, 'location': self.location,
-                'contact': self.contact}
+        #self.save_tracker()
+        return {'serial_no': self.serial_no, 'model': self.model.name, 'active': self.activ,
+                'display_name': self.display_name, 'cartridges': self.cartridges, 'ip': self.ip,
+                'location': self.location, 'contact': self.contact, 'notes': self.notes}
         
     def _print(self):
         print(self.serial_no)
@@ -93,6 +109,17 @@ class PrinterLib(object):
         PrinterLib.name_index.append(new.serial_no)
         self._save()
 
+    def get_obj(self, name):
+        if name in PrinterLib.name_index:
+            return PrinterLib.obj[PrinterLib.name_index.index(name)]
+        return None
+
+    def update_obj(self, obj):
+        for i, obj_ in enumerate(PrinterLib.obj):
+            if obj_.serial_no == obj.serial_no:
+                PrinterLib.obj[i] = obj
+                self._save()
+
     def _save(self):
         with open(PrinterLib.file, 'w') as f:
             f.write(dumps(self._export()))
@@ -115,6 +142,10 @@ class PrinterLib(object):
                 PrinterLib.obj += [Printer(**obj)]
                 PrinterLib.name_index += [obj['serial_no']]
 
+
+pLib = PrinterLib()
 if __name__ == '__main__':
-    pLib = PrinterLib()
-    print(pLib)
+    test = pLib.obj[1]
+    print(test)
+    test.serial_no = 'döfmsf'
+    print(test)
