@@ -1,13 +1,14 @@
 from json import dumps, loads
 from datetime import datetime as dt, timedelta
 from os import path
+from Packages.GlobalClasses import LockedClass
 from Packages.PrinterObject.StaticVar import *
 from Packages.Libs.main import cLib, mLib
 from Packages.PrinterObject.Tracker import PrinterTracker
 from Packages.PrinterObject.Logs import Logger
 
 
-class Printer(object):
+class Printer(LockedClass):
     def __init__(self, **kwargs):
         self.activ = kwargs.get('active', True)
         self.serial_no = kwargs.get('serial_no')
@@ -19,20 +20,19 @@ class Printer(object):
         self.contact = kwargs.get('contact', '')
         self.cartridges = cLib.get(kwargs.get('cartridges', self.model.cartridges))
         self.tracker = PrinterTracker(self.serial_no, self.model.name)
-        self.protect = True
-
-    def __setattr__(self, key, value):
-        if 'protect' in self.__dict__.keys():
-            if key not in ('serial_no', 'model', 'manufacturer', 'protect'):
-                Logger(self.serial_no).logging(key, self.__getattribute__(key), value)
-                super().__setattr__(key, value)
-        else:
-            super().__setattr__(key, value)
+        super().__init__('serial_no', 'model')
 
     def __str__(self):
-        return f'{self.serial_no}\n{self.model}\n{self.display_name}\n{self.notes}\n{self.ip}\n{self.location}\n' \
-               f'{self.contact}'
-    
+        return f'{self.serial_no}\n{self.model}\n{self.display_name}\n{self.ip}\n{self.location}\n' \
+               f'{self.contact}\n{self.notes}\n'
+
+    def update_data(self, kwargs):
+        for key, val in [(key, val) for key, val in kwargs.items() if key in self.__dict__.keys()]:
+            old = self.__getattribute__(key)
+            self.__setattr__(key, val)
+            Logger(self.serial_no).logging(key, old, self.__getattribute__(key))
+
+
     @staticmethod
     def string_compare(arg, self_str):
         '''
@@ -55,7 +55,6 @@ class Printer(object):
         self.tracker.save()
 
     def export(self):
-        #self.save_tracker()
         return {'serial_no': self.serial_no, 'model': self.model.name, 'active': self.activ,
                 'display_name': self.display_name, 'cartridges': self.cartridges, 'ip': self.ip,
                 'location': self.location, 'contact': self.contact, 'notes': self.notes}
@@ -74,7 +73,7 @@ class Printer(object):
         '''
         self.tracker.update(self.cartridges, **kwargs)
         self.save_tracker()
-        
+
     def update_tracker_batch(self, **kwargs):
         '''
         Update the trackers with multiple values at once
@@ -107,7 +106,7 @@ class PrinterLib(object):
         new = Printer(**kwargs)
         PrinterLib.obj.append(new)
         PrinterLib.name_index.append(new.serial_no)
-        self._save()
+        self.save()
 
     def get_obj(self, name):
         if name in PrinterLib.name_index:
@@ -116,14 +115,25 @@ class PrinterLib(object):
 
     def update_obj(self, obj):
         for i, obj_ in enumerate(PrinterLib.obj):
-            if obj_.serial_no == obj.serial_no:
-                PrinterLib.obj[i] = obj
-                self._save()
+            if obj_.serial_no == obj['serial_no']:
+                print('old')
+                print(PrinterLib.obj[i].update_data(obj))
+                PrinterLib.obj[i].update_data(obj)
+                print('new')
+                print(PrinterLib.obj[i].update_data(obj))
+        #self.save()
 
-    def _save(self):
-        with open(PrinterLib.file, 'w') as f:
-            f.write(dumps(self._export()))
-    
+    def save(self):
+        temp = self._import()
+        try:
+            with open(PrinterLib.file, 'w') as f:
+                f.write(dumps(self._export()))
+        except:
+            print('An Error Occured file wasnt saved')
+            with open(PrinterLib.file, 'w') as f:
+                f.write(dumps(temp))
+
+
     def _export(self):
         '''
         self to obj for json
@@ -145,7 +155,4 @@ class PrinterLib(object):
 
 pLib = PrinterLib()
 if __name__ == '__main__':
-    test = pLib.obj[1]
-    print(test)
-    test.serial_no = 'döfmsf'
-    print(test)
+    print(pLib)

@@ -9,7 +9,7 @@ def timestamp():
 
 class Logger(object):
     def __init__(self, serial_no):
-        self.file = Path(LOG_DIR, serial_no)
+        self.file = Path(LOG_DIR, f'{serial_no}.json')
         self.log = self._read()
 
     def _read(self):
@@ -20,8 +20,11 @@ class Logger(object):
             return []
 
     def _write(self):
-        with open(self.file) as f:
+        with open(self.file, 'w') as f:
             f.write(dumps(self.log))
 
     def logging(self, key, old, new):
-        self.log.append([timestamp(), key, old, new])
+        if old != new:
+            self.log.append([timestamp(), key, old, new])
+            print(self.log)
+            self._write()

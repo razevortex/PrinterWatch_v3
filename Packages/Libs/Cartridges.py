@@ -1,16 +1,18 @@
 from Packages.Libs.StaticVar import *
+from Packages.GlobalClasses import LockedSlots
 from json import dumps, loads
 from pathlib import Path
 from os import path
 
 #  Just a Container of a Cart-Type
-class _CartridgeModel(object):
+class _CartridgeModel(LockedSlots):
     __slots__ = 'name', 'manufacturer', 'color', 'price', 'global_stats'
 
     def __init__(self, **kwargs):
         [self.__setattr__(key, val) for key, val in kwargs.items()]
         if not kwargs.get('global_stats', False):
             self.__setattr__('global_stats', {'Pages': 0, 'Toner': 0})
+        super().__init__('name', 'manufacturer', 'color')
 
     def __repr__(self):
         return self.__str__()
@@ -41,8 +43,8 @@ class CartridgesLib(object):
     file = Path(DB_DIR, 'cartlib.json')
     
     def __init__(self):
-        if path.exists(CartridgesLib.file):
-            self.load()
+
+        self.load()
             
     def __repr__(self):
         msg = 'Cartridges Lib :\n\n'
@@ -51,10 +53,14 @@ class CartridgesLib(object):
         return msg
 
     def save(self):
-        if CartridgesLib.file is not None:
+        temp = self._import()
+        try:
             with open(CartridgesLib.file, 'w') as f:
                 f.write(dumps(self._export()))
-            
+        except:
+            with open(CartridgesLib.file, 'w') as f:
+                f.write(dumps(temp))
+
     def _export(self):
         '''
         self to obj for json
@@ -63,15 +69,15 @@ class CartridgesLib(object):
         return [obj.export() for obj in CartridgesLib.obj]
 
     def _import(self):
-        if CartridgesLib.file is not None:
-            with open(CartridgesLib.file, 'r') as f:
-                return loads(f.read())
+        with open(CartridgesLib.file, 'r') as f:
+            return loads(f.read())
 
     def load(self):
-        for obj in self._import():
-            if obj['name'] not in CartridgesLib.name_index:
-                CartridgesLib.obj += [_CartridgeModel(**obj)]
-                CartridgesLib.name_index += [obj['name']]
+        if path.exists(CartridgesLib.file):
+            for obj in self._import():
+                if obj['name'] not in CartridgesLib.name_index:
+                    CartridgesLib.obj += [_CartridgeModel(**obj)]
+                    CartridgesLib.name_index += [obj['name']]
     
     def build_new(self, name='name', manufacturer='manufacturer', color='color', price=-1):
         if name not in CartridgesLib.name_index and name != 'name':

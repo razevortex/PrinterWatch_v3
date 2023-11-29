@@ -1,29 +1,23 @@
 from Packages.Libs.StaticVar import *
+from Packages.GlobalClasses import LockedSlots
 from json import dumps, loads
 from pathlib import Path
 from os import path
 
-class _PrinterModel(object):
+class _PrinterModel(LockedSlots):
 	"""
 	The _PrinterModel is a Container of data that are immutable but is essential for the creation of the
 	mutable Tracking objects of the PrinterObject
 	"""
-	__slots__ = ('name', 'manufacturer', 'cartridges', 'color', 'copie', 'locked')
+	__slots__ = ('name', 'manufacturer', 'cartridges', 'color', 'copie')
 
 	def __init__(self, **kwargs):
-		super().__init__()
 		[self.__setattr__(key, val) for key, val in kwargs.items()]
-		self.locked = True
+		super().__init__('name', 'manufacturer', 'cartridges', 'color', 'copie')
 	
-	def __setattr__(self, key, val):
-		try:
-			if self.__getattribute__('locked'):
-				pass
-		except:
-			super().__setattr__(key, val)
 
 	def __str__(self):
-		temp = f'{self.manufacturer}\n{self.name}\nCart-Type:{self.cartridges}\nFeatures: '
+		temp = f'{self.manufacturer} {self.name}\nCart-Type:{self.cartridges}\nFeatures: '
 		if self.color:
 			temp += 'Color, '
 		if self.copie:
@@ -55,8 +49,7 @@ class ModelLib(object):
 	file = Path(DB_DIR, 'modelslib.json')
 	
 	def __init__(self):
-		if path.exists(ModelLib.file):
-			self.load()
+		self.load()
 	
 	def __repr__(self):
 		return ''.join([f'{typ.name}:>\n{str(typ)}\n\n' for typ in ModelLib.obj])
@@ -72,23 +65,28 @@ class ModelLib(object):
 		self.save()
 	
 	def save(self):
-		if ModelLib.file is not None:
+		temp = self._import()
+		try:
 			with open(ModelLib.file, 'w') as f:
 				f.write(dumps(self._export()))
-	
+		except:
+			print('An Error Occured file wasnt saved')
+			with open(ModelLib.file, 'w') as f:
+				f.write(dumps(temp))
+
 	def _export(self):
 		return [obj.export() for obj in ModelLib.obj]
 	
 	def _import(self):
-		if ModelLib.file is not None:
-			with open(ModelLib.file, 'r') as f:
-				return loads(f.read())
+		with open(ModelLib.file, 'r') as f:
+			return loads(f.read())
 	
 	def load(self):
-		for obj in self._import():
-			if obj['name'] not in ModelLib.name_index:
-				ModelLib.obj += [_PrinterModel(**obj)]
-		ModelLib.name_index += [obj.name for obj in ModelLib.obj]
+		if path.exists(ModelLib.file):
+			for obj in self._import():
+				if obj['name'] not in ModelLib.name_index:
+					ModelLib.obj += [_PrinterModel(**obj)]
+			ModelLib.name_index += [obj.name for obj in ModelLib.obj]
 	
 	def get(self, model):
 		if model in ModelLib.name_index:

@@ -1,5 +1,13 @@
 from Packages.StaticVar import *
 
+model_oid = (('ECOSYS M6635cidn', 'ECOSYS M3655idn', 'MFC-9142CDN', 'MFC-L3770CDW', 'MFC-L3750CDW',
+               'TASKalfa 3051ci', 'TASKalfa 5052ci', 'TASKalfa 4002i', 'MFC-9332CDW', 'MFC-L8650CDW',
+               'DCP-L3510CDW', 'MFC-9460CDN'),
+              ('MFC-9142CDN', 'MFC-L3750CDW', 'MFC-L3770CDW', 'MFC-L8650CDW', 'MFC-9342CDW'))
+
+model_dict = ({'location': '1.3.6.1.2.1.1.6.0'},
+              {'contact': '1.3.6.1.2.1.1.4.0'})
+
 VALID_OID = '1.3.6.1.2.1.1.1.0'
 
 VALID_CLIENT_OID = {'KYOCERA': {'manufacturer': 'Kyocera',
@@ -10,12 +18,12 @@ VALID_CLIENT_OID = {'KYOCERA': {'manufacturer': 'Kyocera',
                                 'serial_no': '1.3.6.1.2.1.43.5.1.1.17.1'}}
 
 # toner are 2 values the first are the max value the second the current fill value
-kyocera_toner_bw = ({'B': '1.3.6.1.2.1.43.11.1.1.8.1.1'}, {'B': '1.3.6.1.2.1.43.11.1.1.9.1.1'})
+kyocera_toner_bw = {'Toner':({'B': '1.3.6.1.2.1.43.11.1.1.8.1.1'}, {'B': '1.3.6.1.2.1.43.11.1.1.9.1.1'})}
 
-kyocera_toner_color = ({'C': '1.3.6.1.2.1.43.11.1.1.8.1.1', 'M': '1.3.6.1.2.1.43.11.1.1.8.1.2',
+kyocera_toner_color = {'Toner':({'C': '1.3.6.1.2.1.43.11.1.1.8.1.1', 'M': '1.3.6.1.2.1.43.11.1.1.8.1.2',
                         'Y': '1.3.6.1.2.1.43.11.1.1.8.1.3', 'B': '1.3.6.1.2.1.43.11.1.1.8.1.4'},
                        {'C': '1.3.6.1.2.1.43.11.1.1.9.1.1', 'M': '1.3.6.1.2.1.43.11.1.1.9.1.2',
-                        'Y': '1.3.6.1.2.1.43.11.1.1.9.1.3', 'B': '1.3.6.1.2.1.43.11.1.1.9.1.4'})
+                        'Y': '1.3.6.1.2.1.43.11.1.1.9.1.3', 'B': '1.3.6.1.2.1.43.11.1.1.9.1.4'})}
 
 kyocera_pages = {'Prints': '1.3.6.1.4.1.1347.42.3.1.1.1.1.1',
                  'Copies': '1.3.6.1.4.1.1347.42.3.1.1.1.1.2'}
