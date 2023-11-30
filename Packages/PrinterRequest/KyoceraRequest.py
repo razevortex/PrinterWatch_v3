@@ -18,28 +18,24 @@ class KyoceraReq(object):
             oid.update(taskalfa_pages)
         if 'ecosys'.casefold() in model.name.casefold():
             oid.update(ecosys_pages)
-        print(oid)
-        self._request(oid)
+        try:
+            self._request(oid)
+        except:
+            pass
 
     def _request(self, oids):
-        print(oids)
         for key, val in oids.items():
+            #  Request and Calculation of Toner fill left
             if key == 'Toner':
                 for k, v in val[0].items():
                     _max = 1 / int(_snmp_get(self.data['ip'], v).strip()) * 100
                     _fill = int(_snmp_get(self.data['ip'], val[1][k]).strip()) * _max
                     self.tracker_data[k] = int(_fill)
+            #  Request of the Page counts
             else:
                 got = _snmp_get(self.data['ip'], val)
-                print(got)
-                #if got == 'NaN':
-                #    self.tracker_data = None
-                #    return
-                #else:
-                try:
-                    self.tracker_data[key] = int(got.strip())
-                except:
-                    self.tracker_data[key] = val
+                self.tracker_data[key] = int(got.strip())
+
 
 if '__main__' == __name__:
     from Packages.PrinterRequest.DefaultRequest import AdvRequest
