@@ -1,23 +1,41 @@
 from imports import *
 from snmp_foos import *
-from BrotherRequest import Brother
-from KyoceraRequest import Kyocera
+from Packages.csv_read import model_ip
+from Packages.PrinterRequest.BrotherRequest import BrotherReq
+from Packages.PrinterRequest.KyoceraRequest import KyoceraReq
+from Packages.PrinterRequest.DefaultRequest import *
 
 
 class PrinterRequest(object):
-	def __init__(self, printer_obj):
-		self.result = {}
-		self.printer = printer_obj
-		model = printer_obj.model.name
-		self.valid = printer_obj.serial_no == _snmp_get(printer_obj.ip, serial_no_oid[model])
-		self.method = {'Brother': Brother, 'Kyocera': Kyocera}[printer_obj.model.manufacturer]
+	def __init__(self, ip):
+		self.ip = ip
+		self.printer = None
+		self.response = None
+		self.request(ip)
 
-	def get(self):
-		if self.valid:
-			got = self.method.get()
-			if type(got) == dict:
-				got['date'] = dt.now()
-				self.printer.update_tracker(got)
+	def request(self, ip):
+		temp = AdvRequest(ip)
+		if temp.valid():
+			if temp.data['serial_no'] in pLib.name_index:
+				self.printer = pLib.get_obj(temp.data['serial_no'])
+				if self.printer.ip != ip:
+					pLib.update_obj({'serial_no': temp.data['serial_no'], 'ip': ip})
+					self.printer = pLib.get_obj(temp.data['serial_no'])
+			else:
+				pLib.add_new(**temp.data) #temp.data['serial_no'], temp.data['model'], **temp.data)
+				self.printer = pLib.get_obj(temp.data['serial_no'])
+			i = ('Brother', 'Kyocera').index(temp.data['manufacturer'])
+			self.response = (BrotherReq, KyoceraReq)[i](temp.data)
 
+	def __repr__(self):
+		if self.printer is not None and self.response is not None:
+			msg = f'printer:\n{str(self.printer)}\nresponse:\n{self.response.data}\ntracker:\n{self.response.tracker_data}\n---------------------------------------\n'
 		else:
-			return False
+			msg = f'No Success IP:{self.ip}\n---------------------------------------\n'
+		return msg
+
+
+if __name__ == '__main__':
+	for key in model_ip.keys():
+		got = PrinterRequest(key)
+		print(got)

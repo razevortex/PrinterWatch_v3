@@ -22,7 +22,7 @@ class LockedSlots(object):
 
 
 class LockedClass(object):
-
+    __slots__ = '_locked'
     def __init__(self, *args):
         args = args + ('_locked',)
         self.__setattr__('_locked', args)

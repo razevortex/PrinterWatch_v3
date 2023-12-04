@@ -34,15 +34,16 @@ class BrotherReq(object):
         # narrow the html content of specific areas with content we are looking for
         temp = soup.find_all('dl', class_='items')
         in_tag = False
-        t_dict = {}
+        t_dict = {'Copies': {}, 'Prints': {}}
         for i, t in enumerate(temp):
             if i == 2 or i == 5:
                 for dd, dt in zip(t.find_all('dd'), t.find_all('dt')):
                     self._req0_toner(dd, dt)
-                    if i == 5 and 'page'.casefold() in str(dd.text).casefold():
+                    #if i == 5 and 'page'.casefold() in str(dd.text).casefold():
+                    if 'page'.casefold() in str(dd.text).casefold():
                         in_tag = self._req0_pages(dd, dt)
                     elif in_tag:
-                        t_dict[in_tag] = {}
+
                         t_dict[in_tag][str(dt.text)] = str(dd.text).strip()
         self.merge_dict(t_dict)
         print(self.tracker_data)
@@ -66,11 +67,13 @@ class BrotherReq(object):
                     self.tracker_data[col] = int(val)
 
     def merge_dict(self, t_dict):
+        #print('merge dict', t_dict)
         for key, val in t_dict.items():
             for k, v in val.items():
                 if k in ('Color', 'Colour', 'B&W'):
-                    k = 'Color' + key if k != 'B&W' else key
-                    self.tracker_data[k] = v
+                    if 'sided' not in k:
+                        k = 'Color' + key if k != 'B&W' else key
+                        self.tracker_data[k] = v
 
     def request_1(self):
         soup = self.get_soup(1)
