@@ -43,10 +43,10 @@ class DataDict(BaseDict):
             arr.sort()
             temp = DataDict()
             for date_ in arr:
-                temp['Date'] += date_
+                temp += {'Date': date_}
                 a, b = self._get_date(date_), other._get_date(date_)
                 for key in [key for key in BaseDict.KEYS if key != 'Date']:
-                    temp[key] += sum([_dict.get(key, 0) for _dict in (a, b)])
+                    temp += {key: sum([_dict.get(key, 0) for _dict in (a, b)])}
             return temp
     
     def _get_date(self, date):
@@ -102,7 +102,8 @@ class CurrentDict(BaseDict):
             if self[key] != val:
                 if key == 'Date':
                     self[key], delta[key] = date_update(self[key], val)
-                elif key in 'BCYM':
+            if key != 'Date':
+                if key in 'BCYM':
                     self[key], delta[key] = cart_update(self[key], val)
                 else:
                     self[key], delta[key] = page_update(self[key], val)
@@ -135,6 +136,9 @@ class PrinterTracker(object):
         return f'Tracker:\n{str(self.current)}\n{str(self.data)}\n'
     
     def update(self, dict_obj, carts=()):
+        if not (self.current['Date'] is None):
+            if (dict_obj['Date'] <= self.current['Date']):
+                return
         delta = self.current.update(**dict_obj)
         if not (delta is None):
             cLib.update(carts, delta)
@@ -162,7 +166,6 @@ class PrinterTracker(object):
     def _to_json(self):
         data = {}
         for key, val in self.data.items():
-            print(key, val)
             if key == 'Date':
                 val = [v.strftime(PrinterTracker.dt_string_forms[0]) for v in val]
             data[key] = val

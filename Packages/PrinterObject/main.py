@@ -19,6 +19,8 @@ class Printer(LockedClass):
         self.location = kwargs.get('location', '')
         self.contact = kwargs.get('contact', '')
         self.cartridges = cLib.get(kwargs.get('cartridges', self.model.cartridges))
+        if not self.cartridges:
+            self.cartridges = self.model.cartridges
         self.tracker = PrinterTracker(self.serial_no, self.model.name)
         super().__init__('serial_no', 'model')
 
@@ -71,7 +73,7 @@ class Printer(LockedClass):
         @param kwargs: {tracker_keys: value}
         @return: None
         '''
-        self.tracker.update(self.cartridges, **kwargs)
+        self.tracker.update(kwargs, carts=self.cartridges)
         self.save_tracker()
 
     def update_tracker_batch(self, **kwargs):
@@ -82,8 +84,11 @@ class Printer(LockedClass):
         '''
         for i in range(len(kwargs.get('Date', []))):
             temp = {key: val[i] for key, val in kwargs.items()}
-            self.tracker.update(self.cartridges, **temp)
+            self.tracker.update(temp, carts=self.cartridges)
         self.save_tracker()
+
+    def get_data_tracker(self):
+        return self.tracker.data
 
 
 class PrinterLib(object):
@@ -133,6 +138,20 @@ class PrinterLib(object):
             with open(PrinterLib.file, 'w') as f:
                 f.write(dumps(temp))
 
+    def get_search(self, this):
+        if this == '*':
+            return PrinterLib.obj
+        arr = []
+        for obj in PrinterLib.obj:
+            if this in str(obj):
+                arr.append(obj)
+
+    def data_tracker_set(self, search):
+        obj_set = self.get_search(search)
+        data = obj_set[0].tracker.data
+        for obj in obj_set[1:]:
+            data = data + obj.tracker.data
+        return data
 
     def _export(self):
         '''

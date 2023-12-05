@@ -12,8 +12,8 @@ class CSV(object):
 
     @classmethod
     def reader(cls, filename):
-        with open(filename, 'r') as f:
-            return cls([line.split(',') for line in f.readlines()])
+        with open(filename, 'r', encoding='cp1252') as f:
+            return cls([line.strip().split(',') for line in f.readlines()])
 
     def get_row(self, row_index, out=list):
         if row_index < len(self.values):
@@ -61,5 +61,19 @@ class CSV(object):
             elif out == list:
                 return [[col[i] for col in self.values] for i in range(len(self.keys))]
 
+csv_keys = ('TonerBK', 'TonerC', 'TonerM', 'TonerY', 'Printed_BW', 'Printed_BCYM', 'Copied_BW', 'Copied_BCYM', 'Status_Report', 'Time_Stamp')
+json_keys = ('B', 'C', 'M', 'Y', 'Prints', 'ColorPrints', 'Copies', 'ColorCopies', 'none', 'Date')
+
+def get_tracker_set(client, tracker_keys):
+    path = '/home/razevortex/PycharmProjects/PrinterWatch_v3/db/*.csv'.replace('*', client)
+    data = CSV.reader(path)
+    dic_t = {key: data.get_col(csv_keys[json_keys.index(key)], out=list) for key in tracker_keys}
+    dic_t.update({key: [int(v) for v in val] for key, val in dic_t.items() if key != 'Date'})
+    dic_t['Date'] = [dt.strptime(string.split('.')[0], '%Y-%m-%d %H:%M:%S') for string in dic_t['Date']]
+    return dic_t
+
 cli = CSV.reader('/home/razevortex/PycharmProjects/PrinterWatch_v3/db/clients.csv')
 model_ip = {key: val for key, val in zip(cli.get_col('IP'), cli.get_col('Model'))}
+
+if __name__ == '__main__':
+    pass

@@ -22,8 +22,7 @@ class _CartridgeModel(LockedSlots):
 
     def update(self, **kwargs):
         self.global_stats['Toner'] += kwargs.get(self.color, 0)
-        for key, val in [(key, val) for key, val in kwargs.items() if key != 'Date' and len(key) > 2]:
-            print(key, val)
+        for key, val in [(key, val) for key, val in kwargs.items() if key != 'Date']:
             if self.color == 'B' and key in ('Prints', 'Copies'):
                 self.global_stats['Pages'] += val
             if key.startswith('Color'):
@@ -91,6 +90,18 @@ class CartridgesLib(object):
         if args[0] == '*':
             return CartridgesLib.obj
         return [CartridgesLib.obj[CartridgesLib.name_index.index(arg)] for arg in args if arg in CartridgesLib.name_index]
+
+    def get_filtered_set(self, **kwargs):
+        arr = []
+        for obj in CartridgesLib.obj:
+            add = True
+            for key, val in [(key, val) for key, val in kwargs.items() if
+                             key in ('name', 'manufacturer', 'color')]:
+                if add:
+                    add = (val == obj.__getattribute__(key))
+            if add:
+                arr.append(obj)
+        return arr
 
     def update(self, carts:tuple, data:dict) -> None:
         for i, obj in enumerate(CartridgesLib.name_index):

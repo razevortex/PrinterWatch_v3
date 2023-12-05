@@ -94,5 +94,16 @@ class ModelLib(object):
 		if model == '*':
 			return ModelLib.obj
 
+	def get_filtered_set(self, **kwargs):
+		arr = []
+		for obj in ModelLib.obj:
+			add = True
+			for key, val in [(key, val) for key, val in kwargs.items() if key in ('name', 'manufacturer', 'cartridges', 'color', 'copie')]:
+				if add:
+					add = (val == obj.__getattribute__(key)) if key != 'cartridges' else (val in obj.__getattribute__(key))
+			if add:
+				arr.append(obj)
+		return arr
+
 	def get_tracker_keys(self, model):
 		return self.get(model).get_tracker_keys()

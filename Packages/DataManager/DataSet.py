@@ -19,6 +19,20 @@ class DataBase(object):
         return msg
 
 if __name__ == '__main__':
+    from Packages.csv_read import *
+    def migrate_db():
+        cLib.reset_stats()
+        db = DataBase()
+        for obj in db.printer.obj:
+            print(obj.serial_no, get_tracker_set(obj.serial_no, obj.model.get_tracker_keys()))
+            obj.update_tracker_batch(**get_tracker_set(obj.serial_no, obj.model.get_tracker_keys()))
+    #migrate_db()
     db = DataBase()
-    db.print_()
-    print(db)
+    temp = db.printer.data_tracker_set('*')
+    for key, val in temp.items():
+        if key == 'Date':
+            t = val[-1] - val[0]
+
+            print(key, len(val), t.days, val)
+        else:
+            print(key, len(val), sum(val), val)
