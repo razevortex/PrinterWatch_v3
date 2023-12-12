@@ -17,6 +17,8 @@ VALID_CLIENT_OID = {'KYOCERA': {'manufacturer': 'Kyocera',
                                 'model': '1.3.6.1.2.1.25.3.2.1.3.1',
                                 'serial_no': '1.3.6.1.2.1.43.5.1.1.17.1'}}
 
+overrides = {'TASKalfa 4002i': {'Prints': '1.3.6.1.4.1.1347.42.3.1.1.1.1.1', 'Copies': '1.3.6.1.4.1.1347.42.3.1.1.1.1.2'}}
+
 # toner are 2 values the first are the max value the second the current fill value
 kyocera_toner_bw = {'Toner':({'B': '1.3.6.1.2.1.43.11.1.1.8.1.1'}, {'B': '1.3.6.1.2.1.43.11.1.1.9.1.1'})}
 

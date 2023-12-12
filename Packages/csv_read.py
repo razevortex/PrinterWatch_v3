@@ -69,7 +69,12 @@ def get_tracker_set(client, tracker_keys):
     data = CSV.reader(path)
     dic_t = {key: data.get_col(csv_keys[json_keys.index(key)], out=list) for key in tracker_keys}
     dic_t.update({key: [int(v) for v in val] for key, val in dic_t.items() if key != 'Date'})
-    dic_t['Date'] = [dt.strptime(string.split('.')[0], '%Y-%m-%d %H:%M:%S') for string in dic_t['Date']]
+    arr = []
+    for string in dic_t['Date']:
+        string = string.split('.')[0]
+        print(string, dt.strptime(string, '%Y-%m-%d %H:%M:%S') )
+        arr.append(dt.strptime(string, '%Y-%m-%d %H:%M:%S'))
+    dic_t['Date'] = arr
     return dic_t
 
 cli = CSV.reader('/home/razevortex/PycharmProjects/PrinterWatch_v3/db/clients.csv')

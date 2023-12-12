@@ -1,5 +1,5 @@
 from Packages.PrinterRequest.snmp_foos import _snmp_get
-from imports import *
+from Packages.PrinterRequest.imports import *
 from Packages.csv_read import model_ip
 from Packages.PrinterRequest.snmp_foos import *
 from Packages.PrinterRequest.StaticVar import model_oid, model_dict

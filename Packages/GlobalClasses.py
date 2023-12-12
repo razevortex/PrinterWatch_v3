@@ -1,3 +1,4 @@
+from time import perf_counter_ns as nsec
 
 class LockedSlots(object):
     __slots__ = ('_locked')
@@ -40,6 +41,26 @@ class LockedClass(object):
     def __setattr__(self, key, value):
         if not (key in self._locked):
             super().__setattr__(key, value)
+
+
+class TaskInterval(object):
+    def __init__(self, **kwargs):
+        for key, val in kwargs.items():
+            self.__setattr__(key, (self.get_sec(), val))
+        self.tasks = kwargs.keys()
+
+    def get_sec(self):
+        return int(nsec() * .000000001)
+
+    def trigger(self):
+        for task in self.tasks:
+
+            temp = self.__getattribute__(task)
+            if self.get_sec() - temp[0] > temp[1]:
+                print(f'triggered => {task}')
+                self.__setattr__(task, (self.get_sec(), temp[1]))
+                return task
+        return False
 
 if __name__ == '__main__':
 

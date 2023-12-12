@@ -1,9 +1,12 @@
-from imports import *
-from snmp_foos import *
+import time
+from datetime import datetime as dt
+from Packages.PrinterRequest.snmp_foos import *
 from Packages.csv_read import model_ip
+from Packages.Libs.main import mLib, cLib
 from Packages.PrinterRequest.BrotherRequest import BrotherReq
 from Packages.PrinterRequest.KyoceraRequest import KyoceraReq
 from Packages.PrinterRequest.DefaultRequest import *
+from time import perf_counter_ns as nsec
 
 
 class PrinterRequest(object):
@@ -12,6 +15,7 @@ class PrinterRequest(object):
 		self.printer = None
 		self.response = None
 		self.request(ip)
+		self.update_tracker()
 
 	def request(self, ip):
 		temp = AdvRequest(ip)
@@ -26,6 +30,12 @@ class PrinterRequest(object):
 				self.printer = pLib.get_obj(temp.data['serial_no'])
 			i = ('Brother', 'Kyocera').index(temp.data['manufacturer'])
 			self.response = (BrotherReq, KyoceraReq)[i](temp.data)
+
+	def update_tracker(self):
+		if self.response:
+			t_dict = self.response.tracker_data
+			t_dict['Date'] = dt.now()
+			self.printer.update_tracker(**self.response.tracker_data)
 
 	def __repr__(self):
 		if self.printer is not None and self.response is not None:

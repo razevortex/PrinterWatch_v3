@@ -1,4 +1,4 @@
-from imports import sp
+from Packages.PrinterRequest.imports import sp
 from Packages.csv_read import model_ip
 
 def _snmp_walk(ip, oid):
@@ -59,4 +59,9 @@ if __name__ == '__main__':
 			write_txt(name, text)
 
 
+	def get_this_walk(ip):
+		name = f'/home/razevortex/PycharmProjects/PrinterWatch_v3/snmp_walks/{ip}.txt'
+		text = ''.join([f'{line}\n' for line in _snmp_walk(ip, '1.3.6.1')])
+		write_txt(name, text)
 
+	get_this_walk('172.20.10.113')

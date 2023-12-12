@@ -48,7 +48,12 @@ class DataDict(BaseDict):
                 for key in [key for key in BaseDict.KEYS if key != 'Date']:
                     temp += {key: sum([_dict.get(key, 0) for _dict in (a, b)])}
             return temp
-    
+
+    def time_prune(self, start=dt.now()-timedelta(days=30), end=dt.now()):
+
+        index_list = [i for i, date in enumerate(self['Date']) if start < date < end]
+        return DataDict(**{key: val[index_list[0]: index_list[-1]] for key, val in self.items()})
+
     def _get_date(self, date):
         if date in self.get('Date', []):
             return {key: val[self['Date'].index(date)] for key, val in self.items() if key != 'Date'}
@@ -125,16 +130,29 @@ class PrinterTracker(object):
     def __init__(self, printer, model=''):
         self.file = str(PrinterTracker.path_template).replace('*', printer)
         if path.exists(self.file):
-            data, cur = self.load()
-            self.data = DataDict(**{key: val for key, val in data.items()})
-            self.current = CurrentDict(**{key: val for key, val in cur.items()})
+            try:
+                data, cur = self.load()
+                self.data = DataDict(**{key: val for key, val in data.items()})
+                self.current = CurrentDict(**{key: val for key, val in cur.items()})
+            except:
+                self._new_tracker(model)
+                self.save()
         else:
-            self.data = DataDict(**{key: [] for key in mLib.get_tracker_keys(model)})
-            self.current = CurrentDict(**{key: None for key in mLib.get_tracker_keys(model)})
+            self._new_tracker(model)
 
     def __repr__(self):
         return f'Tracker:\n{str(self.current)}\n{str(self.data)}\n'
-    
+
+    def _new_tracker(self, model):
+        self.data = DataDict(**{key: [] for key in mLib.get_tracker_keys(model)})
+        self.current = CurrentDict(**{key: None for key in mLib.get_tracker_keys(model)})
+
+    def reset(self):
+        temp = list(self.data.keys())
+        self.data = DataDict(**{key: [] for key in temp})
+        self.current = CurrentDict(**{key: None for key in temp})
+        self.save()
+
     def update(self, dict_obj, carts=()):
         if not (self.current['Date'] is None):
             if (dict_obj['Date'] <= self.current['Date']):
