@@ -22,10 +22,9 @@ class DataBase(object):
                 if temp is None:
                     temp = obj.data.time_prune()
                 else:
-
-                        temp = temp + obj.data.time_prune()
+                    temp = temp + obj.data.time_prune()
             except:
-                    print('err', obj.data)
+                    print('err => merged_tracker_data')
         return temp
 
     def gather_tracker_data(self):
@@ -35,6 +34,8 @@ class DataBase(object):
                     req(ip)
                 except:
                     print('err', ip)
+            return True
+        return False
 
     def __repr__(self):
         msg = f'Cartridges[{len(self.cartridges.name_index)}]: {self.cartridges.name_index}\n'
@@ -48,21 +49,26 @@ if __name__ == '__main__':
     def migrate_db():
         cLib.reset_stats()
         db = DataBase()
-        for got in db.printer.get_search('4002', result=object):
+        for got in db.printer.get_search('*', result=object):
             print(got)
-
             got.reset_tracker()
             print(got.serial_no)#, get_tracker_set(got.serial_no, got.model.get_tracker_keys()))
-            print(get_tracker_set(got.serial_no, got.model.get_tracker_keys()))
             try:
                 got.update_tracker_batch(**get_tracker_set(got.serial_no, got.model.get_tracker_keys()))
             except:
                 print('failed')
 
+    #migrate_db()
+
     def listen():
         db = DataBase()
+
         while True:
             db.gather_tracker_data()
-    db = DataBase()
-    print(db.merged_tracker_data())
+
+
     #listen()
+
+    db = DataBase()
+
+    print(db.merged_tracker_data())

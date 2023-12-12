@@ -140,6 +140,11 @@ class PrinterTracker(object):
         else:
             self._new_tracker(model)
 
+    def _all_keys(self, dict_obj: dict):
+        if self.data.keys() == self.current.keys() == dict_obj.keys():
+            return True
+        return False
+
     def __repr__(self):
         return f'Tracker:\n{str(self.current)}\n{str(self.data)}\n'
 
@@ -154,17 +159,18 @@ class PrinterTracker(object):
         self.save()
 
     def update(self, dict_obj, carts=()):
-        if not (self.current['Date'] is None):
-            if (dict_obj['Date'] <= self.current['Date']):
-                return
-        delta = self.current.update(**dict_obj)
-        if not (delta is None):
-            cLib.update(carts, delta)
-            cLib.save()
-            if self.data['Date']:
-                self.data.update(**delta)
-            else:
-                self.data += delta
+        if self._all_keys(dict_obj):
+            if not (self.current['Date'] is None):
+                if (dict_obj['Date'] <= self.current['Date']):
+                    return
+            delta = self.current.update(**dict_obj)
+            if not (delta is None):
+                cLib.update(carts, delta)
+                cLib.save()
+                if self.data['Date']:
+                    self.data.update(**delta)
+                else:
+                    self.data += delta
 
     def save(self):
         with open(self.file, 'w') as f:
