@@ -1,8 +1,10 @@
-from Packages.PrinterObject.StaticVar import LOG_DIR
+from datetime import datetime as dt
 from json import dumps, loads
 from os import path
 from pathlib import Path
-from datetime import datetime as dt
+
+from Packages.PrinterObject.StaticVar import LOG_DIR
+
 
 def timestamp():
     return dt.now().strftime('%d.%m.%Y %H:%M:%S')

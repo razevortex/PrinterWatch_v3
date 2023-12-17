@@ -1,11 +1,10 @@
 from json import dumps, loads
-from datetime import datetime as dt, timedelta
 from os import path
+from .StaticVar import *
 from Packages.GlobalClasses import LockedClass
-from Packages.PrinterObject.StaticVar import *
 from Packages.Libs.main import cLib, mLib
-from Packages.PrinterObject.Tracker import PrinterTracker
 from Packages.PrinterObject.Logs import Logger
+from Packages.PrinterObject.Tracker import PrinterTracker
 
 
 class Printer(LockedClass):
@@ -25,7 +24,7 @@ class Printer(LockedClass):
         super().__init__('serial_no', 'model')
 
     def __str__(self):
-        return f'{self.serial_no}\n{str(self.model)}\n{self.display_name}\n{self.ip}\n{self.location}\n' \
+        return f'{self.serial_no}\n{self.model}\n{self.display_name}\n{self.ip}\n{self.location}\n' \
                f'{self.contact}\n{self.notes}\n'
 
     def update_data(self, kwargs):
@@ -66,9 +65,6 @@ class Printer(LockedClass):
         print(self.ip)
         print(self.model)
         print(str(self.tracker))
-
-    def reset_tracker(self):
-        self.tracker.reset()
 
     def update_tracker(self, **kwargs):
         '''
@@ -141,20 +137,13 @@ class PrinterLib(object):
             with open(PrinterLib.file, 'w') as f:
                 f.write(dumps(temp))
 
-    def get_search(self, this, result=object):
+    def get_search(self, this):
         if this == '*':
-            if result == object:
-                return PrinterLib.obj
-            else:
-                return [obj.__getattribute__(result) for obj in PrinterLib.obj]
+            return PrinterLib.obj
         arr = []
         for obj in PrinterLib.obj:
             if this in str(obj):
-                if result == object:
-                    arr.append(obj)
-                else:
-                    arr.append(obj.__getattribute__(result))
-        return arr
+                arr.append(obj)
 
     def data_tracker_set(self, search):
         obj_set = self.get_search(search)

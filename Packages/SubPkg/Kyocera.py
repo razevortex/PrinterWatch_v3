@@ -1,5 +1,5 @@
-from Requests.snmp_request import _snmp_walk, _snmp_get
 from Requests.StaticVars import *
+from Requests.snmp_request import _snmp_get
 
 
 class Kyocera(object):

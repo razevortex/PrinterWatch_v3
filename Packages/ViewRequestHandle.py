@@ -1,11 +1,10 @@
-import copy
 import datetime as dt
-from django.http import HttpResponse, QueryDict
-from Packages.SubPkg.const.ConstantParameter import page_modifier_dict_templates, data_modifier_dict_templates
-from Packages.SubPkg.foos import read_conf, write_conf, data_view_request_CartStorage, dict_key_translate, handle_ip_form, remove_ip
-from Packages.SubPkg.csv_handles import LibOverride, Logging, userDB
-from Packages.userIN import get_user_db
 
+from Packages.SubPkg.const.ConstantParameter import page_modifier_dict_templates, data_modifier_dict_templates
+from Packages.SubPkg.csv_handles import LibOverride, Logging, userDB
+from Packages.SubPkg.foos import read_conf, write_conf, data_view_request_CartStorage, dict_key_translate, \
+    handle_ip_form, remove_ip
+from Packages.userIN import get_user_db
 
 device_details_key = [('ID', 'ID'), ('deviceId', 'Serial_No'), ('location', 'Location'), ('contact', 'Contact'), ('notes', 'Notes')]
 

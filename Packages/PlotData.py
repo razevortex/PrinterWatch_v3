@@ -1,6 +1,7 @@
+from datetime import datetime as dt
+
 from Packages.StrucData import *
 from Packages.SubPkg.csv_handles import *
-from datetime import datetime as dt
 
 cli = dbClient()
 cli.updateData()

@@ -1,15 +1,13 @@
-import os.path
-from Packages.SubPkg.const.ConstantParameter import *
-from Packages.SubPkg.Brother import *
-from Packages.SubPkg.Kyocera import *
-from Packages.SubPkg.csv_handles import *
-import re
-from functools import wraps
 import datetime as dt
+import os.path
+import re
 import subprocess as sp
-from subprocess import Popen
+from functools import wraps
+
 from django.core import mail
-from django.conf import settings
+
+from Packages.SubPkg.const.ConstantParameter import *
+from Packages.SubPkg.csv_handles import *
 
 
 def send_a_email(subject, msg, from_, to_):

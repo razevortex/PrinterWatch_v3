@@ -1,8 +1,9 @@
-from Packages.Libs.StaticVar import *
-from Packages.GlobalClasses import LockedSlots
 from json import dumps, loads
-from pathlib import Path
 from os import path
+from pathlib import Path
+from .StaticVar import DB_DIR
+from Packages.GlobalClasses import LockedSlots
+
 
 #  Just a Container of a Cart-Type
 class _CartridgeModel(LockedSlots):
@@ -114,3 +115,15 @@ class CartridgesLib(object):
             obj.reset_stats()
             CartridgesLib.obj[CartridgesLib.name_index.index(obj.name)] = obj
         self.save()
+
+    def get_types_view(self):
+        temp = {typ: {'color': [], 'manufacturer': ''} for typ in set(list([name.rstrip('BKCYM') for name in CartridgesLib.name_index]))}
+        view = {}
+        for obj in CartridgesLib.obj:
+            key = obj.name.rstrip('BKCYMS')
+            if key not in view.keys():
+                view[key] = {'color': [], 'manufacturer': [], 'member': []}
+            for val in ('color', 'manufacturer'):
+                view[key][val] = list(set(view[key][val] + [obj.__getattribute__(val)]))
+            view[key]['member'] += [obj.name]
+        return view

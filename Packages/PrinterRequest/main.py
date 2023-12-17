@@ -1,12 +1,8 @@
-import time
 from datetime import datetime as dt
-from Packages.PrinterRequest.snmp_foos import *
-from Packages.csv_read import model_ip
-from Packages.Libs.main import mLib, cLib
-from Packages.PrinterRequest.BrotherRequest import BrotherReq
-from Packages.PrinterRequest.KyoceraRequest import KyoceraReq
-from Packages.PrinterRequest.DefaultRequest import *
-from time import perf_counter_ns as nsec
+
+from webinterface._Packages.PrinterRequest.BrotherRequest import BrotherReq
+from webinterface._Packages.PrinterRequest.DefaultRequest import *
+from webinterface._Packages.PrinterRequest.KyoceraRequest import KyoceraReq
 
 
 class PrinterRequest(object):
@@ -46,6 +42,4 @@ class PrinterRequest(object):
 
 
 if __name__ == '__main__':
-	for key in model_ip.keys():
-		got = PrinterRequest(key)
-		print(got)
+	pass

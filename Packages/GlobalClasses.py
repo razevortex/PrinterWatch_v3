@@ -44,23 +44,31 @@ class LockedClass(object):
 
 
 class TaskInterval(object):
-    def __init__(self, **kwargs):
-        for key, val in kwargs.items():
-            self.__setattr__(key, (self.get_sec(), val))
-        self.tasks = kwargs.keys()
+    '''
+    list of task obj [ {name: str, last_time: int, interval: int, event: method/function},...]
+    '''
+    def __init__(self, args):
+        self.tasks = []
+        for arg in args:
+            self.__setattr__(arg[0], [None, arg[1], arg[2]])
+            self.tasks.append(arg[0])
 
     def get_sec(self):
         return int(nsec() * .000000001)
 
     def trigger(self):
         for task in self.tasks:
+            t_old, interval, event = self.__getattribute__(task)
+            if t_old is None:
+                event()
+                t_old = self.get_sec()
+                print(task)
+            elif self.get_sec() - t_old > interval:
+                event()
+                t_old = self.get_sec()
+                print(task)
+            self.__setattr__(task, [t_old, interval, event])
 
-            temp = self.__getattribute__(task)
-            if self.get_sec() - temp[0] > temp[1]:
-                print(f'triggered => {task}')
-                self.__setattr__(task, (self.get_sec(), temp[1]))
-                return task
-        return False
 
 if __name__ == '__main__':
 

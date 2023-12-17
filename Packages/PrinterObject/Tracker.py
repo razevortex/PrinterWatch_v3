@@ -1,8 +1,9 @@
+from datetime import datetime as dt
 from json import dumps, loads
-from datetime import datetime as dt, timedelta
 from os import path
-from Packages.PrinterObject.StaticVar import *
+from .StaticVar import *
 from Packages.Libs.main import cLib, mLib
+
 
 class BaseDict(dict):
     KEYS = 'B', 'C', 'Y', 'M', 'Prints', 'ColorPrints', 'Copies', 'ColorCopies', 'Date'
@@ -48,12 +49,7 @@ class DataDict(BaseDict):
                 for key in [key for key in BaseDict.KEYS if key != 'Date']:
                     temp += {key: sum([_dict.get(key, 0) for _dict in (a, b)])}
             return temp
-
-    def time_prune(self, start=dt.now()-timedelta(days=30), end=dt.now()):
-
-        index_list = [i for i, date in enumerate(self['Date']) if start < date < end]
-        return DataDict(**{key: val[index_list[0]: index_list[-1]] for key, val in self.items()})
-
+    
     def _get_date(self, date):
         if date in self.get('Date', []):
             return {key: val[self['Date'].index(date)] for key, val in self.items() if key != 'Date'}
@@ -68,7 +64,19 @@ class DataDict(BaseDict):
             self[key][len(self[key])-1] += kwargs.get(key)
             if new:
                 self[key].append(0)
-            
+
+    def _of_key(self, keys='*'):
+        if keys == '*':
+            return self
+        else:
+            return DataDict(**{key: val for key, val in self.items() if key in keys})
+
+    def _of_timeframe(self, start, end, keys='*'):
+        index_arr = [i for i, date in enumerate(self['Date']) if start <= date < end]
+        if len(index_arr) < 1:
+            return False
+        return DataDict(**{key: val[index_arr[0]:index_arr[-1]] for key, val in self._of_key(keys=keys)})
+
 
 # Since the Tracker (except the Date tracker) is to track the value changes over given time but initial will get the
 # absolute value there is some preprocessing done by this foo´s
@@ -119,7 +127,6 @@ class CurrentDict(BaseDict):
         return self[key]
 
 
-
 class PrinterTracker(object):
     """
     The Main Tracker Object contains the Current and Data dict´s handles the save and load updating Cartridge Objects global_stats
@@ -135,42 +142,35 @@ class PrinterTracker(object):
                 self.data = DataDict(**{key: val for key, val in data.items()})
                 self.current = CurrentDict(**{key: val for key, val in cur.items()})
             except:
-                self._new_tracker(model)
-                self.save()
-        else:
-            self._new_tracker(model)
+                self.data = DataDict(**{key: [] for key in mLib.get_tracker_keys(model)})
+                self.current = CurrentDict(**{key: None for key in mLib.get_tracker_keys(model)})
 
-    def _all_keys(self, dict_obj: dict):
-        if self.data.keys() == self.current.keys() == dict_obj.keys():
-            return True
-        return False
+        else:
+            self.data = DataDict(**{key: [] for key in mLib.get_tracker_keys(model)})
+            self.current = CurrentDict(**{key: None for key in mLib.get_tracker_keys(model)})
 
     def __repr__(self):
         return f'Tracker:\n{str(self.current)}\n{str(self.data)}\n'
 
-    def _new_tracker(self, model):
-        self.data = DataDict(**{key: [] for key in mLib.get_tracker_keys(model)})
-        self.current = CurrentDict(**{key: None for key in mLib.get_tracker_keys(model)})
-
-    def reset(self):
-        temp = list(self.data.keys())
-        self.data = DataDict(**{key: [] for key in temp})
-        self.current = CurrentDict(**{key: None for key in temp})
-        self.save()
+    @property
+    def meta(self):
+        if len(self.data['Date']) < 1:
+            return len(self.data['Date']), None, None
+        else:
+            return len(self.data['Date']), self.data['Date'][0], self.data['Date'][-1]
 
     def update(self, dict_obj, carts=()):
-        if self._all_keys(dict_obj):
-            if not (self.current['Date'] is None):
-                if (dict_obj['Date'] <= self.current['Date']):
-                    return
-            delta = self.current.update(**dict_obj)
-            if not (delta is None):
-                cLib.update(carts, delta)
-                cLib.save()
-                if self.data['Date']:
-                    self.data.update(**delta)
-                else:
-                    self.data += delta
+        if not (self.current['Date'] is None):
+            if (dict_obj['Date'] <= self.current['Date']):
+                return
+        delta = self.current.update(**dict_obj)
+        if not (delta is None):
+            cLib.update(carts, delta)
+            cLib.save()
+            if self.data['Date']:
+                self.data.update(**delta)
+            else:
+                self.data += delta
 
     def save(self):
         with open(self.file, 'w') as f:

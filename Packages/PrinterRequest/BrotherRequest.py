@@ -1,11 +1,8 @@
-from Packages.PrinterRequest.snmp_foos import *
-from Packages.PrinterRequest.StaticVar import kyocera_toner_bw, kyocera_toner_color, kyocera_pages, taskalfa_pages, ecosys_pages
-from Packages.PrinterObject.main import pLib
-from Packages.Libs.main import *
-from Packages.PrinterRequest.StaticVar import brother_urls
 import requests
 from bs4 import BeautifulSoup
-import datetime as dt
+
+from webinterface._Packages.Libs.main import *
+from webinterface._Packages.PrinterRequest.StaticVar import brother_urls
 
 
 class BrotherReq(object):
@@ -91,15 +88,6 @@ class BrotherReq(object):
         print(self.tracker_data)
 
 
-
-
 # Execution Sandbox
 if __name__ == '__main__':
-    from Packages.PrinterRequest.DefaultRequest import AdvRequest
-    for key, val in model_ip.items():
-        if val == 'MFC-9460CDN':
-            t = AdvRequest(key)
-            if t.valid():
-                if t.data['manufacturer'] == 'Brother':
-                    print('Brother')
-                    result = BrotherReq(t.data)
+    pass

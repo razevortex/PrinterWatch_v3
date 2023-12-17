@@ -1,10 +1,12 @@
+import codecs
+import os.path
+from os import listdir
+from pathlib import Path
+
 import bcrypt
+
 from Packages.SubPkg.const.ConstantParameter import ROOT
 from Packages.SubPkg.csv_handles import userDB
-import os.path
-from pathlib import Path
-from os import listdir
-import codecs
 
 
 class StrHexCrypt(object):

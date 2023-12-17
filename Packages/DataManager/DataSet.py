@@ -1,8 +1,8 @@
-from Packages.PrinterObject.main import pLib, cLib, mLib
-from Packages.PrinterRequest.main import PrinterRequest as req
-from Packages.GlobalClasses import TaskInterval
+from json import dumps
 
-scheduler = TaskInterval(req=600)
+from Packages.GlobalClasses import TaskInterval
+from Packages.PrinterObject.main import pLib, cLib, mLib
+
 
 class DataBase(object):
     def __init__(self):
@@ -27,15 +27,14 @@ class DataBase(object):
                     print('err => merged_tracker_data')
         return temp
 
-    def gather_tracker_data(self):
-        if scheduler.trigger() == 'req':
-            for ip in self.printer.get_search('*', result='ip'):
-                try:
-                    req(ip)
-                except:
-                    print('err', ip)
-            return True
-        return False
+    def get_tracker_sets(self, search='*', min_data=10):
+        temp = []
+        objs = [obj for obj in self.printer.get_search(search) if len(obj.tracker.data['Date']) > min_data]
+        [temp.extend(obj.tracker.data['Date']) for obj in objs]
+        dates = list(set(temp))
+        dates.sort()
+        print(dates)
+
 
     def __repr__(self):
         msg = f'Cartridges[{len(self.cartridges.name_index)}]: {self.cartridges.name_index}\n'
@@ -43,32 +42,30 @@ class DataBase(object):
         msg += f'Printer[{len(self.printer.name_index)}]: {self.printer.name_index}\n'
         return msg
 
-if __name__ == '__main__':
+    def get_overview_table(self, keys=('display_name', 'model', 'ip', 'cartridges')):
+        arr = []
+        for obj in self.printer.obj:
+            arr.append({key: obj.export()[key] for key in keys})
+        return dumps(list(keys)), dumps(arr)
 
-    from Packages.csv_read import *
+
+if __name__ == '__main__':
+    db = DataBase()
+    print(db.get_tracker_sets())
+    '''from _Packages.csv_read import *
     def migrate_db():
         cLib.reset_stats()
         db = DataBase()
-        for got in db.printer.get_search('*', result=object):
-            print(got)
-            got.reset_tracker()
-            print(got.serial_no)#, get_tracker_set(got.serial_no, got.model.get_tracker_keys()))
-            try:
-                got.update_tracker_batch(**get_tracker_set(got.serial_no, got.model.get_tracker_keys()))
-            except:
-                print('failed')
-
+        for obj in db.printer.obj:
+            print(obj.serial_no, get_tracker_set(obj.serial_no, obj.model.get_tracker_keys()))
+            obj.update_tracker_batch(**get_tracker_set(obj.serial_no, obj.model.get_tracker_keys()))
     #migrate_db()
-
-    def listen():
-        db = DataBase()
-
-        while True:
-            db.gather_tracker_data()
-
-
-    #listen()
-
     db = DataBase()
+    temp = db.printer.data_tracker_set('*')
+    for key, val in temp.items():
+        if key == 'Date':
+            t = val[-1] - val[0]
 
-    print(db.merged_tracker_data())
+            print(key, len(val), t.days, val)
+        else:
+            print(key, len(val), sum(val), val)'''

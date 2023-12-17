@@ -1,10 +1,6 @@
-from Packages.PrinterRequest.snmp_foos import _snmp_get
-from Packages.PrinterRequest.imports import *
-from Packages.csv_read import model_ip
-from Packages.PrinterRequest.snmp_foos import *
-from Packages.PrinterRequest.StaticVar import kyocera_toner_bw, kyocera_toner_color, kyocera_pages, taskalfa_pages, ecosys_pages, overrides
-from Packages.PrinterObject.main import pLib
-from Packages.Libs.main import *
+from webinterface._Packages.PrinterRequest.StaticVar import kyocera_toner_bw, kyocera_toner_color, kyocera_pages, \
+    taskalfa_pages, ecosys_pages
+from webinterface._Packages.PrinterRequest.snmp_foos import _snmp_get
 
 
 class KyoceraReq(object):
@@ -18,8 +14,6 @@ class KyoceraReq(object):
             oid.update(taskalfa_pages)
         if 'ecosys'.casefold() in model.name.casefold():
             oid.update(ecosys_pages)
-        if model.name in overrides.keys():
-            oid.update(overrides[model.name])
         try:
             self._request(oid)
         except:
@@ -37,15 +31,7 @@ class KyoceraReq(object):
             else:
                 got = _snmp_get(self.data['ip'], val)
                 self.tracker_data[key] = int(got.strip())
-            print(self.tracker_data)
 
 
 if '__main__' == __name__:
-    from Packages.PrinterRequest.DefaultRequest import AdvRequest
-    for key, val in model_ip.items():
-        t = AdvRequest(key)
-        if t.valid():
-            if t.data['manufacturer'] == 'Kyocera':
-                print('Kyocera')
-                result = KyoceraReq(t.data)
-                print(result.data, result.tracker_data)
+    pass

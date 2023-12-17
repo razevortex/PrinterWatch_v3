@@ -1,5 +1,7 @@
 from functools import wraps
+
 from Packages.SubPkg.const.ConstantParameter import data_dict_template
+
 
 def DataValidation(func):
     @wraps(func)

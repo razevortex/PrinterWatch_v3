@@ -1,17 +1,11 @@
-import subprocess as sp
-import re
-import os
-
 from Packages.SubPkg.Kyocera import KyoceraDefault
 
 if __name__ == '__main__':
     from SubPkg.const.ConstantParameter import *
-    from SubPkg.Brother import *
     from SubPkg.csv_handles import *
     from SubPkg.foos import *
 else:
     from .SubPkg.const.ConstantParameter import *
-    from .SubPkg.Brother import *
     from .SubPkg.csv_handles import *
     from .SubPkg.foos import *
 

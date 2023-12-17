@@ -1,7 +1,7 @@
 import os
 
 _HERE = os.path.realpath(__file__)
-temp = _HERE.split(r'Packages')
+temp = _HERE.split(r'_Packages')
 # ROOT stores the absolute path to the project directory with \ at its end
 ROOT = temp[0]#'/home/razevortex/PycharmProjects/pythonProject/PrinterWatch-webserver/PrinterWatch'
 # example : 'D:\pypro\PrinterWatch2.1.1\'

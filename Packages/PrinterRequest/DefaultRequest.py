@@ -1,10 +1,7 @@
-from Packages.PrinterRequest.snmp_foos import _snmp_get
-from Packages.PrinterRequest.imports import *
-from Packages.csv_read import model_ip
-from Packages.PrinterRequest.snmp_foos import *
-from Packages.PrinterRequest.StaticVar import model_oid, model_dict
-from Packages.PrinterObject.main import pLib
-from Packages.Libs.main import *
+from webinterface._Packages.Libs.main import *
+from webinterface._Packages.PrinterObject.main import pLib
+from webinterface._Packages.PrinterRequest.StaticVar import model_oid, model_dict
+from webinterface._Packages.PrinterRequest.snmp_foos import _snmp_get
 
 manufacturer = list(set([m.manufacturer for m in mLib.get('*')]))
 
@@ -114,9 +111,4 @@ class InitSNMP(object):
                 pLib.update_obj(obj)'''
 
 if __name__ == '__main__':
-    for key, val in model_ip.items():
-        req = AdvRequest(key)
-        print(req.data) if req.valid() else print('err')
-
-#test_oid('1.3.6.1.2.1.1.4.0')
-
+    pass

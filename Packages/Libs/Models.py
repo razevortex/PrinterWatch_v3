@@ -1,8 +1,9 @@
-from Packages.Libs.StaticVar import *
-from Packages.GlobalClasses import LockedSlots
 from json import dumps, loads
-from pathlib import Path
 from os import path
+from pathlib import Path
+from .StaticVar import DB_DIR
+from Packages.GlobalClasses import LockedSlots
+
 
 class _PrinterModel(LockedSlots):
 	"""
