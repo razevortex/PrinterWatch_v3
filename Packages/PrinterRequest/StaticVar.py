@@ -1,3 +1,5 @@
+#from Packages.PrinterObject.main import cLib, mLib, pLib
+
 model_oid = (('ECOSYS M6635cidn', 'ECOSYS M3655idn', 'MFC-9142CDN', 'MFC-L3770CDW', 'MFC-L3750CDW',
                'TASKalfa 3051ci', 'TASKalfa 5052ci', 'TASKalfa 4002i', 'MFC-9332CDW', 'MFC-L8650CDW',
                'DCP-L3510CDW', 'MFC-9460CDN'),

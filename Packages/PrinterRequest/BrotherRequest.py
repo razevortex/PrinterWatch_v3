@@ -1,8 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
-
-from webinterface._Packages.Libs.main import *
-from webinterface._Packages.PrinterRequest.StaticVar import brother_urls
+from Packages.PrinterRequest.StaticVar import *
+from Packages.Libs.main import *
 
 
 class BrotherReq(object):

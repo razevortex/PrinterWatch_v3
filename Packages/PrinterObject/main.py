@@ -9,7 +9,7 @@ from Packages.PrinterObject.Tracker import PrinterTracker
 
 class Printer(LockedClass):
     def __init__(self, **kwargs):
-        self.activ = kwargs.get('active', True)
+        self.active = kwargs.get('active', True)
         self.serial_no = kwargs.get('serial_no')
         self.model = mLib.get(kwargs.get('model'))
         self.display_name = kwargs.get('display_name', self.serial_no)

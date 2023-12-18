@@ -1,9 +1,9 @@
 from datetime import datetime as dt
 
-from webinterface._Packages.PrinterRequest.BrotherRequest import BrotherReq
-from webinterface._Packages.PrinterRequest.DefaultRequest import *
-from webinterface._Packages.PrinterRequest.KyoceraRequest import KyoceraReq
-
+from Packages.PrinterRequest.BrotherRequest import BrotherReq
+from Packages.PrinterRequest.DefaultRequest import *
+from Packages.PrinterRequest.KyoceraRequest import KyoceraReq
+#from Packages.PrinterObject.main import *
 
 class PrinterRequest(object):
 	def __init__(self, ip):

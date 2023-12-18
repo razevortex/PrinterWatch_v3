@@ -72,10 +72,12 @@ class DataDict(BaseDict):
             return DataDict(**{key: val for key, val in self.items() if key in keys})
 
     def _of_timeframe(self, start, end, keys='*'):
+        start = self['Date'][0] if start is None else start
+        end = self['Date'][-1] if end is None else end
         index_arr = [i for i, date in enumerate(self['Date']) if start <= date < end]
         if len(index_arr) < 1:
             return False
-        return DataDict(**{key: val[index_arr[0]:index_arr[-1]] for key, val in self._of_key(keys=keys)})
+        return DataDict(**{key: val[index_arr[0]:index_arr[-1]] for key, val in self._of_key(keys=keys).items()})
 
 
 # Since the Tracker (except the Date tracker) is to track the value changes over given time but initial will get the
@@ -158,6 +160,13 @@ class PrinterTracker(object):
             return len(self.data['Date']), None, None
         else:
             return len(self.data['Date']), self.data['Date'][0], self.data['Date'][-1]
+
+    def sub_data(self, amount=None, past=None, befor=None, keys='*'):
+        if amount is None:
+            amount = 2
+        if self.meta[0] < amount:
+            return False
+        return self.data._of_timeframe(past, befor, keys=keys)
 
     def update(self, dict_obj, carts=()):
         if not (self.current['Date'] is None):

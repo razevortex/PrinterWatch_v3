@@ -4,7 +4,7 @@ from pathlib import Path
 from .StaticVar import DB_DIR
 from Packages.GlobalClasses import LockedSlots
 
-
+print('Cart:', DB_DIR)
 #  Just a Container of a Cart-Type
 class _CartridgeModel(LockedSlots):
     __slots__ = 'name', 'manufacturer', 'color', 'price', 'global_stats'
@@ -127,3 +127,4 @@ class CartridgesLib(object):
                 view[key][val] = list(set(view[key][val] + [obj.__getattribute__(val)]))
             view[key]['member'] += [obj.name]
         return view
+

@@ -1,3 +1,4 @@
+import copy
 from json import dumps
 
 from Packages.GlobalClasses import TaskInterval
@@ -27,14 +28,28 @@ class DataBase(object):
                     print('err => merged_tracker_data')
         return temp
 
-    def get_tracker_sets(self, search='*', min_data=10):
+    def get_tracker_sets(self, search='*', befor=None, past=None, min_data=None, keys='*'):
         temp = []
-        objs = [obj for obj in self.printer.get_search(search) if len(obj.tracker.data['Date']) > min_data]
-        [temp.extend(obj.tracker.data['Date']) for obj in objs]
+        if type(keys) == list and not 'Date' in keys:
+            keys.append('Date')
+        objs = {obj.display_name: obj.tracker.sub_data(amount=min_data, befor=befor, past=past, keys=keys) for obj in self.printer.get_search(search)}
+        [temp.extend(tracker['Date']) for tracker in objs.values() if tracker]
         dates = list(set(temp))
         dates.sort()
-        print(dates)
+        data_set = {}
+        for name, obj in objs.items():
+            if obj:
+                temp = {key: [] for key in obj.keys() if key != 'Date'}
+                for date in dates:
+                    if date in obj['Date']:
+                        for key in temp.keys():
+                            temp[key].append(obj[key][obj['Date'].index(date)])
+                    else:
+                        for key in temp.keys():
+                            temp[key].append(0)
+                data_set[name] = temp
 
+        return data_set, dates
 
     def __repr__(self):
         msg = f'Cartridges[{len(self.cartridges.name_index)}]: {self.cartridges.name_index}\n'
@@ -50,22 +65,16 @@ class DataBase(object):
 
 
 if __name__ == '__main__':
+    from datetime import datetime as dt, timedelta
+    befor = dt.now()
+    past = befor - timedelta(days=100)
     db = DataBase()
-    print(db.get_tracker_sets())
-    '''from _Packages.csv_read import *
-    def migrate_db():
-        cLib.reset_stats()
-        db = DataBase()
-        for obj in db.printer.obj:
-            print(obj.serial_no, get_tracker_set(obj.serial_no, obj.model.get_tracker_keys()))
-            obj.update_tracker_batch(**get_tracker_set(obj.serial_no, obj.model.get_tracker_keys()))
-    #migrate_db()
-    db = DataBase()
-    temp = db.printer.data_tracker_set('*')
-    for key, val in temp.items():
-        if key == 'Date':
-            t = val[-1] - val[0]
+    befor, past = [dt.strptime(input(f'{t} (in format dd.mm.yy):'), '%d.%m.%y') for t in ('befor', 'past')]
 
-            print(key, len(val), t.days, val)
-        else:
-            print(key, len(val), sum(val), val)'''
+
+    test_set, dates = db.get_tracker_sets(befor=befor, past=past, keys=['Prints', 'B'])
+    print('Dates', len(dates), ''.join([date.strftime('%d.%m.%y') + " | " for date in dates]))
+    for key, val in test_set.items():
+        print(key)
+        for k, v in val.items():
+            print(k, len(v), v)
