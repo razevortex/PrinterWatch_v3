@@ -1,5 +1,5 @@
 from json import dumps
-
+from datetime import timedelta
 from Packages.GlobalClasses import TaskInterval
 from Packages.PrinterObject.main import pLib, cLib, mLib
 
@@ -33,8 +33,42 @@ class DataBase(object):
         [temp.extend(obj.tracker.data['Date']) for obj in objs]
         dates = list(set(temp))
         dates.sort()
-        print(dates)
+        return dates, objs
 
+    def merged_time_frames(self, objs, key_, dates):
+        datasets = []
+        for obj in objs:
+            data = []
+            for start, end in dates:
+                val = obj.tracker.data._of_timeframe(start, end, keys=(key_, ))
+                if val:
+                    val = sum(val[key_])
+                else:
+                    val = 0
+                data.append(val)
+            datasets.append({'label': obj.display_name, 'data': data})
+        return {'labels': [date[0].strftime('%d.%m.%Y') for date in dates], 'datasets': datasets}
+
+    def make_time_frames(self, dates, timeframe):
+        frame_start, frame_end = dates[0], dates[0] + timeframe
+        temp = [(frame_start, frame_end)]
+        while frame_end < dates[-1]:
+            frame_start, frame_end = frame_end, frame_end + timeframe
+            temp += [(frame_start, frame_end)]
+        return temp
+
+    def generate_plot(self, key, search='*', min_data=10, timeframe=None):
+        dates, objs = self.get_tracker_sets(search=search, min_data=min_data)
+        if timeframe is not None:
+            dates = self.make_time_frames(dates, timeframe)
+            return self.merged_time_frames(objs, key, dates)
+        datasets = []
+        for obj in objs:
+            data = [0] * len(dates)
+            for date, val in zip(obj.tracker.data['Date'], obj.tracker.data[key]):
+                data[dates.index(date)] = val
+            datasets.append({'label': obj.display_name, 'data': data})
+        return {'labels': [date.strftime('%d.%m.%Y') for date in dates], 'datasets': datasets}
 
     def __repr__(self):
         msg = f'Cartridges[{len(self.cartridges.name_index)}]: {self.cartridges.name_index}\n'
@@ -51,7 +85,8 @@ class DataBase(object):
 
 if __name__ == '__main__':
     db = DataBase()
-    print(db.get_tracker_sets())
+    print(db.generate_plot('Prints'))
+    print(db.generate_plot('Prints', timeframe=timedelta(days=28)))
     '''from _Packages.csv_read import *
     def migrate_db():
         cLib.reset_stats()

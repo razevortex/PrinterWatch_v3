@@ -1,79 +1,38 @@
-from Packages.RequestHandle import *
-from Packages.SubPkg.foos import *
-from Packages.SubPkg.const.ConstantParameter import data_dict_template, run_interval
-from Packages.SubPkg.csv_handles import *
-from Packages.StrucData import create_stat_db, update_recentCache
-import time
-import datetime as dt
+import bs4
+from webinterface._Packages.GlobalClasses import TaskInterval
+from webinterface._Packages.PrinterObject.main import *
+from webinterface._Packages.PrinterRequest.main import PrinterRequest as req
+
+back_log_size = 100
 
 
-def coffee_break(min, start):
-    sec = int(min * 60)
-    running_for = time.time() - start
-    early = running_for - sec
-    print('run & early', running_for, early)
-    try:
-        create_stat_db()
-        update_recentCache()
-    except:
-        print(f'!!! ERROR !!! > during break Cache phase')
-    try:
-        arr = get_pending_ip()
-        t_arr = []
-        created_ip = []
-        for t_dic in arr:
-            cli = {'IP': t_dic['IP']}
-            get = ClientGet(cli)
-            db = dbClient()
-            db.updateData()
-            data = get.snmp_run_main()
-            if data is not False:
-                try:
-                    for key in ['Serial_No', 'Model', 'Manufacture']:
-                        if key not in list(data.keys()):
-                            t_dic['TRIED'] = int(t_dic['TRIED']) + 1
-                            t_arr.append(t_dic)
-                            break
-                        if data[key] == 'NaN':
-                            t_dic['TRIED'] = int(t_dic['TRIED']) + 1
-                            t_arr.append(t_dic)
-                            break
-                    data_dict_to_store(data)
-                    created_ip.append(data['IP'])
-                except:
-                    t_dic['TRIED'] = int(t_dic['TRIED']) + 1
-                    t_arr.append(t_dic)
-                    break
-        update_ip_form(t_arr)
-        [remove_ip(i) for i in created_ip]
-    except:
-        print(f'!!! ERROR !!! > during break New IPs phase')
-    if early < 0:
-        now = write_timestamp_to_com()
-        print(f'wrote {now} to com')
-        print(f'doin´ ma {early / 60} minute coffee  break!')
-        early = early * -1
-        time.sleep(early)
+def report_msg(msg: str):
+    if msg in ('start', 'stop'):
+        return f"run {msg} at: {dt.now().strftime('%d.%m.%Y %H:%M:%S')}"
+    else:
+        return f"Exception at: {dt.now().strftime('%d.%m.%Y %H:%M:%S')} => during: {msg}\n"
 
 
-while running(True):
-    start = time.time()
-    clients = dbClient()
-    clients.updateData()
-    listed = clients.ClientData
-    progress = 0
+def report(msg):
+    lines = []
+    if path.exists('/home/razevortex/PrinterWatch_v3/bg_err_log.txt'):
+        with open('/home/razevortex/PrinterWatch_v3/bg_err_log.txt', 'r') as f:
+            lines = [line for line in f.readlines()]
+    if len(lines) > back_log_size:
+        lines = lines[-back_log_size:]
+    lines.append(report_msg(msg))
+    with open('/home/razevortex/PrinterWatch_v3/bg_err_log.txt', 'w') as f:
+        f.write(''.join(lines))
 
-    for cli in listed:
+
+def on_watch():
+    report('start')
+    for ip, serial in [(obj.ip, obj.serial_no) for obj in pLib.get_search('*', result=object) if obj.active]:
         try:
-            print('<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
-            print(f'request cycle progress : {progress}/{len(listed)}')
-            get = ClientGet(cli)
-            data = get.snmp_run_main()
-
-            if data is not False:
-                if data['Serial_No'] == cli['Serial_No']:
-                    print(data_dict_to_store(data))
+            req(ip)
         except:
-            print(f'!!! ERROR !!! > client: {cli["Serial_No"]}')
-        progress += 1
-    coffee_break(run_interval, start)
+            report(serial)
+    report('stop')
+
+
+on_watch()

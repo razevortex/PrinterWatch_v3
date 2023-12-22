@@ -75,7 +75,7 @@ class DataDict(BaseDict):
         index_arr = [i for i, date in enumerate(self['Date']) if start <= date < end]
         if len(index_arr) < 1:
             return False
-        return DataDict(**{key: val[index_arr[0]:index_arr[-1]] for key, val in self._of_key(keys=keys)})
+        return DataDict(**{key: val[index_arr[0]:index_arr[-1]] for key, val in self._of_key(keys=keys).items()})
 
 
 # Since the Tracker (except the Date tracker) is to track the value changes over given time but initial will get the

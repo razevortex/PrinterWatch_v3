@@ -144,6 +144,7 @@ class PrinterLib(object):
         for obj in PrinterLib.obj:
             if this in str(obj):
                 arr.append(obj)
+        return arr
 
     def data_tracker_set(self, search):
         obj_set = self.get_search(search)
