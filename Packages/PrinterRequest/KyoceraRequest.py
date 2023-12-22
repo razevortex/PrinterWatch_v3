@@ -1,6 +1,6 @@
-from webinterface._Packages.PrinterRequest.StaticVar import kyocera_toner_bw, kyocera_toner_color, kyocera_pages, \
-    taskalfa_pages, ecosys_pages
-from webinterface._Packages.PrinterRequest.snmp_foos import _snmp_get
+from Packages.PrinterRequest.StaticVar import *
+from Packages.Libs.main import *
+from Packages.PrinterRequest.snmp_foos import _snmp_get
 
 
 class KyoceraReq(object):

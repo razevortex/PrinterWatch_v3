@@ -43,15 +43,20 @@ class LockedClass(object):
             super().__setattr__(key, value)
 
 
+
+
+
 class TaskInterval(object):
     '''
     list of task obj [ {name: str, last_time: int, interval: int, event: method/function},...]
     '''
-    def __init__(self, args):
+    def __init__(self, **kwargs):
         self.tasks = []
-        for arg in args:
-            self.__setattr__(arg[0], [None, arg[1], arg[2]])
-            self.tasks.append(arg[0])
+        for key, val in kwargs.items():
+            print(key, val)
+            val.insert(0, None)
+            self.__setattr__(key, val)
+            self.tasks.append(key)
 
     def get_sec(self):
         return int(nsec() * .000000001)

@@ -255,6 +255,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/db/L874617332.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/db/L874820075.csv">
           <value>
             <Attribute>
@@ -270,6 +277,13 @@
           </value>
         </entry>
         <entry key="/db/LW16945225.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/db/N2E3508435.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
@@ -305,6 +319,13 @@
           </value>
         </entry>
         <entry key="/db/RC68Y02592.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/db/RC69604927.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />

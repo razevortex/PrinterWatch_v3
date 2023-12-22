@@ -1,5 +1,7 @@
 from pathlib import Path
-DB_DIR = Path('/home/razevortex/PrinterWatch_v3/jsons')
+import os
+from Packages.StaticVar import *
+
 DATA_KEYS_GROUPED = {'Pages': ('Prints', 'Copies', 'ColorPrints', 'ColorCopies'), 'Cartridges': ('B', 'C', 'M', 'Y'), 'Time': ('Date',)}
 DATA_KEYS_LIST = ('Prints', 'Copies', 'ColorPrints', 'ColorCopies', 'B', 'C', 'M', 'Y', 'Date')
 
@@ -9,3 +11,6 @@ CART_MODEL_GROUP = [['TN-242BK', 'TN-246C', 'TN-246M', 'TN-246Y'], ['TN-247BK', 
                     ['TN-241BK', 'TN-245C', 'TN-245M', 'TN-245Y'], ['TN-326BK', 'TN-326C', 'TN-326M', 'TN-326Y'],
                     ['TN-325BK', 'TN-325C', 'TN-325M', 'TN-325Y'],
                     ['TK-1140'], ['TK-3190'], ['TK-6325'], ['TK-130'], ['TK-170']]
+
+if __name__ == '__main__':
+    pass

@@ -1,7 +1,7 @@
-from webinterface._Packages.Libs.main import *
-from webinterface._Packages.PrinterObject.main import pLib
-from webinterface._Packages.PrinterRequest.StaticVar import model_oid, model_dict
-from webinterface._Packages.PrinterRequest.snmp_foos import _snmp_get
+from Packages.Libs.main import *
+from Packages.PrinterObject.main import pLib
+from Packages.PrinterRequest.StaticVar import *
+from Packages.PrinterRequest.snmp_foos import _snmp_get
 
 manufacturer = list(set([m.manufacturer for m in mLib.get('*')]))
 
