@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+
+</head>
+<body>
+
+<form method="post" id="login">{% csrf_token %}</form>
+
+<script>
+    const formElement = document.getElementById("login");
+    function createInput(_type, _name, _num) {
+        var inElement = document.createElement("input");
+        inElement.type = _type;
+        inElement.id = _name;
+        inElement.name = _name;
+        if (_type == "hidden") {
+            inElement.value = "{{ username|safe }}";}
+        document.getElementById("login").appendChild(inElement);
+
+    }
+
+    function createForm() {
+
+
+        alert(formElement);
+        let ref = "{{ form|safe }}";
+        if (ref != "/") {
+        formElement.action = "{{ form|safe }}";}
+        const inputEle = {{ inputs|safe }};
+        for (var i in inputEle) {
+            let iE = inputEle[i];
+            createInput(iE[0], iE[1], iE[2]);
+            formElement.appendChild(document.createElement("br"));
+            }
+        var submitButton = document.createElement("button");
+        submitButton.type = "submit";
+        submitButton.textContent = "Submit Form";
+        formElement.appendChild(submitButton);
+
+    }
+alert("inscript");
+</script>
+
+<script>
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    window.onload = createForm;
+</script>
+
+</body>
+</html>
