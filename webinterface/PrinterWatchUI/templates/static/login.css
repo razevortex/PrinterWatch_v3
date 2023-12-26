@@ -1,0 +1,32 @@
+body{
+  background-color: #294;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    margin-left: auto;
+    margin-right: auto;
+    width: 25%;
+    background-color: #6AF;
+    border: 3px solid #CCC;
+    border-radius: 10%;
+    overflow: hidden;
+    align-content: stretch;
+    text-align: center;
+}
+
+.form > div {
+    width: 100%;
+    text-align: center;
+    background-color: #222;
+    color: #A80;
+}
+
+input {
+    size: 100;
+}
+
+.form > p {
+    text-align: center;
+}

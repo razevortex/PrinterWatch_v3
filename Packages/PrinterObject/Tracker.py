@@ -175,7 +175,7 @@ class PrinterTracker(object):
         delta = self.current.update(**dict_obj)
         if not (delta is None):
             cLib.update(carts, delta)
-            cLib.save()
+            cLib._save()
             if self.data['Date']:
                 self.data.update(**delta)
             else:

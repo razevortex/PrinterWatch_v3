@@ -4,6 +4,7 @@ from pathlib import Path
 from PIL import Image
 import hashlib
 from Packages.UserManager.StaticVar import *
+from Packages.UserManager.SessionHandle import SessionObj
 from Packages.GlobalClasses import LockedSlots
 
 
@@ -14,27 +15,38 @@ class UserObject(LockedSlots):
         [self.__setattr__(key, val) for key, val in kwargs.items()]
         super().__init__(*user_object_keys[:3])
 
-    def verify_creds(self, cred, _input:str):
-        if self.status != 0 and cred in ('_pass', 'fact2'):
-            if cred == '_pass' and hashlib.sha256(bytes(_input, 'utf-8')).hexdigest() == self.__getattribute__('_pass'):
-                self.status = STATUS_DEFAULT
-                return True
-            elif cred == 'fact2' and pyotp.TOTP(self.__getattribute__('auth2_key')).verify(_input):
-                self.status = STATUS_DEFAULT
-                return True
-            else:
-                self.status -= 1
-                return False
+    def verify_creds(self, **kwargs):
+        if self.status != 0:
+            for key, val in kwargs.items():
+                if key == '_pass' and val != '':
+                    if hashlib.sha256(bytes(val, 'utf-8')).hexdigest() == self.__getattribute__('_pass'):
+                        self.status = 5
+                        return {'title': '2 Fact Auth', 'href': '/', 'submit': 'Submit',
+                                'fields': [['hidden', 'username', self.username], ['text', 'fact2', '']]}
+                    else:
+                        self.status -= 1
+                        return False
+                if key == 'fact2' and val != '':
+                    if pyotp.TOTP(self.__getattribute__('auth2_key')).verify(val):
+                        self.status = 5
+                        token = SessionObj().create_token(self.username)
+                        token.update({'title': f'Hi {self.username},', 'href': '/main/plot/', 'submit': 'Enter'})
+                        #        'fields': [['hidden', 'username', self.username],
+                        #                   ['hidden', 'timetoken', token['timetoken']]]}
+                        return token
+                    else:
+                        self.status -= 1
+                        return False
         return None
 
-    def cred(self):
+    '''def cred(self):
         if self.status:
             entered = hashlib.sha256(bytes(input('enter password:'), 'utf-8'))
             #print(hash(entered), self.__getattribute__('pass'))
             if self.__getattribute__('_pass') == entered.hexdigest():
                 if pyotp.TOTP(self.__getattribute__('auth2_key')).verify(input('enter 2 auth:')):
                     return True
-        return False
+        return False'''
 
     def export(self):
         return {slot: self.__getattribute__(slot) for slot in self.__slots__}
@@ -89,9 +101,20 @@ class UserLib(object):
             return UserLib.name_index.index(name)
         return False
 
-    def user_(self, name):
-        if not self.user_exists(name) is False:
-            return UserLib.obj[self.user_exists(name)]
+    def is_valid_user(self, name):
+        obj = UserLib.obj[self.user_exists(name)]
+        if obj:
+            if obj.status != 0:
+                return True
+        return False
+
+    def user_(self, **kwargs):
+        if not self.user_exists(kwargs.get('username', '')) is False:
+            if 'timetoken' in kwargs.keys():
+                return SessionObj().validate(**kwargs)
+            got = UserLib.obj[self.user_exists(kwargs.get('username', ''))].verify_creds(**kwargs)
+            self.save()
+            return got
 
     def auth_user(self, name):
         if name in UserLib.name_index:
