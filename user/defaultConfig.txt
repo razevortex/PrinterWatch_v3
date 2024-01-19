@@ -1,4 +1,0 @@
-PrinterMonitor=filter:*
-DeviceDetails=time:total;vals:seperated
-CartStorage=days:14
-Analytics=group:Serial_No;value:BW;filter:
