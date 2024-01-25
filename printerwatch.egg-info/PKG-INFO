@@ -1,0 +1,6 @@
+Metadata-Version: 2.1
+Name: printerwatch
+Version: 1.0
+Summary: package used to track printer data and use them in a django application
+Author: razevortex
+Author-email: razevortex@googlemail.com

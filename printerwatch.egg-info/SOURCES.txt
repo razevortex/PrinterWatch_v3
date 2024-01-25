@@ -1,0 +1,9 @@
+setup.py
+/srv/servme/printerwatch/GlobalClasses.py
+/srv/servme/printerwatch/StaticVar.py
+/srv/servme/printerwatch/__init__.py
+printerwatch.egg-info/PKG-INFO
+printerwatch.egg-info/SOURCES.txt
+printerwatch.egg-info/dependency_links.txt
+printerwatch.egg-info/requires.txt
+printerwatch.egg-info/top_level.txt
