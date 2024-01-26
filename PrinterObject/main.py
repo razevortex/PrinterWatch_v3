@@ -142,7 +142,7 @@ class PrinterLib(object):
             return PrinterLib.obj
         arr = []
         for obj in PrinterLib.obj:
-            if this in str(obj):
+            if this.casefold() in str(obj).casefold():
                 arr.append(obj)
         return arr
 

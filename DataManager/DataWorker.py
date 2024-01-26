@@ -2,10 +2,6 @@ from printerwatch.DataManager.DataSet import DataBase
 from datetime import datetime as dt, date, timedelta
 
 db = DataBase()
-#befor, past = [dt.strptime(input(f'{t} (in format dd.mm.yy):'), '%Y-%m-%d') for t in ('befor', 'past')]
-#keys = ['Prints']
-#test_set, dates = db.get_tracker_sets(befor=befor, past=past, keys=keys)
-
 
 class DataObject(object):
     def __init__(self, past='2022-01-01', befor=None, interval=2, search='*', key='Prints', incr=True, group=False):
@@ -37,7 +33,10 @@ class DataObject(object):
         #                   grouped
         else:
             temp = [self.framer(obj.tracker.data['Date'], obj.tracker.data[self.key]) for obj in self.search_filter() if obj.tracker.data['Date']]
-            return [(self.search, [sum(*t) for t in zip(temp[:])]),]
+            arr = []
+            for d in range(len(self.timeframe)):
+                arr.append(sum([t[d] for t in temp]))
+            return ((self.search, arr),)
 
     def framer(self, date, vals):
         if date[0].date() > self.timeframe[-1]:
