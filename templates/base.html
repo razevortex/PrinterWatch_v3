@@ -1,0 +1,32 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+	<head>
+		{% block css %}
+		{% if cssfiles %}
+		
+		<link rel="stylesheet" type="text/css" href="{% static 'css/ui.css' %}">
+	
+		{% endif %}
+		{% endblock %}
+		
+
+		<title>{% block pagetitle %}{% endblock %}</title>
+	</head>
+	<body>
+	{% block js %}
+	{% if jsfiles %}
+	{% for js in jsfiles %}
+	<script type="text/javascript" src="{% static 'js/{{ js }}.js' %}"></script>
+	{% endfor %}
+	{% endif %}
+	{% endblock %}
+	{{ cssfiles }}
+	{% block head %}
+	{% endblock %}
+	{% block nav %}
+	{% endblock %}
+	{% block content %}
+	{% endblock %}
+	</body>
+</html>
