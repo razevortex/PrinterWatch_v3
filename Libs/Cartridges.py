@@ -20,6 +20,10 @@ class _CartridgeModel(LockedSlots):
 
     def __str__(self):
         return f'  name = {self.name}\n  manufacturer = {self.manufacturer}\n  color = {self.color}\n  global_stats = {self.global_stats}\n'
+    
+    @property
+    def id(self):
+        return f'{self.manufacturer} {self.name}'
 
     def update(self, **kwargs):
         self.global_stats['Toner'] += kwargs.get(self.color, 0)
@@ -75,9 +79,12 @@ class CartridgesLib(object):
     def load(self):
         if path.exists(CartridgesLib.file):
             for obj in self._import():
-                if obj['name'] not in CartridgesLib.name_index:
+                #if obj['name'] not in CartridgesLib.name_index:
+                #    CartridgesLib.obj += [_CartridgeModel(**obj)]
+                #    CartridgesLib.name_index += [obj['name']]
+                if f"{obj['manufacturer']} {obj['name']}" not in CartridgesLib.name_index:
                     CartridgesLib.obj += [_CartridgeModel(**obj)]
-                    CartridgesLib.name_index += [obj['name']]
+                    CartridgesLib.name_index += CartridgesLib.obj[-1].id #[obj['name']]
     
     def build_new(self, name='name', manufacturer='manufacturer', color='color', price=-1):
         if name not in CartridgesLib.name_index and name != 'name':
@@ -87,6 +94,11 @@ class CartridgesLib(object):
             CartridgesLib.name_index.append(cart.name)
         self.save()
 
+    def get_select_context(self, *args):
+        for arg in self.get(*args):
+            print(arg)
+        return {arg.color: {'selected': arg.name, 'options': [c.name for c in CartridgesLib.obj if c.color == arg.color]} for arg in self.get(*args)}
+        
     def get(self, *args):
         if args[0] == '*':
             return CartridgesLib.obj

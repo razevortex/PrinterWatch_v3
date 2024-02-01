@@ -4,6 +4,9 @@ from printerwatch.Libs.Models import *
 mLib = ModelLib()
 cLib = CartridgesLib()
 
+def test():
+    print(mLib)
+    print(cLib)
 if __name__ == '__main__':
     print(mLib)
     print(cLib)

@@ -23,6 +23,29 @@ class Printer(LockedClass):
         self.tracker = PrinterTracker(self.serial_no, self.model.name)
         super().__init__('serial_no', 'model')
 
+
+    @property
+    def manufacturer(self):
+        return self.model.manufacturer
+
+    @property
+    def model_(self):
+        return self.model.name
+
+    @property
+    def cart_fill(self):
+        return {key: val for key, val in self.tracker.current.__dict__.items() if key in 'BCYM'}
+
+    @property
+    def counter(self):
+        return {key: val for key, val in self.tracker.current.__dict__.items() if not key in 'BCYM' and key != "Date"}
+    
+    def get_context_obj(self):
+        temp = {'manufacturer': self.manufacturer, 'model': self.model_}
+        temp.update({key: self.__dict__[key] for key, val in self.__dict__.items() if key in ('serial_no', 'display_name', 'ip', 'cartridges', 'location', 'contact', 'active', 'notes')})
+        temp['cartridges'] = cLib.get_select_context(*temp['cartridges'])
+        return {'obj': temp, 'counter': self.counter, 'carts': self.cart_fill}
+    
     def __str__(self):
         return f'{self.serial_no}\n{self.model}\n{self.display_name}\n{self.ip}\n{self.location}\n' \
                f'{self.contact}\n{self.notes}\n'
@@ -105,12 +128,16 @@ class PrinterLib(object):
             msg += str(obj) + '\n' + str(obj.tracker) + '\n\n'
         return msg
 
-    def add_new(self, serial_no, model, **kwargs):
-        kwargs.update(dict(serial_no=serial_no, model=model))
-        new = Printer(**kwargs)
-        PrinterLib.obj.append(new)
-        PrinterLib.name_index.append(new.serial_no)
-        self.save()
+    #def get_context(self, printer=PrinterLib.name_index[0], ):
+    #    temp = [p.displayname for p in PrinterLib.obj]
+        
+    def add_new(self, serial_no, model, ip, **kwargs):
+        if serial_no not in PrinterLib.name_index:
+            kwargs.update(dict(serial_no=serial_no, model=model, ip=ip))
+            new = Printer(**kwargs)
+            PrinterLib.obj.append(new)
+            PrinterLib.name_index.append(new.serial_no)
+            self.save()
 
     def get_obj(self, name):
         if name in PrinterLib.name_index:

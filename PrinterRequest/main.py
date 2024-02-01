@@ -41,5 +41,12 @@ class PrinterRequest(object):
 		return msg
 
 
+class RequestDummy(PrinterRequest):
+    def __init__(self, ip):
+        super().__init__(ip)
+        
+    def update_tracker(self):
+        print(self.response)
+        
 if __name__ == '__main__':
 	pass
