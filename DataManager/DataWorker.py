@@ -1,7 +1,30 @@
 from printerwatch.DataManager.DataSet import DataBase
 from datetime import datetime as dt, date, timedelta
+from json import dumps
 
 db = DataBase()
+
+
+class responseObj(object):
+    def __init__(self, keylist, name, default={}):
+        self._keylist, self._name = keylist, name
+        if keylist != '*':
+            [self.__setattr__(key, val) for key, val in default.items() if key in keylist]
+        else:
+            [self.__setattr__(key, val) for key, val in default.items()]
+
+    def get_(self, req):
+        [self.__setattr__(key, val) for key, val in req.items() if (self._keylist == '*') or key in self._keylist]
+    
+    def get_return(self):
+        return {key: val for key, val in self.__dict__.items() if (self._keylist == '*') or key in self._keylist} 
+
+
+class ResponseHandler(object):
+    def __init__(self, view, *args):
+        [self.__setattr__(arg.name, arg) for arg in args]
+
+
 
 class DataObject(object):
     def __init__(self, past='2022-01-01', befor=None, interval=2, search='*', key='Prints', incr=True, group=False):
@@ -65,3 +88,60 @@ class DataObject(object):
         else:
             return db.printer.get_search(self.search)
 
+
+class PrinterView(object):
+    def __init__(self, **kwargs):
+        #self.printerkeys = ['serial_no'
+        self.context = {}
+        self.x = 0
+        self._update(**kwargs)
+        self._selecting(**kwargs)
+        self._cart_state()
+        
+    def _update(self, **kwargs):
+        print(' Data Worker Update Start: ')
+        if kwargs.get('serial_no', False):
+            #t = {'serial_no': kwargs.get('serial_no')}
+            #t.update({key: val for key, val in kwargs.items()})
+            #print(t)
+            #db.printer.update_obj(t)
+            db.printer.update_obj(dict(kwargs))
+        print(' Data Worker Update End! ')
+        
+    def _selecting(self, **kwargs):
+        # get index of the obj 
+        if kwargs == {}:
+            x = self.x   # if no request set 0
+        else:
+            if kwargs.get('select', False) != kwargs.get('serial_no', False):   # if select dropdown was changed use selected objs index
+                x = db.printer.name_index.index(kwargs.get('select'))
+            else:
+                x = db.printer.name_index.index(kwargs.get('serial_no'))  # else use the previous objs index
+                if kwargs.get('next', False):   # and in/decrement it if next or back was used
+                    x += 1
+                elif kwargs.get('back', False):
+                    x += -1 
+        for i, key in enumerate(['back', 'selected', 'next']): 
+                if key == 'selected':
+                    self.context.update(db.printer.obj[x + i - 1].get_context_obj())
+                    self.context[key] = {'serial_no': db.printer.obj[x + i - 1].serial_no, 'display_name': db.printer.obj[x + i - 1].display_name}
+                else:
+                    self.context[key] = db.printer.obj[x + i - 1].serial_no
+        temp = {'serial_no': db.printer.obj[x + i - 1].serial_no, 'display_name': db.printer.obj[x + i - 1].display_name}
+        self.context['selectable'] = [temp] + [{'serial_no': obj.serial_no, 'display_name': obj.display_name} for obj in db.printer.obj]
+        self.x = x
+    
+    def _cart_state(self):
+        state = db.printer.obj[self.x].tracker.current
+        labels, data, color = [], [], []
+        c = {'B': (0, 0, 0, 0.5), 'C': (0, 255, 255, 0.5), 'M': (255, 0, 255, 0.5), 'Y': (255, 255, 0, 0.5)}
+        self.context['counter'] = {}
+        for key, val in state.items():
+            if key in 'BCYM':
+                labels.append(key), data.append(val), color.append(f"rgba{c[key]}")
+            elif key != 'Date':
+                self.context['counter'][key] = val
+        #temp = {'labels': labels, 'datasets': [{'label': 'Cartridge %', 'data': data, 'backgroundColor': color}]}
+        #self.context['config'] = dumps({'type': 'bar', 'data': temp, 'options': {'scales': { 'y': { 'beginAtZero': True }}}})
+        self.context['data'] = dumps({'labels': labels, 'datasets': [{'label': 'Cartridge %', 'data': data, 'backgroundColor': color}]})
+    

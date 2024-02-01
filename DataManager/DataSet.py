@@ -158,7 +158,7 @@ if __name__ == '__main__':
 
             print(key, len(val), t.days, val)
         else:
-            print(key, len(val), sum(val), val)'''
+            print(key, len(val), sum(val), val)
 from json import dumps
 from datetime import timedelta, datetime as dt, date
 from printerwatch.GlobalClasses import TaskInterval
@@ -289,7 +289,7 @@ if __name__ == '__main__':
     db = DataBase()
     print(db.generate_plot('Prints'))
     print(db.generate_plot('Prints', timeframe=timedelta(days=28)))
-    '''from _printerwatch.csv_read import *
+    from _printerwatch.csv_read import *
     def migrate_db():
         cLib.reset_stats()
         db = DataBase()
