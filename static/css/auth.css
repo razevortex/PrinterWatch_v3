@@ -1,0 +1,57 @@
+body{
+  	background-color: #CCC;
+  	padding-left: 0;
+  	margin-top: 0;
+  	margin-left: auto;
+  	margin-right: auto;
+}
+
+.formObj {
+	background-color: #222;
+	top: 0;
+	width: 40%;
+	margin: auto;
+	display: flex;
+	flex-direction: column;
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-weight: bold;
+  text-align: center;
+  color: #A82;
+}
+
+
+.btn {
+  -webkit-appearance: none;
+  width: 100%;
+  background-color: #A82;
+  }
+
+.spaceing {
+  padding: 10px 0;
+}
+
+.big {
+  border: solid 0px #000;
+  height: 200%;
+  }
+  
+.key {
+	width: 50%;
+	height: auto;
+}
+
+.row {
+    	display: flex;
+    	justify-content: space-evenly;
+    	flex-basis: 10;
+    	width: 100%;   
+}
+
+.can {
+    border: solid 2px #000;
+    background-color: #DDD;
+    position: relativ;
+    height: 80%;
+    width: 80%;
+    margin: auto;
+}
