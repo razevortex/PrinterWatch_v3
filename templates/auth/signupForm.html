@@ -1,0 +1,69 @@
+{% load static %}
+
+{% block form %}
+<div class="formObj">
+	<form method="POST" id="signup" action="qr">{% csrf_token %}
+		<div class="row">
+			<span>Username:</span><input type="text" name="username" id="username" onchange="check();" value="">
+		</div>
+		<div class="row">
+			<span>Password:</span><input type="password" name="pass" id="pass" onchange="check();" value="">
+		</div>
+		<div class="row">
+			<span>Password:</span><input type="password" name="repeat" id="repeat" onchange="check();" value="">
+		</div>
+		<div class="row">
+			<button type="submit" id="btn" class="btn big" form="login" value="submit" onclick="check();" disabled>Enter</button>
+		</div>
+	</form>
+</div>
+
+<script>
+
+console.log({{ user|safe }});
+
+function check() {
+	const userTable = {{ user|safe }};
+	const passA = document.getElementById("pass");
+	const passB = document.getElementById("repeat");
+	const username = document.getElementById("username");
+	const aVal = passA.value;
+	const bVal = passB.value;
+	const name = username.value;
+	let u = false;
+	let p = false;
+	
+	if ( aVal === bVal && aVal.length > 5 ) {
+		p = true;
+	}
+	else {
+	  if ( aVal.length > 5 && bVal.length > 5 ) {
+	    alert("passwords didn't match");
+	    passB.value = '';
+	  }
+	}
+	if (!(userTable.includes(name)) && name.length > 4) {
+	  console.log(name);
+
+	  u = true;
+	}
+	else {
+	  if ( name.length > 5 ) {
+	    alert(name+' is already in use');
+	  }
+	}
+	
+	btnOn(u, p);
+}
+	
+function btnOn(user, pw) {
+	if ( user && pw ){
+		document.getElementById('btn').disabled = false;
+	}
+	else {
+		document.getElementById('btn').disabled = true;
+	}
+}
+</script>
+
+{% endblock %}

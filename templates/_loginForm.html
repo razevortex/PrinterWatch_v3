@@ -1,0 +1,34 @@
+{% load static %}
+
+
+{% block form %}
+<div class="formObj">
+
+{% if username %}
+	<form method="POST" id="login" action="redirect/">{% csrf_token %}
+		<input type="hidden" name="username" value="username">
+		<div class="row">
+			<p> 2 Fact Auth {{ username }} </p>
+		</div>
+		<div class="row">
+			<span class="key">Auth Key:</span><input type="text" name="auth2_key" value="">
+		</div>
+		<div class="row">
+			<button type="submit" class="btn big" form="login" value="submit">Enter</button>
+		</div>
+	</form>	
+{% else %}
+	<form method="POST" id="login" action="">{% csrf_token %}
+		<div class="row">
+			<span class="key">Username:</span><input type="text" name="username" value="">
+		</div>
+		<div class="row">
+			<span class="key">Password:</span><input type="password" name="pass" value="">
+		</div>
+		<div class="row">
+			<button type="submit" class="btn big spaceing" form="login" value="submit">Enter</button>
+		</div>
+	</form>
+{% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+	<head>
+	
+		<title>PrinterWatchAuth</title>
+		<meta charset="UTF-8">
+		<meta name="author" content="Raze Vortex">
+	{% block css %}
+  <link rel="stylesheet" type="text/css" href="/static/css/auth.css">
+  {% endblock %}
+		
+	</head>
+	<body>
+	  <p>{{ page }}</p>
+		{% block form %}
+		{% include "auth/loginForm.html" %}
+		{% endblock %}
+	</body>
+</html>

@@ -1,6 +1,3 @@
-{% extends "base.html" %}
-
-{% block nav %}
 <form method="POST" id="nav" target="_top">{% csrf_token %}</form>
 	<div class="sidebar"><div class="sidecol">
 	<div><button class="nav" id="a" onclick="goto(this);"> A </button></div>
@@ -8,10 +5,11 @@
 	<div>	<button class="nav" id="c" onclick="goto(this);"> C </button></div>
 </div></div>
 <script>
+
 function goto(btn) {
         let form = document.getElementById("nav");
         form.action = btn.id;
         form.submit();
 }
 </script>
-{% endblock %}
+

@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% block css %}
+		
+<link rel="stylesheet" type="text/css" href="{% static 'css/ui.css' %}">
+	
+{% endblock %}
+
+{% block js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block head %}
+<div class="topbar">
+    <div class="toprow">
+    
+        <div class="inputbox" id="_search">
+		<span> Search: </span> <input type="text"  name="search" value="{{ search }}" form="uiform">
+        </div>    
+
+        <div class="inputbox" id="_daterange">
+		<span> Start: </span> <input type="date" name="past" id="_daterange0" value="{{ past }}" form="uiform">
+		<span> End: </span> <input type="date" name="befor" id="_daterange1" value="{{ befor }}" form="uiform">
+        </div>
+
+        <div class="inputbox" id="_interval">
+		<span> Intervall (Days): </span> <input type="number" name="interval" min="2" max="" value="{{ interval }}" form="uiform">
+        </div>
+
+	<div class="inputbox" id="_key">
+            <span> Plotted Val: </span> 
+	    <select name="key" value="{{ key }}" form="uiform">
+                <option value="Prints"{% if key == "Prints" %} selected{% endif %}>Prints</option>
+		<option value="ColorPrints"{% if key == "ColorPrints" %} selected{% endif %}>ColorPrints</option>
+                <option value="Copies"{% if key == "Copies" %} selected{% endif %}>Copies</option>
+		<option value="ColorCopies"{% if key == "ColorCopies" %} selected{% endif %}>ColorCopies</option>
+            </select>
+        </div>
+        
+	<div class="inputbox" id="_increasing">
+		<span> Increment Val: </span> <input type="checkbox" id="incr" name="incr" form="uiform" {% if incr %}checked="checked"{% else %}unchecked{% endif %}>
+	    <span> Group Val: </span> <input type="checkbox" id="incr" name="group" form="uiform" {% if group %}checked="checked"{% else %}unchecked{% endif %}>
+        </div>
+   
+    </div>
+    
+    <div class="toprow">
+	<form id="uiform" method="POST" target="_top" action="http://servme/bp/">{% csrf_token %}</form>    
+        <button class="on" type="submit" value="Submit" form="uiform">
+            Apply    
+        </button>
+    </div>
+</div>
+{% endblock %}
+{% block content %}
+<div class="can">
+<canvas id="canvas"></canvas>
+</div>
+    <script>
+        new Chart(
+        document.getElementById('canvas'),
+        {
+            type: 'line',
+            data: {{ data|safe }}
+        });
+    </script>
+{% endblock %}
+

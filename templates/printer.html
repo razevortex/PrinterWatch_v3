@@ -1,0 +1,25 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+        <head>
+                {% block css %}
+                
+                <link rel="stylesheet" type="text/css" href="/static/css/printer.css">
+        
+                {% endblock %}
+        {% include "chartImport.html" %}        
+        <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
+        
+        <title>{% block pagetitle %}{% endblock %}</title>
+        </head>
+        <body>
+	      {% include "printerObj.html" %}
+        {% block js %}
+        {% endblock %}
+        {% block head %}
+        {% endblock %}
+        
+        
+        </body>
+</html>
+

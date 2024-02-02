@@ -1,0 +1,21 @@
+<div class="obj">
+	<form method="POST" name="form" id="form" action="">{% csrf_token %}
+	  <input type="hidden" name="create" value="printer">
+    <div class="row">
+      <h1>Add new Printer:</h1>
+    </div>
+    <div class="row">
+      <p>it is possible to add multiple printer at once <br>
+         just keep the ips seperated by ' ' or ','.</p>
+    </div>
+    <div class="row">
+	  
+	    <span class="key">Enter IPs: </span> <input type="text" id="ip" name="ip" value="">
+	    
+	  </div>
+	  <div class="row">
+	    <input type="submit" id="btnsubmit" value="Save" class="btn big spaceing" name="add_printer"/>
+	  </div>
+  </form>
+</div>
+

@@ -1,0 +1,25 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+	<head>
+	
+		<title>PrinterWatchAuth</title>
+		<meta charset="UTF-8">
+		<meta name="author" content="Raze Vortex">
+	{% block css %}
+  <link rel="stylesheet" type="text/css" href="/static/css/auth.css">
+  {% endblock %}
+		
+	</head>
+	<body>
+	  {% if page == "login" %}
+		{% block form %}
+		{% include "auth/loginForm.html" %}
+		{% endblock %}
+		{% elif page == "signup" %}
+		{% include "auth/signupForm.html" %}
+    {% else %}
+    <p> redirect </p>
+    {% endif %}
+</body>
+</html>
