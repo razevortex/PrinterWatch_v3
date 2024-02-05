@@ -1,7 +1,11 @@
 from json import dumps, loads
 from os import path
 from pathlib import Path
+import qrcode
+from qrcode.image.pil import PilImage
 from PIL import Image
+import io
+import base64
 import hashlib
 from printerwatch.UserManager.StaticVar import *
 from printerwatch.UserManager.SessionHandle import SessionObj
@@ -21,8 +25,8 @@ class UserObject(LockedSlots):
                 if key == '_pass' and val != '':
                     if hashlib.sha256(bytes(val, 'utf-8')).hexdigest() == self.__getattribute__('_pass'):
                         self.status = 5
-                        return {'title': '2 Fact Auth', 'href': '/', 'submit': 'Submit',
-                                'fields': [['hidden', 'username', self.username], ['text', 'fact2', '']]}
+                        kwargs.update({'token': False})
+                        return kwargs
                     else:
                         self.status -= 1
                         return False
@@ -30,10 +34,7 @@ class UserObject(LockedSlots):
                     if pyotp.TOTP(self.__getattribute__('auth2_key')).verify(val):
                         self.status = 5
                         token = SessionObj().create_token(self.username)
-                        token.update({'title': f'Hi {self.username},', 'href': '/main/plot/', 'submit': 'Enter'})
-                        #        'fields': [['hidden', 'username', self.username],
-                        #                   ['hidden', 'timetoken', token['timetoken']]]}
-                        return token
+                        return {'token': token}
                     else:
                         self.status -= 1
                         return False
@@ -53,7 +54,13 @@ class UserObject(LockedSlots):
 
     def __repr__(self):
         return ''.join([f'{slot}: {self.__getattribute__(slot)}' for slot in self.__slots__])
-
+    
+    @classmethod
+    def create_new(cls, **kwargs):
+        t_dict = {'status': 5, 'TTT': True, 'permission': 0, 'config': []}
+        t_dict.update({key: val for key, val in kwargs.items() if key in ('username', '_pass', 'auth2_key')})
+        return cls(**t_dict)
+        
     @classmethod
     def create_new_from_terminal(cls, name):
         password = False
@@ -71,6 +78,16 @@ class UserObject(LockedSlots):
         print(', '.join([f'{key}: {val}' for key, val in {'username': name, '_pass': password.hexdigest(), 'auth2_key': factAuth, 'status': 5, 'TTT': True, 'permission': 0, 'config': []}.items()])) 
         return cls(**{'username': name, '_pass': password.hexdigest(), 'auth2_key': factAuth, 'status': 5, 'TTT': True, 'permission': 0, 'config': []})
 
+def qr_key_gen(username='', _pass='', **kwargs):
+    _pass = hashlib.sha256(bytes(_pass, 'utf-8'))
+    auth2_key = pyotp.random_base32()
+    uri = pyotp.totp.TOTP(auth2_key).provisioning_uri(name=username, issuer_name='printerwatch')
+    qr = qrcode.make(uri)
+    #qr_img = qr.make_image(fill_color="black", black_color="white")
+    buffer = io.BytesIO()
+    qr.save(buffer, format="PNG")
+    return {'username': username, '_pass': _pass.hexdigest(), 'auth2_key': auth2_key, 'qr': base64.b64encode(buffer.getvalue()).decode()}
+    
 
 class UserLib(object):
     obj = []
@@ -90,6 +107,13 @@ class UserLib(object):
             with open(UserLib.file, 'w') as f:
                 f.write(dumps(temp))
 
+    def create_new(self, **kwargs):
+        temp = qr_key_gen(**kwargs)
+        UserLib.name_index += [temp['username']]
+        UserLib.obj += [UserObject.create_new(**temp)]
+        self.save()
+        return temp
+        
     def create_user(self, name):
         if not self.user_exists(name) is False and len(name) >= 4:
             UserLib.name_index += [name]
@@ -98,8 +122,8 @@ class UserLib(object):
         self.save()
 
     def user_exists(self, name):
-        if name in UserLib.name_index:
-            return UserLib.name_index.index(name)
+        if name in UserLib().name_index:
+            return UserLib().name_index.index(name)
         return False
 
     def is_valid_user(self, name):
@@ -110,12 +134,15 @@ class UserLib(object):
         return False
 
     def user_(self, **kwargs):
+        print('user_ foo')
         if not self.user_exists(kwargs.get('username', '')) is False:
             if 'timetoken' in kwargs.keys():
                 return SessionObj().validate(**kwargs)
             got = UserLib.obj[self.user_exists(kwargs.get('username', ''))].verify_creds(**kwargs)
             self.save()
             return got
+        else:
+            return False
 
     def auth_user(self, name):
         if name in UserLib.name_index:

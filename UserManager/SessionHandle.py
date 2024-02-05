@@ -24,7 +24,6 @@ class SessionObj(dict):
             return f.write(dumps(json_obj))
 
     def create_token(self, user):
-
         temp = TimeoutToken.create(user)
         self[temp.__name__] = temp
         self._save()

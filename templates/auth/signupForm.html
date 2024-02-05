@@ -1,21 +1,32 @@
 {% load static %}
-
+{% if qr %}
+<img src="data:img/png;base64,{{ qr }}" alt="QRCODE">
+	<button class="btn big spaceing" onclick="window.location.href='http://127.0.0.1:8000/dlogin/';">
+		to Loginpage
+	</button>
+{% else %}
 {% block form %}
 <div class="formObj">
-	<form method="POST" id="signup" action="qr">{% csrf_token %}
+	<form method="POST" id="signup" action="">{% csrf_token %}
 		<div class="row">
 			<span>Username:</span><input type="text" name="username" id="username" onchange="check();" value="">
 		</div>
 		<div class="row">
-			<span>Password:</span><input type="password" name="pass" id="pass" onchange="check();" value="">
+			<span>Password:</span><input type="password" name="_pass" id="_pass" onchange="check();" value="">
 		</div>
 		<div class="row">
 			<span>Password:</span><input type="password" name="repeat" id="repeat" onchange="check();" value="">
 		</div>
 		<div class="row">
-			<button type="submit" id="btn" class="btn big" form="login" value="submit" onclick="check();" disabled>Enter</button>
-		</div>
-	</form>
+			<button type="submit" id="btn" class="btn big" form="signup" value="submit" onclick="check();" disabled>Enter</button>
+		</div>	</form>
+			<div class="row">
+	<button class="btn big spaceing" onclick="window.location.href='http://127.0.0.1:8000/dlogin/';">
+		Already registered?
+	</button>
+	</div>
+
+
 </div>
 
 <script>
@@ -24,7 +35,7 @@ console.log({{ user|safe }});
 
 function check() {
 	const userTable = {{ user|safe }};
-	const passA = document.getElementById("pass");
+	const passA = document.getElementById("_pass");
 	const passB = document.getElementById("repeat");
 	const username = document.getElementById("username");
 	const aVal = passA.value;
@@ -67,3 +78,4 @@ function btnOn(user, pw) {
 </script>
 
 {% endblock %}
+{% endif %}

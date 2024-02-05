@@ -6,19 +6,21 @@ db = DataBase()
 
 
 class responseObj(object):
-    def __init__(self, keylist, name, default={}):
-        self._keylist, self._name = keylist, name
-        if keylist != '*':
-            [self.__setattr__(key, val) for key, val in default.items() if key in keylist]
-        else:
-            [self.__setattr__(key, val) for key, val in default.items()]
+    def __init__(self, default={}):
+        [self.__setattr__(key, val) for key, val in default.items() if key in keylist]
 
+    def __repr__(self):
+        return '\n'.join([f'{key}: {val}' for key, val in self.__dict__.items()])
+    
     def get_(self, req):
-        [self.__setattr__(key, val) for key, val in req.items() if (self._keylist == '*') or key in self._keylist]
+        print('\n'.join([f'{key}: {val}' for key, val in req.items()]))
+        [self.__setattr__(key, val) for key, val in req.items()]
     
     def get_return(self):
-        return {key: val for key, val in self.__dict__.items() if (self._keylist == '*') or key in self._keylist} 
+        return {key: val for key, val in self.__dict__.items()} 
 
+    def if_key(self, key):
+        return key in self.__dict__.keys()
 
 class ResponseHandler(object):
     def __init__(self, view, *args):
