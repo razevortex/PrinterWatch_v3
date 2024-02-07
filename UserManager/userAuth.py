@@ -20,35 +20,26 @@ class UserObject(LockedSlots):
         super().__init__(*user_object_keys[:3])
 
     def verify_creds(self, **kwargs):
-        if self.status != 0:
-            for key, val in kwargs.items():
-                if key == '_pass' and val != '':
-                    if hashlib.sha256(bytes(val, 'utf-8')).hexdigest() == self.__getattribute__('_pass'):
-                        self.status = 5
-                        kwargs.update({'token': False})
-                        return kwargs
-                    else:
-                        self.status -= 1
-                        return False
-                if key == 'fact2' and val != '':
-                    if pyotp.TOTP(self.__getattribute__('auth2_key')).verify(val):
-                        self.status = 5
-                        token = SessionObj().create_token(self.username)
-                        return {'token': token}
-                    else:
-                        self.status -= 1
-                        return False
-        return None
-
-    '''def cred(self):
-        if self.status:
-            entered = hashlib.sha256(bytes(input('enter password:'), 'utf-8'))
-            #print(hash(entered), self.__getattribute__('pass'))
-            if self.__getattribute__('_pass') == entered.hexdigest():
-                if pyotp.TOTP(self.__getattribute__('auth2_key')).verify(input('enter 2 auth:')):
-                    return True
-        return False'''
-
+        if self.status == 0:
+            return False
+        if kwargs.get('_pass', False):
+            if hashlib.sha256(bytes(kwargs.get('_pass'), 'utf-8')).hexdigest() == self.__getattribute__('_pass'):
+                self.status = 5
+                kwargs.update({'token': None})
+                return kwargs
+            else:
+                self.status -= 1
+                return False
+                
+        if kwargs.get('auth2_key', False):
+            if pyotp.TOTP(self.__getattribute__('auth2_key')).verify(kwargs.get('auth2_key')):
+                self.status = 5
+                return SessionObj().create_token(self.username)
+            else:
+                self.status -= 1
+                return False
+        return False
+        
     def export(self):
         return {slot: self.__getattribute__(slot) for slot in self.__slots__}
 
@@ -83,7 +74,6 @@ def qr_key_gen(username='', _pass='', **kwargs):
     auth2_key = pyotp.random_base32()
     uri = pyotp.totp.TOTP(auth2_key).provisioning_uri(name=username, issuer_name='printerwatch')
     qr = qrcode.make(uri)
-    #qr_img = qr.make_image(fill_color="black", black_color="white")
     buffer = io.BytesIO()
     qr.save(buffer, format="PNG")
     return {'username': username, '_pass': _pass.hexdigest(), 'auth2_key': auth2_key, 'qr': base64.b64encode(buffer.getvalue()).decode()}
@@ -108,18 +98,22 @@ class UserLib(object):
                 f.write(dumps(temp))
 
     def create_new(self, **kwargs):
-        temp = qr_key_gen(**kwargs)
-        UserLib.name_index += [temp['username']]
-        UserLib.obj += [UserObject.create_new(**temp)]
-        self.save()
-        return temp
+        if kwargs.get('username', False):
+            if self.user_exists(kwargs.get('username')) is False and len(kwargs.get('username')) >= 4:
+                temp = qr_key_gen(**kwargs)
+                print(temp)
+                UserLib.name_index += [kwargs.get('username')]
+                UserLib.obj += [UserObject.create_new(**temp)]
+                self.save()
+                return temp
+        return {}
         
-    def create_user(self, name):
-        if not self.user_exists(name) is False and len(name) >= 4:
-            UserLib.name_index += [name]
-            UserLib.obj += [UserObject.create_new_from_terminal(name)]
-        print(UserLib.obj)
-        self.save()
+    #def create_user(self, name):
+    #    if not self.user_exists(name) is False and len(name) >= 4:
+    #        UserLib.name_index += [name]
+    #        UserLib.obj += [UserObject.create_new_from_terminal(name)]
+    #    print(UserLib.obj)
+    #    self.save()
 
     def user_exists(self, name):
         if name in UserLib().name_index:
@@ -136,13 +130,14 @@ class UserLib(object):
     def user_(self, **kwargs):
         print('user_ foo')
         if not self.user_exists(kwargs.get('username', '')) is False:
-            if 'timetoken' in kwargs.keys():
-                return SessionObj().validate(**kwargs)
+            if kwargs.get('token', False):
+                temp = SessionObj().validate(**kwargs.get('token'))
+                if temp:
+                    return temp
             got = UserLib.obj[self.user_exists(kwargs.get('username', ''))].verify_creds(**kwargs)
             self.save()
-            return got
-        else:
-            return False
+            return got if got else {}
+        return {}
 
     def auth_user(self, name):
         if name in UserLib.name_index:

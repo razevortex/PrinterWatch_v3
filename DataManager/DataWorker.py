@@ -6,8 +6,8 @@ db = DataBase()
 
 
 class responseObj(object):
-    def __init__(self, default={}):
-        [self.__setattr__(key, val) for key, val in default.items() if key in keylist]
+    def __init__(self, default={'token': {'timetoken': '', 'username': ''}}):
+        [self.__setattr__(key, val) for key, val in default.items()]
 
     def __repr__(self):
         return '\n'.join([f'{key}: {val}' for key, val in self.__dict__.items()])
@@ -112,7 +112,7 @@ class PrinterView(object):
         
     def _selecting(self, **kwargs):
         # get index of the obj 
-        if kwargs == {}:
+        if not kwargs.get('select', False) and not kwargs.get('serial_no', False):
             x = self.x   # if no request set 0
         else:
             if kwargs.get('select', False) != kwargs.get('serial_no', False):   # if select dropdown was changed use selected objs index

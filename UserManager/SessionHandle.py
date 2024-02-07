@@ -27,12 +27,15 @@ class SessionObj(dict):
         temp = TimeoutToken.create(user)
         self[temp.__name__] = temp
         self._save()
-        return {'fields': [['hidden', 'timetoken', temp.__name__], ['hidden', 'username', user]]}
+        return {'token': {'timetoken': temp.__name__, 'username': user}}
 
     def validate(self, **kwargs):
         token, user, valid = kwargs.get('timetoken', ''), kwargs.get('username', ''), False
+        print(token, user, valid)
         if self.get(token, False):
+            
             valid = self[token].update_timestamp(user)
+            print(valid)
         self._save()
         return valid
 
@@ -58,8 +61,7 @@ class TimeoutToken(object):
     def update_timestamp(self, user):
         if self.in_time() and user == self.username:
             self.timestamp = dt.now()
-            return {'fields': [['hidden', 'username', self.username],
-                               ['hidden', 'timetoken', self.__name__]]}
+            return {'token': {'username': self.username, 'timetoken': self.__name__}}
         return False
 
     def in_time(self):
@@ -79,6 +81,6 @@ class TimeoutToken(object):
 
 test = SessionObj()
 #test.create_token('admin')
-for key, val in test.items():
-    print({'timetoken': key, 'username': val.username})
-    print(test.validate(**{'timetoken': key, 'username': val.username}))
+#for key, val in test.items():
+#    print({'timetoken': key, 'username': val.username})
+#    print(test.validate(**{'timetoken': key, 'username': val.username}))
