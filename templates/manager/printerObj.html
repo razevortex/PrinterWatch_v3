@@ -1,0 +1,73 @@
+<div class="obj">
+	<form method="POST" name="form" id="form" action="">{% csrf_token %}
+	
+	<input type="hidden" name="serial_no" id="serial_no" value="{{ selected.serial_no }}">
+	
+	<div class="row">
+	  <input type="submit" id="back" value="Back" class="btn" name="back">
+	  
+	  <select name="select" id="select" onchange="sub();" form="form">
+			<!--<option value="{{ selected.serial_no }}">{{ selected.display_name }}</option>-->
+			
+			{% for opt in selectable %}
+			  {% if selected.serial_no == opt.serial_no %}
+			    <option value="{{ opt.serial_no }}" selected>{{ opt.display_name }}</option>
+        {% else %}
+			    <option value="{{ opt.serial_no }}">{{ opt.display_name }}</option>
+        {% endif %}
+      {% endfor %}
+	
+	  </select>
+	  <input type="submit" id="next" value="Next" class="btn" name="next">
+	</div>
+
+
+{% for key, val in obj.items %}
+  	{% if key in "serial_no,manufacturer,model" %}
+		<div class="row">
+		<span class="key">{{ key }}: </span> <input type="text" id="{{ key }}" name="{{ key }}" value="{{ val }}" disabled>
+		</div>
+  	{% elif key == "cartridges" %}
+		<div class="row">
+    		{% for k, v in val.items %}		
+  			<span class="key">{{ k }}: </span> 
+  			<select name="{{ k }}" id="{{ k }}">
+  			<option value="{{ v.selected }}">{{ v.selected }}</option>
+      			{% for opt in v.options %}
+    				<option value="{{ opt }}">{{ opt }}</option>
+      			{% endfor %}
+  			</select>	
+    		{% endfor %}
+		</div>
+  	{% else %}
+		<div class="row">
+		<span class="key">{{ key }}: </span> <input type="text" id="{{ key }}" name="{{ key }}" value="{{ val }}">
+		</div>
+	  {% endif %}	
+{% endfor %}
+
+	<div class="row">
+	    <input type="submit" id="btnsubmit" value="Save" class="btn big spaceing" name="{{ obj.serial_no }}"/>
+	</div>
+	<div class="row">
+	    <div class="can">
+          <canvas id="canvas"></canvas>
+      </div>
+  </div>
+
+  {% for key, val in counter.items %}
+  <div class="row">
+		  <span class="key">{{ key }}: </span> <input type="text" id="{{ key }}" name="{{ key }}" value="{{ val }}" disabled>
+	</div>
+	{% endfor %}
+
+  <script>
+        createChart("canvas", "bar", {{ data|safe }}, {scales: {y: {min: 0, max: 100}}});
+
+        function sub(){
+          document.form.submit();
+        }
+  </script>
+	
+	</form>
+</div>

@@ -12,14 +12,10 @@
 		
 	</head>
 	<body>
-	  {% if page == "login" %}
-		{% block form %}
-		{% include "auth/loginForm.html" %}
-		{% endblock %}
-		{% elif page == "signup" %}
+	  {% if page == "signup" %}
 		{% include "auth/signupForm.html" %}
-    {% else %}
-    <p> redirect </p>
+		{% else %}
+		{% include "auth/loginForm.html" %}
     {% endif %}
 </body>
 </html>

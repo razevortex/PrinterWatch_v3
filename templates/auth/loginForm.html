@@ -1,9 +1,8 @@
 {% load static %}
 
-
-{% block form %}
 <script>
 function attachToken(form, obj){
+    alert('run');
     for (const [key, value] of Object.entries(obj)) {
       	let temp = document.createElement("input");
       	temp.type = "hidden";
@@ -11,49 +10,50 @@ function attachToken(form, obj){
       	temp.value = value;
       	temp.form = form.id;
         form.appendChild(temp);
+        console.log(temp.value);
+        alert(temp);
   }
 }
+
+function greeting(ele, obj){
+  const text = document.createTextNode("Welcome " + obj.username);
+  ele.appendChild(text);
+  console.log(ele);
+}
+
 </script>
+
 <div class="formObj">
-{% if valid %}
-<form method="POST" id="login" onsubmit="attachToken(this, {{ token|safe }});" action="">{% csrf_token %}
-<div class="row">
-<input type="submit" value="Enter">
+  {% if valid %}
+    <form method="POST" id="login" onsubmit="attachToken(this, '{{ token|safe }}');" action="http://127.0.0.1:8000/">{% csrf_token %}     
+        <input type="submit" value="Enter">
+      </div>
+    </form>
+  {% elif username %}
+	  <form method="POST" id="login" action="">{% csrf_token %}
+		  <input type="hidden" name="username" value="{{ username }}">
+		  <div class="row">
+			  <p> 2 Fact Auth {{ username }} </p>
+		  </div><div class="row">
+			  <span class="key">Auth Key:</span><input type="text" name="auth2_key" value="">
+		  </div><div class="row">
+			  <button type="submit" class="btn big" form="login" value="submit">Enter</button>
+		  </div>
+	  </form>	
+  {% else %}
+	  <form method="POST" id="login" action="">{% csrf_token %}
+		  <div class="row">
+			  <span class="key">Username:</span><input type="text" name="username" value="">
+		  </div><div class="row">
+			  <span class="key">Password:</span><input type="password" name="_pass" value="">
+		  </div><div class="row">
+			  <button type="submit" class="btn big spaceing" form="login" value="submit">Enter</button>
+		  </div>
+		</form>
+  
+    <div class="row">
+	    <button class="btn big spaceing" onclick="window.location.href='http://servme/signup/';">Not registered?</button>
+	  </div>
+  {% endif %}
 </div>
-</form>
-{% elif username %}
-	<form method="POST" id="login" action="">{% csrf_token %}
-		<input type="hidden" name="username" value="username">
-		<div class="row">
-			<p> 2 Fact Auth {{ username }} </p>
-		</div>
-		<div class="row">
-			<span class="key">Auth Key:</span><input type="text" name="auth2_key" value="">
-		</div>
-		<div class="row">
-			<button type="submit" class="btn big" form="login" value="submit">Enter</button>
-		</div>
-	</form>	
-{% else %}
-	<form method="POST" id="login" action="">{% csrf_token %}
-		<div class="row">
-			<span class="key">Username:</span><input type="text" name="username" value="">
-		</div>
-		<div class="row">
-			<span class="key">Password:</span><input type="password" name="_pass" value="">
-		</div>
-		<div class="row">
-			<button type="submit" class="btn big spaceing" form="login" value="submit">Enter</button>
-		</div></form>
-<div class="row">
-	<button class="btn big spaceing" onclick="window.location.href='http://127.0.0.1:8000/signup/';">
-		Not registered?
-	</button>
-	</div>
 
-	
-
-	
-{% endif %}
-</div>
-{% endblock %}

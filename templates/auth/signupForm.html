@@ -1,37 +1,27 @@
 {% load static %}
+
 {% if qr %}
 <img src="data:img/png;base64,{{ qr }}" alt="QRCODE">
-	<button class="btn big spaceing" onclick="window.location.href='http://127.0.0.1:8000/dlogin/';">
-		to Loginpage
-	</button>
+<button class="btn big spaceing" onclick="window.location.href='http://servme/login/';">to Loginpage</button>
 {% else %}
-{% block form %}
 <div class="formObj">
 	<form method="POST" id="signup" action="">{% csrf_token %}
 		<div class="row">
-			<span>Username:</span><input type="text" name="username" id="username" onchange="check();" value="">
-		</div>
-		<div class="row">
-			<span>Password:</span><input type="password" name="_pass" id="_pass" onchange="check();" value="">
-		</div>
-		<div class="row">
-			<span>Password:</span><input type="password" name="repeat" id="repeat" onchange="check();" value="">
-		</div>
-		<div class="row">
+			<span>Username:</span><input type="text" name="username" id="username" oninput="check();" value="">
+		</div><div class="row">
+			<span>Password:</span><input type="password" name="_pass" id="_pass" oninput="check();" value="">
+		</div><div class="row">
+			<span>Password:</span><input type="password" name="repeat" id="repeat" oninput="check();" value="">
+		</div><div class="row">
 			<button type="submit" id="btn" class="btn big" form="signup" value="submit" onclick="check();" disabled>Enter</button>
-		</div>	</form>
-			<div class="row">
-	<button class="btn big spaceing" onclick="window.location.href='http://127.0.0.1:8000/dlogin/';">
-		Already registered?
-	</button>
+		</div>	
+	</form>
+	<div class="row">
+	  <button class="btn big spaceing" onclick="window.location.href='http://servme/login/';">Already registered?</button>
 	</div>
-
-
 </div>
 
 <script>
-
-console.log({{ user|safe }});
 
 function check() {
 	const userTable = {{ user|safe }};
@@ -76,6 +66,4 @@ function btnOn(user, pw) {
 	}
 }
 </script>
-
-{% endblock %}
 {% endif %}
