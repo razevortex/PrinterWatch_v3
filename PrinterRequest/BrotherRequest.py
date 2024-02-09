@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 from printerwatch.PrinterRequest.StaticVar import *
 from printerwatch.Libs.main import *
-
+from datetime import datetime as dt
 
 class BrotherReq(object):
 
@@ -20,7 +20,17 @@ class BrotherReq(object):
             self.urls = brother_urls['default']
             method_dict['default']()
 
-
+    def get_tracker_data(self):
+        try:
+            for key, val in self.tracker_data.items():
+                print(key, val)
+                self.tracker_data[key] = int(val)
+            self.tracker_data['Date'] = dt.now()
+            #t_dict.update({key: int(val) for key, val in self.tracker_data.items()})
+            return self.tracker_data
+        except:
+            return {}
+    
     def get_soup(self, url):
         req = requests.get(f'http://{self.data["ip"]}{self.urls[url]}')
         return BeautifulSoup(req.content, 'html.parser')

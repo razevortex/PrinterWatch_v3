@@ -1,6 +1,7 @@
 from printerwatch.PrinterRequest.StaticVar import *
 from printerwatch.Libs.main import *
 from printerwatch.PrinterRequest.snmp_foos import _snmp_get
+from datetime import datetime as dt
 
 
 class KyoceraReq(object):
@@ -31,6 +32,14 @@ class KyoceraReq(object):
             else:
                 got = _snmp_get(self.data['ip'], val)
                 self.tracker_data[key] = int(got.strip())
+
+    def get_tracker_data(self):
+        try:
+            t_dict['Date'] = dt.now()
+            t_dict.update({key: int(val) for key, val in self.tracker_data.items()})
+            return t_dict
+        except:
+            return {}
 
 
 if '__main__' == __name__:

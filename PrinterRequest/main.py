@@ -26,12 +26,14 @@ class PrinterRequest(object):
 				self.printer = pLib.get_obj(temp.data['serial_no'])
 			i = ('Brother', 'Kyocera').index(temp.data['manufacturer'])
 			self.response = (BrotherReq, KyoceraReq)[i](temp.data)
-
+			
 	def update_tracker(self):
 		if self.response:
-			t_dict = self.response.tracker_data
-			t_dict['Date'] = dt.now()
-			self.printer.update_tracker(**self.response.tracker_data)
+			#t_dict = self.response.get_tracker_data()
+			#t_dict['Date'] = dt.now()
+			#print(self.printer, self.response.get_tracker_data())
+			#if self.response.get_tracker_data() != {}:
+			self.printer.update_tracker(**self.response.get_tracker_data())
 
 	def __repr__(self):
 		if self.printer is not None and self.response is not None:

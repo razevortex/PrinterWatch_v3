@@ -4,6 +4,43 @@ from json import dumps
 
 db = DataBase()
 
+class reqObj(object):
+    def __init__(self, **kwargs):
+        [self.__setattr__(key, val) for key, val in kwargs.items()]
+
+    def __repr__(self):
+        
+        return 'req:\n' + '\n'.join([f'{key}: {val}' for key, val in self.__dict__.items()])
+    
+    def __setattr__(self, key, val):
+        if type(val) == list:
+            if len(val) == 1:
+                val = val[0]
+        super().__setattr__(key, val)
+        
+    def __getattribute__(self, key):
+        return super().__getattribute__(key)
+
+    def __getattr__(self, key):
+        return False
+        
+    def build(self, *args):
+        if len(args) == 0:
+            return {key: val for key, val in self.__dict__.items()}
+        else:
+            return {key: self.__getattr__(key) for key in args}
+        
+    def add(self, req):
+        print('reqObj:\n')
+        [self.__setattr__(key, val) for key, val in req.items()]
+        
+    
+    def get_return(self):
+        return {key: val for key, val in self.__dict__.items()} 
+
+    def if_key(self, key):
+        return key in self.__dict__.keys()
+
 
 class responseObj(object):
     def __init__(self, default={'token': {'timetoken': '', 'username': ''}}):

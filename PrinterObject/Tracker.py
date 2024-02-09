@@ -9,8 +9,19 @@ class BaseDict(dict):
     KEYS = 'B', 'C', 'Y', 'M', 'Prints', 'ColorPrints', 'Copies', 'ColorCopies', 'Date'
     
     def __init__(self, **kwargs):
+        kwargs = self._typeing(**kwargs)
         super().__init__(**kwargs)
 
+    def _typeing(self, **kwargs):
+        for key, val in kwargs.items():
+            if key != 'Date':
+                if type(val) == str:
+                    try:
+                        kwargs[key] = int(val)
+                    except:
+                        kwargs[key] = None
+        return kwargs
+        
     def __str__(self):
         return '<DICT>\n' + ''.join([f'{key} : {val}\n' for key, val in self.items()])
     
@@ -169,10 +180,13 @@ class PrinterTracker(object):
         return self.data._of_timeframe(past, befor, keys=keys)
 
     def update(self, dict_obj, carts=()):
+        print('update')
         if not (self.current['Date'] is None):
             if (dict_obj['Date'] <= self.current['Date']):
                 return
+        print(self.data)
         delta = self.current.update(**dict_obj)
+        print(delta)
         if not (delta is None):
             cLib.update(carts, delta)
             cLib.save()
@@ -180,6 +194,8 @@ class PrinterTracker(object):
                 self.data.update(**delta)
             else:
                 self.data += delta
+        print(self.data)
+        print('end update')
 
     def save(self):
         with open(self.file, 'w') as f:

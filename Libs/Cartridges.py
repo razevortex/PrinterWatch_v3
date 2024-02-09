@@ -4,7 +4,7 @@ from pathlib import Path
 from .StaticVar import DB_DIR
 from printerwatch.GlobalClasses import LockedSlots
 
-print('Cart:', DB_DIR)
+
 #  Just a Container of a Cart-Type
 class _CartridgeModel(LockedSlots):
     __slots__ = 'name', 'manufacturer', 'color', 'price', 'global_stats'
@@ -56,6 +56,19 @@ class CartridgesLib(object):
             msg += f'{str(sub)}\n'
         return msg
 
+    def _id(self, string):
+        if type(string) == dict:
+            return ' '.join([string.get('manufacturer', ''), string.get('name', '')])
+        elif isinstance(string, _CartridgeModel):
+            return string.id
+        elif type(string) == str:
+            return string
+        else:
+            return ''
+            
+    def _exists(self, this):
+        return self._id(this) in self.name_index
+        
     def save(self):
         temp = self._import()
         try:
@@ -79,30 +92,32 @@ class CartridgesLib(object):
     def load(self):
         if path.exists(CartridgesLib.file):
             for obj in self._import():
-                #if obj['name'] not in CartridgesLib.name_index:
-                #    CartridgesLib.obj += [_CartridgeModel(**obj)]
-                #    CartridgesLib.name_index += [obj['name']]
-                if f"{obj['manufacturer']} {obj['name']}" not in CartridgesLib.name_index:
+                if not self._exists(obj): #f"{obj['manufacturer']} {obj['name']}" not in CartridgesLib.name_index:
                     CartridgesLib.obj += [_CartridgeModel(**obj)]
-                    CartridgesLib.name_index += CartridgesLib.obj[-1].id #[obj['name']]
+                    CartridgesLib.name_index += [CartridgesLib.obj[-1].id] #[obj['name']]
     
     def build_new(self, name='name', manufacturer='manufacturer', color='color', price=-1):
-        if name not in CartridgesLib.name_index and name != 'name':
+        if not self._exists(f'{manufacturer} {name}') and name != 'name':
             kwargs = {'name': name, 'manufacturer': manufacturer, 'color': color, 'price': price, 'global_stats': {'pages': 0, 'usage': 0}}
-            cart = _CartridgeModel(**kwargs)
-            CartridgesLib.obj.append(cart)
-            CartridgesLib.name_index.append(cart.name)
+            CartridgesLib.obj += [_CartridgeModel(**kwargs)]
+            CartridgesLib.name_index += [CartridgesLib.obj[-1].id]
+            #cart = _CartridgeModel(**kwargs)
+            #CartridgesLib.obj.append(cart)
+            #CartridgesLib.name_index.append(cart.name)
         self.save()
 
     def get_select_context(self, *args):
-        for arg in self.get(*args):
-            print(arg)
-        return {arg.color: {'selected': arg.name, 'options': [c.name for c in CartridgesLib.obj if c.color == arg.color]} for arg in self.get(*args)}
+        temp = []
+        for arg in args:
+            for i, name in enumerate(self.name_index):
+                if name.endswith(arg):
+                    temp.append(self.obj[i].id)
+        return {arg.color: {'selected': arg.id, 'options': [c.id for c in CartridgesLib.obj if c.color == arg.color]} for arg in self.get(*args)}
         
     def get(self, *args):
         if args[0] == '*':
-            return CartridgesLib.obj
-        return [CartridgesLib.obj[CartridgesLib.name_index.index(arg)] for arg in args if arg in CartridgesLib.name_index]
+            return self.obj
+        return [self.obj[self.name_index.index(arg)] for arg in args if arg in self.name_index]
 
     def get_filtered_set(self, **kwargs):
         arr = []

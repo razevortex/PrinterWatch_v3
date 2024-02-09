@@ -53,17 +53,17 @@ class ModelLib(object):
 		self.load()
 	
 	def __repr__(self):
-		return ''.join([f'{typ.name}:>\n{str(typ)}\n\n' for typ in ModelLib.obj])
-	
+	    return ''.join([f'{typ.name}:>\n{str(typ)}\n\n' for typ in ModelLib.obj])
+
 	# Build New Rework
-	
 	def build_new(self, name: str = '', manufacturer: str = '', cartridges: tuple = (), color: bool = False, copie: bool = False):
-		if name not in ModelLib.name_index:
-			kwargs = {'name': name, 'manufacturer': manufacturer, 'cartridges': cartridges, 'color': color, 'copie': copie}
-			model = _PrinterModel(**kwargs)
-			ModelLib.obj.append(model)
-			ModelLib.name_index.append(model.name)
-		self.save()
+	    cartridges = [f'{manufacturer} {c}' for c in cartridges]
+	    if name not in self.name_index:
+	        kwargs = {'name': name, 'manufacturer': manufacturer, 'cartridges': cartridges, 'color': color, 'copie': copie}
+	        model = _PrinterModel(**kwargs)
+	        ModelLib.obj.append(model)
+	        ModelLib.name_index.append(model.name)
+	    self.save()
 	
 	def save(self):
 		temp = self._import()
