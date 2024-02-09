@@ -16,33 +16,12 @@ div.topbar {
     flex-direction: column;
 }
 
-.obj {
-	background-color: #222;
-	top: 0;
-	width: 40%;
-	margin: auto;
-	display: flex;
-	flex-direction: column;
-	    font-family: "Lucida Console", "Courier New", monospace;
-    font-weight: bold;
-    text-align: center;
-  color: #A82;
-}
-
 div.toprow {
     display: flex;
     justify-content: space-evenly;
     flex-basis: 10;
     width: 100%;   
 }
-
-.row {
-    	display: flex;
-    	justify-content: space-evenly;
-    	flex-basis: 10;
-    	width: 100%;   
-}
-
 
 .border-width-2 {
   border: solid #CCC;
@@ -72,30 +51,5 @@ div.toprow {
   border-width: 0 0.25em;
   height: 200%;
   }
-
-
-
-div.inputbox {
-    padding-left: 1%;
-    width: 100%;
-    color: #AAA;    
-    align-content: stretch;
-    justify-content: space-evenly;
-    border: 1px solid #666; 
-}
- 
-.can {
-    border: solid 2px #000;
-    background-color: #DDD;
-    position: relativ;
-    height: 80%;
-    width: 80%;
-    margin: auto;
-}
-
-.key {
-	width: 50%;
-	height: auto;
-}
-
+  
 
