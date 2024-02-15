@@ -15,12 +15,42 @@ class _CartridgeModel(LockedSlots):
             self.__setattr__('global_stats', {'Pages': 0, 'Toner': 0})
         super().__init__('name', 'manufacturer', 'color')
 
+    def get_context(self):
+        return {'cart_id': self.id, 'eff': int(self.efficency), 'manufacturer': self.manufacturer, 'color': self.color, 'price': self.price}
+    
+    def edit(self, **kwargs):
+        if kwargs.get('reset', False):
+            self.__setattr__('global_stats', {'Pages': 0, 'Toner': 0})
+        if kwargs.get('price', False):
+            self.price = kwargs.get('price')
+            
     def __repr__(self):
         return self.__str__()
 
     def __str__(self):
         return f'  name = {self.name}\n  manufacturer = {self.manufacturer}\n  color = {self.color}\n  global_stats = {self.global_stats}\n'
     
+    @property
+    def search_ref(self):
+        return self.id.casefold() + ' ' + self.color
+    
+    def string_compare(self, search_query):
+        keys = (search_query, ) if ' ' not in search_query else search_query.split(' ') 
+        for key in keys:
+            key = key.casefold() if key not in 'BCYM-B-C-Y-M' else key
+            if (key.startswith('-') and key[1:] in self.search_ref) or (not key.startswith('-') and key not in self.search_ref):
+                return False
+        return True 
+        
+    @property
+    def efficency(self):
+        temp = 0
+        for val in ('Toner', 'Pages'):
+            if self.global_stats[val] == 0:
+                return False
+            temp = self.global_stats[val] / 100 if val == 'Toner' else self.global_stats[val] / temp
+        return temp
+        
     @property
     def id(self):
         return f'{self.manufacturer} {self.name}'
@@ -37,7 +67,10 @@ class _CartridgeModel(LockedSlots):
         self.__setattr__('global_stats', {'Pages': 0, 'Toner': 0})
 
     def export(self):
-        return {slot: self.__getattribute__(slot) for slot in self.__slots__}
+        if type(self.name) == str and type(self.manufacturer) == str:
+            return {slot: self.__getattribute__(slot) for slot in self.__slots__}
+        else:
+            return None
 
 
 #  a Lib of the Cartridges
@@ -47,8 +80,8 @@ class CartridgesLib(object):
     file = Path(DB_DIR, 'cartlib.json')
     
     def __init__(self):
-
-        self.load()
+        if path.exists(CartridgesLib.file):
+            self.load()
             
     def __repr__(self):
         msg = 'Cartridges Lib :\n\n'
@@ -83,7 +116,7 @@ class CartridgesLib(object):
         self to obj for json
         @return: list(dict)
         '''
-        return [obj.export() for obj in CartridgesLib.obj]
+        return [obj.export() for obj in CartridgesLib.obj if not obj.export() is None]
 
     def _import(self):
         with open(CartridgesLib.file, 'r') as f:
@@ -98,7 +131,7 @@ class CartridgesLib(object):
     
     def build_new(self, name='name', manufacturer='manufacturer', color='color', price=-1):
         if not self._exists(f'{manufacturer} {name}') and name != 'name':
-            kwargs = {'name': name, 'manufacturer': manufacturer, 'color': color, 'price': price, 'global_stats': {'pages': 0, 'usage': 0}}
+            kwargs = {'name': name, 'manufacturer': manufacturer, 'color': color, 'price': price, 'global_stats': {'Pages': 0, 'Toner': 0}}
             CartridgesLib.obj += [_CartridgeModel(**kwargs)]
             CartridgesLib.name_index += [CartridgesLib.obj[-1].id]
             #cart = _CartridgeModel(**kwargs)
@@ -118,6 +151,11 @@ class CartridgesLib(object):
         if args[0] == '*':
             return self.obj
         return [self.obj[self.name_index.index(arg)] for arg in args if arg in self.name_index]
+
+    def get_search(self, this):
+        if this == '*':
+            return self.obj
+        return [obj for obj in self.obj if obj.string_compare(this)]
 
     def get_filtered_set(self, **kwargs):
         arr = []

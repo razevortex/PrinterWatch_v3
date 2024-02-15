@@ -3,10 +3,10 @@ import sys
 
 from printerwatch.PrinterRequest.main import *
 from printerwatch.GlobalClasses import TaskInterval
-
+from printerwatch.PrinterObject.main import PrinterLib
 
 def basic_run():
-    print(pLib.obj[0])
+    pLib = PrinterLib()
     i, n = 0, len([obj for obj in pLib.obj if obj.active])
     for serial_no, ip in [(obj.serial_no, obj.ip) for obj in pLib.obj if obj.active]:
         print(f'run: {i}/{n}')

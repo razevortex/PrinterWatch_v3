@@ -21,18 +21,25 @@ class PrinterRequest(object):
 				if self.printer.ip != ip:
 					pLib.update_obj({'serial_no': temp.data['serial_no'], 'ip': ip})
 					self.printer = pLib.get_obj(temp.data['serial_no'])
-			else:
-				pLib.add_new(**temp.data) #temp.data['serial_no'], temp.data['model'], **temp.data)
+			elif self.unknown_client(temp.data):
 				self.printer = pLib.get_obj(temp.data['serial_no'])
+				print('add success')
+			else:
+				print('add failed')
+				return None
 			i = ('Brother', 'Kyocera').index(temp.data['manufacturer'])
 			self.response = (BrotherReq, KyoceraReq)[i](temp.data)
-			
+	
+	def unknown_client(self, data):
+		print(data)
+		try:
+			pLib.add_new(**data)
+			return True
+		except:
+			return False
+	
 	def update_tracker(self):
 		if self.response:
-			#t_dict = self.response.get_tracker_data()
-			#t_dict['Date'] = dt.now()
-			#print(self.printer, self.response.get_tracker_data())
-			#if self.response.get_tracker_data() != {}:
 			self.printer.update_tracker(**self.response.get_tracker_data())
 
 	def __repr__(self):
@@ -44,11 +51,11 @@ class PrinterRequest(object):
 
 
 class RequestDummy(PrinterRequest):
-    def __init__(self, ip):
-        super().__init__(ip)
-        
-    def update_tracker(self):
-        print(self.response)
-        
+	def __init__(self, ip):
+		super().__init__(ip)
+		
+	def update_tracker(self):
+		print(self.response)
+		
 if __name__ == '__main__':
 	pass

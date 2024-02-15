@@ -18,13 +18,18 @@ class Printer(LockedClass):
         self.ip = kwargs.get('ip', '')
         self.location = kwargs.get('location', '')
         self.contact = kwargs.get('contact', '')
-        cart = kwargs.get('cartridges', []) if kwargs.get('cartridges', []) != [] else self.model.cartridges
+        cart = kwargs.get('cartridges', [])
+        if cart == []:
+            cart = self.set_default_carts()
         #print(self.serial_no, cLib.get(*kwargs.get('cartridges', self.model.cartridges))) 
         self.cartridges = cLib.get(*cart) #*kwargs.get('cartridges', self.model.cartridges))
         self.cartridges = [c.id for c in self.cartridges]
         self.tracker = PrinterTracker(self.serial_no, self.model.name)
         super().__init__('serial_no', 'model')
 
+    def set_default_carts(self):
+        return [f'{self.manufacturer} {cart}' for cart in self.model.cartridges]
+            
     @property
     def manufacturer(self):
         return self.model.manufacturer
@@ -41,9 +46,7 @@ class Printer(LockedClass):
     def counter(self):
         return {key: val for key, val in self.tracker.current.__dict__.items() if not key in 'BCYM' and key != "Date"}
      
-    @property
-    def string(self):
-        return self.__str__().casefold()
+
         
     def get_context_obj(self):
         temp = {'manufacturer': self.manufacturer, 'model': self.model_}
@@ -51,8 +54,7 @@ class Printer(LockedClass):
         temp['cartridges'] = cLib.get_select_context(*temp['cartridges'])
         return {'obj': temp, 'counter': self.counter, 'carts': self.cart_fill}
     
-    def __str__(self):
-        return f'{self.serial_no}\n{self.model}\n{self.display_name}\n{self.ip}\n{self.location}\n{self.contact}\n{self.notes}\n'
+
 
     def update_data(self, kwargs):
         for key, val in [(key, val) for key, val in kwargs.items() if key in self.__dict__.keys()]:
@@ -60,29 +62,30 @@ class Printer(LockedClass):
             self.__setattr__(key, val)
             Logger(self.serial_no).logging(key, old, self.__getattribute__(key))
 
+    def __str__(self):
+        return f'{self.serial_no}\n{self.model}\n{self.display_name}\n{self.ip}\n{self.location}\n{self.contact}\n{self.notes}\n'
+        
+    @property
+    def search_ref(self):
+        return self.__str__().casefold()
+        
     def string_compare(self, search_query):
         '''
         A Match function for Search/Filter Query´s
         :param search_query: string 
         :return: bool
         '''
-        #   The Wildcard case is handled a level above in Lib
-        #if search_query == '*':
-        #    return True
         keys = (search_query, ) if ' ' not in search_query else search_query.split(' ') 
         for key in keys:
-            if (key.startswith('-') and key[1:].casefold() in self.string) or (not key.startswith('-') and key.casefold() not in self.string):
+            if (key.startswith('-') and key[1:].casefold() in self.search_ref) or (not key.startswith('-') and key.casefold() not in self.search_ref):
                 return False
         return True 
-        #arg, self_str = (arg[1:-1], self_str) if arg[0] == arg[-1] == '"' else (arg.casefold(), self_str.casefold())
-        #match = (arg not in self_str) if arg.startswith('-') else (arg in self_str)
-        #return match
-
-    def match_search(self, string:str):
-        for arg in string.split('&&'):
-            if not self.string_compare(arg, str(self)):
-                return None
-        return self
+        
+    #def match_search(self, string:str):
+    #    for arg in string.split('&&'):
+    #        if not self.string_compare(arg, str(self)):
+    #            return None
+    #    return self
 
     def save_tracker(self):
         self.tracker.save()
@@ -141,12 +144,14 @@ class PrinterLib(object):
     #def get_context(self, printer=PrinterLib.name_index[0], ):
     #    temp = [p.displayname for p in PrinterLib.obj]
         
-    def add_new(self, serial_no, model, ip, **kwargs):
-        if serial_no not in PrinterLib.name_index:
-            kwargs.update(dict(serial_no=serial_no, model=model, ip=ip))
+    def add_new(self, **kwargs):
+        if kwargs.get('serial_no', False) and not kwargs.get('serial_no', False) in self.name_index:
+            print(kwargs)
             new = Printer(**kwargs)
+            print(new)
             PrinterLib.obj.append(new)
             PrinterLib.name_index.append(new.serial_no)
+            print(self.name_index)
             self.save()
 
     def get_obj(self, name):
@@ -176,9 +181,8 @@ class PrinterLib(object):
 
     def get_search(self, this):
         if this == '*':
-            return PrinterLib.obj
-        #arr = []
-        return [obj for obj in PrinterLib.obj if obj.string_compare(this)]
+            return self.obj
+        return [obj for obj in self.obj if obj.string_compare(this)]
 
 
     def data_tracker_set(self, search):
