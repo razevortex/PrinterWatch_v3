@@ -39,6 +39,7 @@
 		      <option value="ColorPrints"{% if key == "ColorPrints" %} selected{% endif %}>ColorPrints</option>
           <option value="Copies"{% if key == "Copies" %} selected{% endif %}>Copies</option>
 		      <option value="ColorCopies"{% if key == "ColorCopies" %} selected{% endif %}>ColorCopies</option>
+		      <option value="Carts"{% if key == "Carts" %} selected{% endif %}>Carts</option>
         </select>
         </div>
         
@@ -64,7 +65,7 @@
         new Chart(
         document.getElementById('canvas'),
         {
-            type: 'line',
+            type: {{ type|safe }},
             data: {{ data|safe }}
         });
     </script>

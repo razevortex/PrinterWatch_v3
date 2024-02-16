@@ -1,0 +1,36 @@
+<div class="obj {{ color }}">
+	<form method="POST" name="form" id="form" action="">{% csrf_token %}
+	
+	<div class="row">
+	  <input type="submit" id="back" value="Back" class="btn" name="back">
+	  <select name="select" id="select" onchange="sub();" form="form">
+  		{% for opt in selectable %}
+			  {% if cart_id == opt %}
+			    <option value="{{ opt }}" selected>{{ opt }}</option>
+        {% else %}
+			    <option value="{{ opt }}">{{ opt }}</option>
+        {% endif %}
+      {% endfor %}	
+	  </select>
+	  <input type="submit" id="next" value="Next" class="btn" name="next">
+	</div>
+
+
+		<div class="row"><input type="hidden" id="cart_id" name="cart_id" value="{{ cart_id }}">
+		<span class="key">Cart ID: </span> <input type="text" id="cart" name="cart" value="{{ cart_id }}" disabled>
+		</div>
+		<div class="row">
+  	<span class="key">Pages avg.: {{ eff }}</span> <button id="reset_stats" onclick="switch_reset(this);" class="off" value="0">reset</button>
+  	<input type="hidden" id="reset" name="reset" value="0">
+		</div>
+		<div class="row">
+		<span class="key">Cost: </span> <input type="text" id="price" name="price" value="{{ price }}">
+		</div>
+	  
+
+	<div class="row">
+	    <input type="submit" id="btnsubmit" value="Save" class="btn big spaceing" name="{{ obj.cart_id }}"/>
+	</div>
+
+	</form>
+</div>

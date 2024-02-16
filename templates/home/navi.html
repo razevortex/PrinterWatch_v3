@@ -1,7 +1,8 @@
 {% load static %}
       <form method="POST" id="nav">{% csrf_token %}
 	    <div class="toprow border-width-2">
-        <button type="submit" class="btn big" form="nav" value="submit" formaction="http://servme/manager/">Manager</button>
+        <button type="submit" class="btn big" form="nav" value="submit" formaction="http://servme/manager/">Print</button>
+        <button type="submit" class="btn big" form="nav" value="submit" formaction="http://servme/cartsmgr/">Cart</button>
         <button type="submit" class="btn big" form="nav" value="submit" formaction="http://servme/plot/">Plotting</button>
         <button type="submit" class="btn big" form="nav" value="submit" formaction="http://servme/build/">Add New</button>
         <button type="submit" class="btn big" form="nav" value="submit" formaction="http://servme/">page D</button>

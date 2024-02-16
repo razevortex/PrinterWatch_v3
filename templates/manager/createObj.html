@@ -24,14 +24,14 @@
       <h1>Add new Cartridge:</h1>
     </div>
     <div class="row">
-      <span class="key">Name: </span><input type="text" name="name" value="">
+      <span class="key">Name: </span><input type="text" name="name" id="name" value="" form="cart">
     </div>
     <div class="row">
-      <span class="key">Manufacturer: </span><input type="text" name="manufacturer" value="">
+      <span class="key">Manufacturer: </span><input type="text" name="manufacturer" id="manufacturer" value="" form="cart">
     </div>
     <div class="row">
       <span class="key">Color: </span>
-      <select name="color" value="">
+      <select name="color" id="color" value="" form="cart">
           <option value="B">Black</option>
           <option value="C">Cyan</option>
           <option value="M">Magenta</option>
@@ -39,7 +39,7 @@
       </select>
     </div>
 	  <div class="row">
-	    <input type="submit" id="btnsubmit" value="Save" class="btn big spaceing" name="add_cart"/>
+	    <input type="submit" id="btnsubmit" value="Save" class="btn big spaceing" name="add_cart" form="cart">
 	  </div>
   </form>
   
