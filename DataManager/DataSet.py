@@ -134,12 +134,29 @@ class DataBase(object):
              t[0] += timedelta(days=interval)
         return timearr
 
-    def search_filter(self, search):
-        if search is None:
-            return self.printer
-        else:
-            return self.printer.get_search(search)
+    def lib_by_key(self, key):
+        return {'p': self.printer, 'm': self.printer_models, 'c': self.cartridges}[key]
 
+    def get_search_attr(self, attr:str, lib_='p'):
+        t_dict = {}
+        for obj in self.lib_by_key(lib_).obj:
+            if obj.__getattribute__(attr) in t_dict.keys():
+                t_dict[obj.__getattribute__(attr)].append(obj)
+            else:
+                t_dict[obj.__getattribute__(attr)] = [obj]
+        return t_dict
+
+    def get_search_groups(self, search, lib_='p'):
+        lib = self.lib_by_key(lib_)
+        t_dict = {key: lib.get_search(key) for key in [s.strip() for s in search.split(';')]}
+        return t_dict
+        
+    def get_search_clients(self, search, lib_='p'):
+        lib = self.lib_by_key(lib_)
+        temp = []
+        [temp.extend(lib.get_search(key)) for key in [s.strip() for s in search.split(';')]]
+        return {obj.id if lib_ == 'c' else obj.display_name: obj for obj in temp}
+        
 if __name__ == '__main__':
     db = DataBase()
     

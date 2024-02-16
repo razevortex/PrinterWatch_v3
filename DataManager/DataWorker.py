@@ -19,7 +19,10 @@ class reqObj(object):
         super().__setattr__(key, val)
         
     def __getattribute__(self, key):
-        return super().__getattribute__(key)
+        try:
+            return super().__getattribute__(key)
+        except:
+            return self.__getattr__(key)
 
     def __getattr__(self, key):
         return False
@@ -31,7 +34,7 @@ class reqObj(object):
             return {key: self.__getattribute__(key) for key in args}
             
     def merge_keys_to(self, mergin:list, to:str):
-        self.__setattr__(to, [self.__getattribute__(key) for key in mergin if self.__getattribute__(key)])
+        self.__setattr__(to, [self.__getattribute__(key) for key in mergin if key in self.__dict__.keys()])
         
     def add(self, req):
         [self.__setattr__(key, val) for key, val in req.items()]
@@ -42,47 +45,24 @@ class reqObj(object):
     def if_key(self, key):
         return key in self.__dict__.keys()
 
-# depricated
-class responseObj(object):
-    def __init__(self, default={'token': {'timetoken': '', 'username': ''}}):
-        [self.__setattr__(key, val) for key, val in default.items()]
-
-    def __repr__(self):
-        return '\n'.join([f'{key}: {val}' for key, val in self.__dict__.items()])
-    
-    def get_(self, req):
-        print('\n'.join([f'{key}: {val}' for key, val in req.items()]))
-        [self.__setattr__(key, val) for key, val in req.items()]
-    
-    def get_return(self):
-        return {key: val for key, val in self.__dict__.items()} 
-
-    def if_key(self, key):
-        return key in self.__dict__.keys()
-
-class ResponseHandler(object):
-    def __init__(self, view, *args):
-        [self.__setattr__(arg.name, arg) for arg in args]
-
-
-
 class DataObject(object):
     def __init__(self, past='2022-01-01', befor=None, interval=2, search='*', key='Prints', incr=True, group=False):
         befor = dt.now().date() if befor is None else dt.strptime(befor, '%Y-%m-%d').date()
         self.timeframe = self.timearr((dt.strptime(past, '%Y-%m-%d').date(), befor), timedelta(days=int(interval)))
         self.incr = incr
         self.group = group
-        self.search = self.search_code(search)
         self.key = key  # Tracker keys & Carts
-
+        self.search = self.search_code(search)
+        
     def search_code(self, string):
+        lib = 'p' if 'cart' not in self.key.casefold() else 'c'
         if not self.group:
-            return string
+            return DataBase().get_search_clients(string, lib_=lib)
         else:
-            if ';' in string:
-                return [s.strip() for s in string.split(';')]
+            if string.startswith('!'):
+                return DataBase().get_search_attr(string[1:], lib_=lib)   
             else:
-                return [string, ]
+                return DataBase().get_search_groups(string, lib_=lib)
     
     def __repr__(self):
         return '\n'.join([f'{key}: {val}' for key, val in self.__dict__.items()])
@@ -104,13 +84,13 @@ class DataObject(object):
     def cart_data(self):
         if self.group is False:
             temp = {'label': [], 'data': []}
-            for label, data in [(obj.id, obj.efficency) for obj in self.search_filter()]:
+            for label, data in [(key, val.efficency) for key, val in self.search.items()]:
                 temp['label'].append(label)
                 temp['data'].append(int(data))
             return temp
         else:
             groups = {'label': [], 'data': []}
-            for key, val in self.search_filter().items():
+            for key, val in self.search.items():
                 groups['label'].append(key)
                 temp = [obj.efficency for obj in val]
                 groups['data'].append(sum(temp) // len(temp))
@@ -119,12 +99,17 @@ class DataObject(object):
     def data_pruning(self):
         #                   not grouped
         if self.group is False:
-            return [(obj.display_name, self.framer(obj.tracker.data['Date'], obj.tracker.data[self.key])) for obj in self.search_filter()]
-        #                   grouped
+            if self.key != 'Total':
+                return [(name, self.framer(obj.tracker.data['Date'], obj.tracker.data[self.key])) for name, obj in self.search.items() if len(obj.tracker.data['Date'])>2]
+            else:
+                keys = 'Prints', 'ColorPrints', 'Copies', 'ColorCopies'
+                return [(name, self.framer(obj.tracker.data['Date'], obj.tracker.data[self.key])) for name, obj in self.search.items() if len(obj.tracker.data['Date'])>2]
+    #                   grouped
         else:
             groups = []
-            for key, val in self.search_filter().items():
-                temp = [self.framer(obj.tracker.data['Date'], obj.tracker.data[self.key]) for obj in val]
+            for key, val in self.search.items():
+                key = key if type(key) == str else key.name
+                temp = [self.framer(obj.tracker.data['Date'], obj.tracker.data[self.key]) for obj in val if len(obj.tracker.data['Date'])>2]
                 arr = []
                 for d in range(len(self.timeframe)):
                     arr.append(sum([t[d] for t in temp if t]))

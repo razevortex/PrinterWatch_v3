@@ -29,6 +29,7 @@ class PrinterRequest(object):
 				return None
 			i = ('Brother', 'Kyocera').index(temp.data['manufacturer'])
 			self.response = (BrotherReq, KyoceraReq)[i](temp.data)
+			print(self.response)
 	
 	def unknown_client(self, data):
 		print(data)

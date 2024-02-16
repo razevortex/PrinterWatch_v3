@@ -35,10 +35,12 @@ class KyoceraReq(object):
 
     def get_tracker_data(self):
         try:
-            t_dict['Date'] = dt.now()
-            t_dict.update({key: int(val) for key, val in self.tracker_data.items()})
-            return t_dict
+            #t_dict['Date'] = dt.now()
+            #t_dict.update({key: int(val) for key, val in self.tracker_data.items()})
+            self.tracker_data['Date'] = dt.now()
+            return self.tracker_data
         except:
+            print('get tracker data exeption')
             return {}
 
 
