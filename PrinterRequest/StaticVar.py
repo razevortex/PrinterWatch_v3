@@ -1,7 +1,7 @@
 #from printerwatch.PrinterObject.main import cLib, mLib, pLib
 
-model_oid = (('ECOSYS M6635cidn', 'ECOSYS M3655idn', 'MFC-9142CDN', 'MFC-L3770CDW', 'MFC-L3750CDW',
-               'TASKalfa 3051ci', 'TASKalfa 5052ci', 'TASKalfa 4002i', 'MFC-9332CDW', 'MFC-L8650CDW',
+model_oid = (('ECOSYS M5526cdw', 'ECOSYS M6635cidn', 'ECOSYS M3655idn', 'MFC-9142CDN', 'MFC-L3770CDW', 'MFC-L3750CDW',
+               'TASKalfa 3554ci','TASKalfa 3051ci', 'TASKalfa 5052ci', 'TASKalfa 4002i', 'MFC-9332CDW', 'MFC-L8650CDW',
                'DCP-L3510CDW', 'MFC-9460CDN'),
               ('MFC-9142CDN', 'MFC-L3750CDW', 'MFC-L3770CDW', 'MFC-L8650CDW', 'MFC-9342CDW'))
 

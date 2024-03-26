@@ -44,13 +44,68 @@ class reqObj(object):
 
     def if_key(self, key):
         return key in self.__dict__.keys()
+        
+class ClientGroup(object):
+    def __init__(self, groups, timeframe, keys):
+        self.names = []
+        self.obj = []
+        
+        for key, val in groups.items():
+            
+            
+            print(key, self._data_pruning(keys, timeframe, val.tracker.data))
+            self.names.append(key)
+            self.obj.append(self._data_pruning(keys, timeframe, val.tracker.data))
+
+        print('TIME FRAME -------------------', timeframe)
+        
+    def __repr__(self):
+        msg = ''
+        for i in range(len(self.names)):
+            msg += f'{self.names[i]} =>\n'
+            msg += '    ' + '\n    '.join([f'{key} => {val}' for key, val in self.obj[i].items()]) + '\n'
+        return msg
+
+    def _data_pruning(self, keys, timeframe, data):
+        print("_data_pruning")
+        print('key groups', self._get_key_groups(keys))
+        return {k: self._time_pruning(d, data['Date'], timeframe) for key in self._get_key_groups(keys)}
+    
+    def _time_pruning(self, data, date, timeframe):
+        print("_time_pruning")
+        temp = {key: [] for key in data.keys()}
+        
+        for ts in self._time_frame_index(date, timeframe):
+            if ts is None:
+                [temp[key].append(0) for key in temp.keys()]
+            else:
+                [temp[key].append(sum(data[key][ts[0]:ts[1]])) for key in temp.keys()]
+        return temp                
+        
+    def _time_frame_index(self, date, timeframe):
+        print("_time_frame_index")
+        if date[0].date() > self.timeframe[-1]:
+            return False
+        i, arr = 0, []
+        for time in range(len(timeframe)):
+            while i < len(date) and date[i].date() < timeframe[time]:
+                i += 1
+            arr.append(i if i != 0 else None)
+        return [None if arr[i] is None else (0, arr[i]) if arr[i-1] is None else (arr[i-1], arr[i]) for i in range(1, len(arr))]
+        
+    def _get_key_groups(self, key):
+        if key != 'Carts':
+            keys = ['Prints', 'Copies'], ['ColorPrints', 'ColorCopies']
+            return {'TotalGroup': keys[0] + keys[1], 'ColorGroup': keys[1], 'NonColorGroup': keys[0]}.get(key, [key, ])
+        else:
+            return key
+
 
 class DataObject(object):
-    def __init__(self, past='2022-01-01', befor=None, interval=2, search='*', key='Prints', incr=True, group=False):
+    def __init__(self, past='2022-01-01', befor=None, interval=2, search='*', key='Prints', incr=True, group=False, avg=False, group_key=False):
         befor = dt.now().date() if befor is None else dt.strptime(befor, '%Y-%m-%d').date()
         self.timeframe = self.timearr((dt.strptime(past, '%Y-%m-%d').date(), befor), timedelta(days=int(interval)))
-        self.incr = incr
-        self.group = group
+        self.incr, self.group, self.avg, self.group_key = incr, group, avg, group_key
         self.key = key  # Tracker keys & Carts
         self.search = self.search_code(search)
         
@@ -76,7 +131,14 @@ class DataObject(object):
         ''' does call data_pruning ''' 
         if self.key != 'Carts':
             temp = [{'label': name, 'data': data} for name, data in self.data_pruning()]
-            return {'data': dumps({'labels': [date.strftime('%d.%m.%Y') for date in self.timeframe], 'datasets': temp}), 'type': dumps('line')}
+            if not self.group_key:
+                return {'data': dumps({'labels': [date.strftime('%d.%m.%Y') for date in self.timeframe], 'datasets': temp}), 'type': dumps('line')}
+            else:
+                data = {'labels': [obj['label'] for obj in temp], 'datasets': []}
+                for key in self._get_key_groups():
+                    datasets = {'label': key, 'data': []}
+                    for obj in temp:
+                        pass
         else:
             temp = self.cart_data()
             return {'data': dumps({'labels': temp['label'], 'datasets': [{'label': 'Cart', 'data': temp['data']}]}), 'type': dumps('bar')}
@@ -95,16 +157,26 @@ class DataObject(object):
                 temp = [obj.efficency for obj in val]
                 groups['data'].append(sum(temp) // len(temp))
             return groups
+    
+    def _get_key_groups(self):
+        keys = ['Prints', 'Copies'], ['ColorPrints', 'ColorCopies']
+        return {'TotalGroup': keys[0] + keys[1], 'ColorGroup': keys[1], 'NonColorGroup': keys[0]}[self.key]
+    
+    def key_handle(self, data):
+        if 'Group' in self.key:
+            key = self._get_key_groups()
+            temp = {k: self.framer(data['Date'], data[k]) for k in key if k in data.keys()}
+            if self.group_key:
+                return {key: sum([temp[key][i] for key in temp.keys()]) for i in range(len(temp[key[0]]))}
+            else:
+                return {key: sum(val) // len(val) for key, val in temp.items() if temp.get(key, False)}
+        else:
+            return self.framer(data['Date'], data[self.key])
             
     def data_pruning(self):
         #                   not grouped
         if self.group is False:
-            if self.key != 'Total':
-                return [(name, self.framer(obj.tracker.data['Date'], obj.tracker.data[self.key])) for name, obj in self.search.items() if len(obj.tracker.data['Date'])>2]
-            else:
-                keys = 'Prints', 'ColorPrints', 'Copies', 'ColorCopies'
-                return [(name, self.framer(obj.tracker.data['Date'], obj.tracker.data[self.key])) for name, obj in self.search.items() if len(obj.tracker.data['Date'])>2]
-    #                   grouped
+            return [(name, self.key_handle(obj.tracker.data)) for name, obj in self.search.items() if len(obj.tracker.data['Date'])>2]
         else:
             groups = []
             for key, val in self.search.items():
@@ -112,7 +184,10 @@ class DataObject(object):
                 temp = [self.framer(obj.tracker.data['Date'], obj.tracker.data[self.key]) for obj in val if len(obj.tracker.data['Date'])>2]
                 arr = []
                 for d in range(len(self.timeframe)):
-                    arr.append(sum([t[d] for t in temp if t]))
+                    if self.avg:
+                        arr.append(sum([t[d] for t in temp if t]) // len(temp))
+                    else:
+                        arr.append(sum([t[d] for t in temp if t]))
                 groups.append((key, arr))
             return groups
 
@@ -185,7 +260,8 @@ class PrinterView(object):
                 if kwargs.get('next', False):   # and in/decrement it if next or back was used
                     x += 1
                 elif kwargs.get('back', False):
-                    x += -1 
+                    x += -1
+                x = len(self.db.printer.name_index) + x if x < 0 else x if x < len(self.db.printer.name_index) else x - len(self.db.printer.name_index) 
         for i, key in enumerate(['back', 'selected', 'next']): 
                 j = (x + i - 1) % len(self.db.printer.obj)
                 if key == 'selected':

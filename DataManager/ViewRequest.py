@@ -49,9 +49,9 @@ class InputReceiverBase(object):
 
 
 initial_view = {'plot': {
-                        'names': ['key', 'search', 'past', 'befor', 'interval', 'incr', 'group'],
-                        'types': [0, 0, 3, 3, 1, 2, 2],
-                        'defaults': ['Prints', '*', '2022-01-01', dt.today().date().strftime('%Y-%m-%d'), 14, True, False]
+                        'names': ['key', 'search', 'past', 'befor', 'interval', 'incr', 'group', 'avg', 'group_key'],
+                        'types': [0, 0, 3, 3, 1, 2, 2, 2, 2],
+                        'defaults': ['Prints', '*', '2022-01-01', dt.today().date().strftime('%Y-%m-%d'), 14, True, False, False, False]
                         }
                 }
 

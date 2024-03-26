@@ -65,7 +65,7 @@ class InitSNMP(object):
         self.ip = ip
         self.manufacturer = [{'model': '1.3.6.1.2.1.43.5.1.1.16.1',	'serial_no': '1.3.6.1.2.1.43.5.1.1.17.1'},
                              {'model': '1.3.6.1.2.1.25.3.2.1.3.1', 'serial_no': '1.3.6.1.2.1.43.5.1.1.17.1'}]
-        self.model = (('ECOSYS M6635cidn', 'ECOSYS M3655idn', 'MFC-9142CDN', 'MFC-L3770CDW', 'MFC-L3750CDW',
+        self.model = (('ECOSYS M5526cdw', 'ECOSYS M6635cidn', 'ECOSYS M3655idn', 'MFC-9142CDN', 'MFC-L3770CDW', 'MFC-L3750CDW',
                       'TASKalfa 3051ci', 'TASKalfa 5052ci', 'TASKalfa 4002i', 'MFC-9332CDW', 'MFC-L8650CDW',
                       'DCP-L3510CDW', 'MFC-9460CDN'),
                       ('MFC-9142CDN', 'MFC-L3750CDW', 'MFC-L3770CDW', 'MFC-L8650CDW', 'MFC-9342CDW'))
