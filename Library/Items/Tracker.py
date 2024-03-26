@@ -81,13 +81,49 @@ class DataDict(BaseDict):
 		else:
 			return DataDict(**{key: val for key, val in self.items() if key in keys})
 	
-	def _of_timeframe(self, start, end, keys='*'):
-		start = self['Date'][0] if start is None else start
-		end = self['Date'][-1] if end is None else end
-		index_arr = [i for i, date in enumerate(self['Date']) if start <= date < end]
-		if len(index_arr) < 1:
-			return False
-		return DataDict(**{key: val[index_arr[0]:index_arr[-1]] for key, val in self._of_key(keys=keys).items()})
+	
+    def _get_slice(self, a, b):
+        start, end = None, None
+        for i, d in enumerate(self['Date'])
+            if start is None:
+                if d >= b:
+                    return False
+                elif d >= a:
+                    start = i
+            if not start is None and end is None:
+                if d > b:
+                    return slice(start, i -1, None)
+        return slice(start, None, None)
+
+    def _cut_frame(self, a, b, keys='*', key_merged=False):
+        keys = keys + ['Date']
+        keys = [key for key in self.keys() if key in keys]
+        sli = self.get_slice(a, b)
+        if not sli is None:
+            if key_merged:
+                m = [sum(val) for val in zip(*[self[key][sli] for key in keys if key != 'Date'])]
+                return self['Date'][sli], m
+            else:
+                return {key: self[key][sli] for key in keys]}
+
+    def frame_sum(self, i, cut, temp, frame):
+        for key in temp.keys():
+            if key != 'Date':
+                frame[key][i] = sum(temp[key][:cut])
+                temp[key] = temp[key][cut:]
+            else:
+                temp[key] = temp[key][cut:]
+        return frame, temp
+
+    def framed(self, timeframe, keys='*'):
+        keys = self.keys() if keys == '*' else keys
+        temp = self._cut_frame(timeframe[0], timeframe[-1], keys=keys)
+        frame = {key: [0 for _ in range(len(timeframe))] for key in keys}
+        for i, t in enumerate(timeframe[1:]):
+            for cut in range(len(temp))
+                if temp['Date'][cut] > t:
+                    frame, temp = self.frame_sum(i, cut-1, temp, frame)
+
 
 # Since the Tracker (except the Date tracker) is to track the value changes over given time but initial will get the
 # absolute value there is some preprocessing done by this foo´s
