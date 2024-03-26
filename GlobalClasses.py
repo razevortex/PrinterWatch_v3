@@ -1,4 +1,28 @@
 from time import perf_counter_ns as nsec
+from grp import *
+from os import chown, chmod
+from pathlib import Path
+
+class create_file(object):
+    paths = {'base': '/srv/servme', 'lib': '/srv/servme/db/jsons'}
+    user = getgrnam('rvx').gr_gid
+    group = getgrnam('www-data').gr_gid 
+
+    def lib(name):
+        file_ = Path(create_file.paths['lib'], f'{name}.json')
+        with open(file_, 'w') as f:
+            pass
+        chown(file_, create_file.user, create_file.group)
+        chmod(file_, int('777', base=8))
+
+    def serv(name):
+        file_ = Path(create_file.paths['base'], name)
+        with open(file_, 'w') as f:
+            pass
+        chmod(file_, int('777', base=8))
+        #chown(file_, create_file.user, create_file.group)
+
+
 
 class LockedSlots(object):
     __slots__ = ('_locked')
